@@ -1,11 +1,18 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QSurfaceFormat>
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+int main(int argc, char *argv[]) {
+  QApplication a(argc, argv);
 
-    return a.exec();
+  QSurfaceFormat glFormat;
+  glFormat.setProfile(QSurfaceFormat::CoreProfile);
+  glFormat.setVersion(4, 1);
+  glFormat.setOption(QSurfaceFormat::DebugContext);
+  QSurfaceFormat::setDefaultFormat(glFormat);
+
+  MainWindow w;
+  w.show();
+
+  return a.exec();
 }
