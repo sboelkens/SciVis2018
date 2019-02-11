@@ -1,5 +1,6 @@
 # Visual Studio Files
 .vs/
+*.vcxproj
 
 # Prerequisites
 *.d
