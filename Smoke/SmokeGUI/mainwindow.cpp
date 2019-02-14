@@ -3,6 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
+  ui->mainView->setFocus();
   qDebug() << "✓✓ MainWindow constructor";
 }
 
@@ -13,6 +14,6 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_ngonSlider_valueChanged(int value) {
   ui->ngonValue->setNum(value);
-  ui->mainView->updateBuffers(value);
+  //ui->mainView->updateBuffers();
   ui->mainView->update();
 }

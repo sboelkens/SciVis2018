@@ -1,9 +1,12 @@
 #include "simulation.h"
 
-Simulation::Simulation(double deltaT, float viscosity, int n)
+Simulation::Simulation()
 {
-    dt = deltaT;
-    visc = viscosity;
+    init_simulation(50);
+}
+
+Simulation::Simulation(int n)
+{
     init_simulation(n);
 }
 
@@ -133,10 +136,10 @@ fftw_real* Simulation::diffuse_matter(int n, fftw_real dt)
 
 //set_forces: copy user-controlled forces to the force vectors that are sent to the solver.
 //            Also dampen forces and matter density to get a stable simulation.
-void Simulation::set_forces(void)
+void Simulation::set_forces(int n)
 {
     int i;
-    for (i = 0; i < DIM * DIM; i++)
+    for (i = 0; i < n * n; i++)
     {
         rho0[i]  = 0.995 * rho[i];
         fx[i] *= 0.85;
@@ -145,3 +148,29 @@ void Simulation::set_forces(void)
         vy0[i]    = fy[i];
     }
 }
+
+void Simulation::drag(int n, int winWidth, int winHeight, int mx, int my)
+{
+    int xi,yi,X,Y; double  dx, dy, len;
+    static int lmx=0,lmy=0;				//remembers last mouse location
+
+    // Compute the array index that corresponds to the cursor location
+    xi = (int)clamp((double)(n + 1) * ((double)mx / (double)winWidth));
+    yi = (int)clamp((double)(n + 1) * ((double)(winHeight - my) / (double)winHeight));
+
+    X = xi; Y = yi;
+
+    if (X > (n - 1))  X = n - 1; if (Y > (n - 1))  Y = n - 1;
+    if (X < 0) X = 0; if (Y < 0) Y = 0;
+
+    // Add force at the cursor location
+    my = winHeight - my;
+    dx = mx - lmx; dy = my - lmy;
+    len = sqrt(dx * dx + dy * dy);
+    if (len != 0.0) {  dx *= 0.1 / len; dy *= 0.1 / len; }
+    fx[Y * n + X] += dx;
+    fy[Y * n + X] += dy;
+    rho[Y * n + X] = 10.0f;
+    lmx = mx; lmy = my;
+}
+

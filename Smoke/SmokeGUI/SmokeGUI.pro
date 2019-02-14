@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SmokeGUI
 TEMPLATE = app
 
+QMAKE_LFLAGS += /NODEFAULTLIB:MSVCRT
 
 SOURCES += main.cpp\
         mainwindow.cpp \
