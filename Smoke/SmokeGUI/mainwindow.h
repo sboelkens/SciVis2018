@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
+#include <QPainter>
+#include <QLinearGradient>
+
 #include "mainview.h"
 
 namespace Ui {
@@ -15,6 +19,7 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
+  void setColorLegend();
 
 private slots:
   void on_selectNColorsRho_valueChanged(int value);

@@ -319,6 +319,19 @@ QGroupBox::title {
         <string>Show</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="legendView">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>712</y>
+         <width>240</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>

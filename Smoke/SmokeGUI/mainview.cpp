@@ -120,6 +120,7 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy) {
           triaCoords.append(QVector2D(px, py));
           triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
 
+
           if (j + 1 < DIM && i + 1 < DIM)
           {
               //first tria
