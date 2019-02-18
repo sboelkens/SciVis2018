@@ -12,8 +12,16 @@ MainWindow::~MainWindow() {
   qDebug() << "✗✗ MainWindow destructor";
 }
 
-void MainWindow::on_ngonSlider_valueChanged(int value) {
-  ui->ngonValue->setNum(value);
-  //ui->mainView->updateBuffers();
-  ui->mainView->update();
+void MainWindow::on_showRho_stateChanged(int state)
+{
+    ui->mainView->draw_smoke = state;
+}
+
+void MainWindow::on_showV_stateChanged(int state)
+{
+    ui->mainView->draw_vecs = state;
+}
+
+void MainWindow::on_showF_stateChanged(int state)
+{
 }

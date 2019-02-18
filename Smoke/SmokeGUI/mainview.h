@@ -26,6 +26,15 @@ public:
   void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy);
   void clearArrays();
 
+  double dt;                        //simulation time step
+  float visc;                       //fluid viscosity
+  int   color_dir;                  //use direction color-coding or not
+  float vec_scale;                  //scaling of hedgehogs
+  int   draw_smoke;                 //draw the smoke or not
+  int   draw_vecs;                  //draw the vector field or not
+  int   scalar_col;                 //method for scalar coloring
+  int   frozen;                     //toggles on/off the animation
+
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -62,21 +71,12 @@ private:
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
   const int DIM = 50;               //size of simulation grid
-  double dt;                        //simulation time step
-  float visc;                       //fluid viscosity
-  int   color_dir;                  //use direction color-coding or not
-  float vec_scale;                  //scaling of hedgehogs
-  int   draw_smoke;                 //draw the smoke or not
-  int   draw_vecs;                  //draw the vector field or not
-  int   scalar_col;                 //method for scalar coloring
-  int   frozen;                     //toggles on/off the animation
 
   QPoint lastpos;
   Simulation simulation;
   QTimer* timer;
 
   void do_one_simulation_step();
-  void visualize(fftw_real* rho, fftw_real* vx, fftw_real* vy);
 
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );

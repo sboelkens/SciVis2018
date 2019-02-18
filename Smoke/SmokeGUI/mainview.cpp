@@ -265,7 +265,6 @@ void MainView::paintGL() {
   if (updateUniformsRequired) {
     updateUniforms();
   }
-  //visualize();
   if (draw_smoke)
   {
       glBindVertexArray(gridVAO);

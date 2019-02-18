@@ -17,7 +17,16 @@ public:
   ~MainWindow();
 
 private slots:
-  void on_ngonSlider_valueChanged(int value);
+//  void on_selectNColorsRho_valueChanged(int value);
+//  void on_selectNColorsF_valueChanged(int value);
+//  void on_selectNColorsV_valueChanged(int value);
+//  void on_selectColormapRho_currentIndexChanged(int value);
+//  void on_selectColormapV_currentIndexChanged(int value);
+//  void on_selectColormapF_currentIndexChanged(int value);
+  void on_showRho_stateChanged(int state);
+  void on_showV_stateChanged(int state);
+  void on_showF_stateChanged(int state);
+
 
 private:
   Ui::MainWindow *ui;
