@@ -25,3 +25,25 @@ QVector3D set_colormap(float vy, int scalar_col)
        }
    return QVector3D(0.0, 0.0, 0.0);
 }
+
+QVector3D direction_to_color(float x, float y, int method)
+{
+    float r, g, b, f;
+    if (method)
+    {
+      f = atan2(y,x) / 3.1415927 + 1;
+      r = f;
+      if(r > 1) r = 2 - r;
+      g = f + .66667;
+      if(g > 2) g -= 2;
+      if(g > 1) g = 2 - g;
+      b = f + 2 * .66667;
+      if(b > 2) b -= 2;
+      if(b > 1) b = 2 - b;
+    }
+    else
+    {
+        r = g = b = 1;
+    }
+    return QVector3D(r, g, b);
+}

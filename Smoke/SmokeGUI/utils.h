@@ -10,5 +10,6 @@ const int COLOR_BANDS      = 2;
 
 QVector3D rainbow(double val);
 QVector3D set_colormap(float val, int scalar_col);
+QVector3D direction_to_color(float x, float y, int method);
 
 #endif // UTILS_H

@@ -41,6 +41,7 @@ private:
 
   QOpenGLShaderProgram* mainShaderProg;
   GLuint gridVAO, gridCoordsBO, gridColourBO, gridIndexBO;
+  GLuint linesVAO, linesCoordsBO, linesColourBO, linesIndexBO;
 
   void createShaderPrograms();
   void createBuffers();
@@ -52,6 +53,9 @@ private:
   QVector<QVector2D> triaCoords;
   QVector<QVector3D> triaColours;
   QVector<unsigned short> triaIndices;
+  QVector<QVector2D> lineCoords;
+  QVector<QVector3D> lineColours;
+  QVector<unsigned short> lineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   QMatrix4x4 modelViewMatrix, projectionMatrix;
@@ -73,8 +77,6 @@ private:
 
   void do_one_simulation_step();
   void visualize(fftw_real* rho, fftw_real* vx, fftw_real* vy);
-  void direction_to_color(float x, float y, int method);
-
 
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );
