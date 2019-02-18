@@ -34,7 +34,9 @@ public:
   int   draw_vecs;                  //draw the vector field or not
   int   scalar_col;                 //method for scalar coloring
   int   frozen;                     //toggles on/off the animation
-
+  int   levels_rho;
+  int   levels_v;
+  int   levels_f;
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -43,7 +45,6 @@ protected:
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
   void timerEvent(QTimerEvent *event);
-  void keyPressEvent(QKeyEvent* event);
 
 private:
   QOpenGLDebugLogger* debugLogger;

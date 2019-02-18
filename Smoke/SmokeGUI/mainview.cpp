@@ -84,7 +84,7 @@ void MainView::createBuffers() {
 }
 
 void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy) {
-    qDebug() << " call me call me";
+//    qDebug() << " call me call me";
 
   clearArrays();
 
@@ -118,7 +118,7 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy) {
           idx3 = (j * DIM) + (i + 1);
 
           triaCoords.append(QVector2D(px, py));
-          triaColours.append(set_colormap(rho[idx0], scalar_col));
+          triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
 
           if (j + 1 < DIM && i + 1 < DIM)
           {
@@ -236,8 +236,11 @@ void MainView::initializeGL() {
   vec_scale = 1;
   draw_smoke = 1;
   draw_vecs = 1;
-  scalar_col = 1;
+  scalar_col = 0;
   frozen = 0;
+  levels_rho = 10;
+  levels_v = 10;
+  levels_f = 10;
 
   do_one_simulation_step();
   this->startTimer(0);
@@ -249,9 +252,9 @@ void MainView::do_one_simulation_step(void)
     simulation.set_forces(DIM);
     Struct dir = simulation.solve(DIM, visc, dt);
     fftw_real* rho = simulation.diffuse_matter(DIM, dt);
-    qDebug() <<" rho row: " << rho[0] << rho[1] << rho[50] << rho[51];
+//    qDebug() <<" rho row: " << rho[0] << rho[1] << rho[50] << rho[51];
     updateBuffers(rho, dir.vx, dir.vy);
-    qDebug() << "check";
+//    qDebug() << "check";
 }
 
 void MainView::paintGL() {
@@ -303,16 +306,6 @@ void MainView::mousePressEvent(QMouseEvent *event)
         simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
     }
     lastpos = event->pos();
-}
-
-void MainView::keyPressEvent(QKeyEvent *event)
-{
-    qDebug() << event->key();
-    switch(event->key()) {
-    case 'A':
-        frozen = !frozen;
-        break;
-    }
 }
 
 void MainView::timerEvent(QTimerEvent *e)

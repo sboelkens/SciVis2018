@@ -68,6 +68,15 @@ QGroupBox::title {
          <height>22</height>
         </rect>
        </property>
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="value">
+        <number>10</number>
+       </property>
       </widget>
       <widget class="QLabel" name="label">
        <property name="geometry">
@@ -106,11 +115,6 @@ QGroupBox::title {
        </property>
        <item>
         <property name="text">
-         <string>select color map</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string>grayscale</string>
         </property>
        </item>
@@ -133,6 +137,15 @@ QGroupBox::title {
          <width>42</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="value">
+        <number>10</number>
        </property>
       </widget>
       <widget class="QLabel" name="label_5">
@@ -157,11 +170,6 @@ QGroupBox::title {
          <height>22</height>
         </rect>
        </property>
-       <item>
-        <property name="text">
-         <string>select color map</string>
-        </property>
-       </item>
        <item>
         <property name="text">
          <string>white</string>
@@ -205,6 +213,15 @@ QGroupBox::title {
          <height>22</height>
         </rect>
        </property>
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+       <property name="value">
+        <number>10</number>
+       </property>
       </widget>
       <widget class="QLabel" name="label_7">
        <property name="geometry">
@@ -228,11 +245,6 @@ QGroupBox::title {
          <height>22</height>
         </rect>
        </property>
-       <item>
-        <property name="text">
-         <string>select color map</string>
-        </property>
-       </item>
        <item>
         <property name="text">
          <string>grayscale</string>
