@@ -31,7 +31,8 @@ public:
   int   color_dir;                  //use direction color-coding or not
   float vec_scale;                  //scaling of hedgehogs
   int   draw_smoke;                 //draw the smoke or not
-  int   draw_vecs;                  //draw the vector field or not
+  int   draw_vecs;                  //draw the velocity field or not
+  int   draw_force_field;           //draw the forcefield or not
   int   scalar_col;                 //method for scalar coloring
   int   frozen;                     //toggles on/off the animation
   int   levels_rho;
@@ -52,6 +53,7 @@ private:
   QOpenGLShaderProgram* mainShaderProg;
   GLuint gridVAO, gridCoordsBO, gridColourBO, gridIndexBO;
   GLuint linesVAO, linesCoordsBO, linesColourBO, linesIndexBO;
+  GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
 
   void createShaderPrograms();
   void createBuffers();
@@ -66,6 +68,9 @@ private:
   QVector<QVector2D> lineCoords;
   QVector<QVector3D> lineColours;
   QVector<unsigned short> lineIndices;
+  QVector<QVector2D> fLineCoords;
+  QVector<QVector3D> fLineColours;
+  QVector<unsigned short> fLineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   QMatrix4x4 modelViewMatrix, projectionMatrix;

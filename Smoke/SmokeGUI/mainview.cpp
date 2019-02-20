@@ -16,6 +16,10 @@ MainView::~MainView() {
   glDeleteBuffers(1, &linesColourBO);
   glDeleteBuffers(1, &linesIndexBO);
   glDeleteVertexArrays(1, &linesVAO);
+  glDeleteBuffers(1, &fLinesCoordsBO);
+  glDeleteBuffers(1, &fLinesColourBO);
+  glDeleteBuffers(1, &fLinesIndexBO);
+  glDeleteVertexArrays(1, &fLinesVAO);
 
   delete mainShaderProg;
 
@@ -81,6 +85,24 @@ void MainView::createBuffers() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
 
   glBindVertexArray(0);
+
+  glGenVertexArrays(1, &fLinesVAO);
+  glBindVertexArray(fLinesVAO);
+
+  glGenBuffers(1, &fLinesCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &fLinesColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &fLinesIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
+
+  glBindVertexArray(0);
 }
 
 void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
@@ -98,6 +120,10 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   lineCoords.reserve(n_points * 2);
   lineColours.reserve(n_points * 2);
   lineIndices.reserve(n_points * 2);
+
+  fLineCoords.reserve(n_points * 2);
+  fLineColours.reserve(n_points * 2);
+  fLineIndices.reserve(n_points * 2);
 
   int idx0, idx1, idx2, idx3;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
@@ -139,6 +165,13 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
           lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
           lineIndices.append(2*idx0);
           lineIndices.append(2*idx0+1);
+
+          fLineCoords.append(QVector2D(px, py));
+          fLineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
+          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
+          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
+          fLineIndices.append(2*idx0);
+          fLineIndices.append(2*idx0+1);
       }
   }
 
@@ -160,6 +193,14 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
 
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*fLineCoords.size(), fLineCoords.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*fLineColours.size(), fLineColours.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*fLineIndices.size(), fLineIndices.data(), GL_DYNAMIC_DRAW);
 }
 
 void MainView::updateMatrices() {
@@ -195,6 +236,12 @@ void MainView::clearArrays() {
   lineColours.squeeze();
   lineIndices.clear();
   lineIndices.squeeze();
+  fLineCoords.clear();
+  fLineCoords.squeeze();
+  fLineColours.clear();
+  fLineColours.squeeze();
+  fLineIndices.clear();
+  fLineIndices.squeeze();
 }
 
 // ---
@@ -237,6 +284,7 @@ void MainView::initializeGL() {
   vec_scale = 1;
   draw_smoke = 1;
   draw_vecs = 1;
+  draw_force_field = 0;
   scalar_col = 0;
   frozen = 0;
   levels_rho = 10;
@@ -250,40 +298,69 @@ void MainView::initializeGL() {
 
 void MainView::do_one_simulation_step(void)
 {
+//    try
+//    {
     simulation.set_forces(DIM);
     Struct vdir = simulation.solve(DIM, visc, dt);
     fftw_real* rho = simulation.diffuse_matter(DIM, dt);
     Struct fdir = simulation.get_force();
+//    }
+//    catch (std::exception e)
+//    {
+//        qDebug() << "simulation step failed";
+//        qDebug() << e.what();
+//    }
+    try
+    {
 //    qDebug() <<" rho row: " << rho[0] << rho[1] << rho[50] << rho[51];
     updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
 //    qDebug() << "check";
+    }
+    catch (std::exception e)
+    {
+        qDebug() << "updating buffers failed";
+        qDebug() << e.what();
+    }
 }
 
 void MainView::paintGL() {
+  try
+    {
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      //glLoadIdentity();
 
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //glLoadIdentity();
+      mainShaderProg->bind();
 
-  mainShaderProg->bind();
+      if (updateUniformsRequired) {
+        updateUniforms();
+      }
+      if (draw_smoke)
+      {
+          glBindVertexArray(gridVAO);
+          glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          glBindVertexArray(0);
+      }
+      if (draw_vecs)
+      {
+          glBindVertexArray(linesVAO);
+          glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          glBindVertexArray(0);
+      }
+      if (draw_force_field)
+      {
+          glBindVertexArray(fLinesVAO);
+          glDrawElements(GL_LINES, fLineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          glBindVertexArray(0);
+      }
 
-  if (updateUniformsRequired) {
-    updateUniforms();
-  }
-  if (draw_smoke)
-  {
-      glBindVertexArray(gridVAO);
-      glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-      glBindVertexArray(0);
-  }
-  if (draw_vecs)
-  {
-      glBindVertexArray(linesVAO);
-      glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-      glBindVertexArray(0);
-  }
-
-  mainShaderProg->release();
+      mainShaderProg->release();
+    }
+    catch (std::exception e)
+    {
+        qDebug() << "update failed";
+        qDebug() << e.what();
+    }
   //glFlush();
 }
 

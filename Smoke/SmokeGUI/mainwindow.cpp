@@ -26,6 +26,7 @@ void MainWindow::on_showV_stateChanged(int state)
 
 void MainWindow::on_showF_stateChanged(int state)
 {
+    ui->mainView->draw_force_field = state;
 }
 
 void MainWindow::on_selectColormapRho_currentIndexChanged(int index)
