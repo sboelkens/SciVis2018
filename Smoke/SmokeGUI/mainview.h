@@ -23,7 +23,7 @@ public:
   MainView(QWidget *parent = 0);
   ~MainView();
 
-  void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy);
+  void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
 
   double dt;                        //simulation time step

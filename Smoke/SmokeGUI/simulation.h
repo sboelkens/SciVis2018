@@ -5,11 +5,11 @@
 #include <rfftw.h>
 
 
-struct velocity2d {
-    fftw_real *vx, *vy;
+struct dir2d {
+    fftw_real *x, *y;
 };
 
-typedef struct velocity2d Struct;
+typedef struct dir2d Struct;
 
 class Simulation
 {
@@ -19,6 +19,7 @@ public:
 
     Struct solve(int n, fftw_real visc, fftw_real dt);
     fftw_real* diffuse_matter(int n, fftw_real dt);
+    Struct get_force();
     void set_forces(int n);
     void drag(int n, int winWidth, int winHeight, int mx, int my);
 

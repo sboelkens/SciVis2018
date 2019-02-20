@@ -101,8 +101,8 @@ Struct Simulation::solve(int n, fftw_real visc, fftw_real dt)
        { vx[i+n*j] = f*vx0[i+(n+2)*j]; vy[i+n*j] = f*vy0[i+(n+2)*j]; }
 
     Struct velocity2d;
-    velocity2d.vx = vx;
-    velocity2d.vy = vy;
+    velocity2d.x = vx;
+    velocity2d.y = vy;
 
     return velocity2d;
 }
@@ -172,5 +172,14 @@ void Simulation::drag(int n, int winWidth, int winHeight, int mx, int my)
     fy[Y * n + X] += dy;
     rho[Y * n + X] = 10.0f;
     lmx = mx; lmy = my;
+}
+
+Struct Simulation::get_force()
+{
+    Struct force2d;
+    force2d.x = fx;
+    force2d.y = fy;
+
+    return force2d;
 }
 

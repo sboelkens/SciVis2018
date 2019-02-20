@@ -83,7 +83,7 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy) {
+void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
 //    qDebug() << " call me call me";
 
   clearArrays();
@@ -251,10 +251,11 @@ void MainView::initializeGL() {
 void MainView::do_one_simulation_step(void)
 {
     simulation.set_forces(DIM);
-    Struct dir = simulation.solve(DIM, visc, dt);
+    Struct vdir = simulation.solve(DIM, visc, dt);
     fftw_real* rho = simulation.diffuse_matter(DIM, dt);
+    Struct fdir = simulation.get_force();
 //    qDebug() <<" rho row: " << rho[0] << rho[1] << rho[50] << rho[51];
-    updateBuffers(rho, dir.vx, dir.vy);
+    updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
 //    qDebug() << "check";
 }
 
