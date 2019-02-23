@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-  ui->mainView->setFocus();
+  this->setFocus();
   setColorLegend();
 
   qDebug() << "✓✓ MainWindow constructor";
@@ -17,38 +17,47 @@ MainWindow::~MainWindow() {
 void MainWindow::on_showRho_stateChanged(int state)
 {
     ui->mainView->draw_smoke = state;
+    this->setFocus();
 }
 
 void MainWindow::on_showV_stateChanged(int state)
 {
     ui->mainView->draw_vecs = state;
+    this->setFocus();
 }
 
 void MainWindow::on_showF_stateChanged(int state)
 {
     ui->mainView->draw_force_field = state;
+    this->setFocus();
 }
 
 void MainWindow::on_selectColormapRho_currentIndexChanged(int index)
 {
     ui->mainView->scalar_col = index;
+    ui->mainView->updateUniformsRequired = true;
     setColorLegend();
+    this->setFocus();
 }
 
 void MainWindow::on_selectNColorsRho_valueChanged(int value)
 {
     ui->mainView->levels_rho = value;
+    ui->mainView->updateUniformsRequired = true;
     setColorLegend();
+    this->setFocus();
 }
 
 void MainWindow::on_selectNColorsV_valueChanged(int value)
 {
     ui->mainView->levels_v = value;
+    this->setFocus();
 }
 
 void MainWindow::on_selectNColorsF_valueChanged(int value)
 {
     ui->mainView->levels_f = value;
+    this->setFocus();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

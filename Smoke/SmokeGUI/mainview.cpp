@@ -10,6 +10,7 @@ MainView::~MainView() {
 
   glDeleteBuffers(1, &gridCoordsBO);
   glDeleteBuffers(1, &gridColourBO);
+  glDeleteBuffers(1, &gridValBO);
   glDeleteBuffers(1, &gridIndexBO);
   glDeleteVertexArrays(1, &gridVAO);
   glDeleteBuffers(1, &linesCoordsBO);
@@ -35,8 +36,13 @@ void MainView::createShaderPrograms() {
   mainShaderProg = new QOpenGLShaderProgram();
   mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
   mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
-
   mainShaderProg->link();
+
+  cMapShaderProg = new QOpenGLShaderProgram();
+  cMapShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cmapvertshader.glsl");
+  cMapShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cmapfragshader.glsl");
+  cMapShaderProg->link();
+
 
   // Qt wrappers
   // uniModelViewMatrix = mainShaderProg->uniformLocation("modelviewmatrix");
@@ -45,6 +51,11 @@ void MainView::createShaderPrograms() {
   // Pure OpenGL
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
+
+  uniMVMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "modelviewmatrix");
+  uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
+  uniNLevels_cMap = glGetUniformLocation(cMapShaderProg->programId(), "levels");
+  uniColorMap_cMap = glGetUniformLocation(cMapShaderProg->programId(), "mode");
 }
 
 void MainView::createBuffers() {
@@ -62,6 +73,11 @@ void MainView::createBuffers() {
   glBindBuffer(GL_ARRAY_BUFFER, gridColourBO);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenBuffers(1, &gridValBO);
+  glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
   glGenBuffers(1, &gridIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
@@ -115,6 +131,7 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 
   triaCoords.reserve(n_points);
   triaColours.reserve(n_points);
+  triaVals.reserve(n_points);
   triaIndices.reserve(n_trias);
 
   lineCoords.reserve(n_points * 2);
@@ -145,6 +162,7 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 
           triaCoords.append(QVector2D(px, py));
           triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
+          triaVals.append(rho[idx0]);
 
 
           if (j + 1 < DIM && i + 1 < DIM)
@@ -180,6 +198,9 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 
   glBindBuffer(GL_ARRAY_BUFFER, gridColourBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*triaColours.size(), triaColours.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
@@ -217,9 +238,16 @@ void MainView::updateUniforms() {
   // mainShaderProg->setUniformValue(uniProjectionMatrix, projectionMatrix);
 
   // Pure OpenGL
+  mainShaderProg->bind();
   glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
-
+  mainShaderProg->release();
+  cMapShaderProg->bind();
+  glUniformMatrix4fv(uniMVMat_cMap, 1, false, modelViewMatrix.data());
+  glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
+  glUniform1i(uniNLevels_cMap, levels_rho);
+  glUniform1i(uniColorMap_cMap, scalar_col);
+  cMapShaderProg->release();
   updateUniformsRequired = false;
 }
 
@@ -228,6 +256,8 @@ void MainView::clearArrays() {
   triaCoords.squeeze();
   triaColours.clear();
   triaColours.squeeze();
+  triaVals.clear();
+  triaVals.squeeze();
   triaIndices.clear();
   triaIndices.squeeze();
   lineCoords.clear();
@@ -330,17 +360,18 @@ void MainView::paintGL() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //glLoadIdentity();
 
-      mainShaderProg->bind();
-
       if (updateUniformsRequired) {
         updateUniforms();
       }
+      cMapShaderProg->bind();
       if (draw_smoke)
       {
           glBindVertexArray(gridVAO);
           glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
       }
+      cMapShaderProg->release();
+      mainShaderProg->bind();
       if (draw_vecs)
       {
           glBindVertexArray(linesVAO);

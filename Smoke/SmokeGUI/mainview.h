@@ -38,6 +38,7 @@ public:
   int   levels_rho;
   int   levels_v;
   int   levels_f;
+  bool updateUniformsRequired;
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -51,7 +52,8 @@ private:
   QOpenGLDebugLogger* debugLogger;
 
   QOpenGLShaderProgram* mainShaderProg;
-  GLuint gridVAO, gridCoordsBO, gridColourBO, gridIndexBO;
+  QOpenGLShaderProgram* cMapShaderProg;
+  GLuint gridVAO, gridCoordsBO, gridColourBO, gridValBO, gridIndexBO;
   GLuint linesVAO, linesCoordsBO, linesColourBO, linesIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
 
@@ -60,10 +62,9 @@ private:
   void updateMatrices();
   void updateUniforms();
 
-  bool updateUniformsRequired;
-
   QVector<QVector2D> triaCoords;
   QVector<QVector3D> triaColours;
+  QVector<float> triaVals;
   QVector<unsigned short> triaIndices;
   QVector<QVector2D> lineCoords;
   QVector<QVector3D> lineColours;
@@ -73,6 +74,7 @@ private:
   QVector<unsigned short> fLineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
+  GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
   QMatrix4x4 modelViewMatrix, projectionMatrix;
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

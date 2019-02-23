@@ -45,3 +45,5 @@ DEPENDPATH += $$PWD/../fftw-2.1.3/rfftw \
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../library/FFTW.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../library/libFFTW.a
+
+DISTFILES +=
