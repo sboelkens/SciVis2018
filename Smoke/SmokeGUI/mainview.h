@@ -39,6 +39,11 @@ public:
   int   levels_v;
   int   levels_f;
   bool updateUniformsRequired;
+  // scaling/clamping
+  bool clamp_cmap;                  // if false, scaling
+  float clamp_min;
+  float clamp_max;
+
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -75,6 +80,7 @@ private:
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
+  GLint uniClamping, uniClampMin, uniClampMax; // scaling/clamping uniforms
   QMatrix4x4 modelViewMatrix, projectionMatrix;
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

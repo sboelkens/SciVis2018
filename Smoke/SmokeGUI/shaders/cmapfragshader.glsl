@@ -6,6 +6,9 @@ layout (location = 2) in float vertattrib_in;
 
 uniform int levels;
 uniform int mode;
+uniform int clamp;
+uniform float minval;
+uniform float maxval;
 
 out vec4 fColor;
 
@@ -16,6 +19,12 @@ void main() {
   value = int(value);
   value/= levels;
 
+  if (clamp == 1)
+  {
+      if (value<minval) value=minval; if (value>maxval) value=maxval;
+      value = value/(maxval-minval);
+  }
+
   if (mode == 0) //grayscale
   {
       fColor = vec4(value, value, value, 1.0);
@@ -23,7 +32,6 @@ void main() {
   else if (mode == 1) //rainbow
   {
       float dx=0.8;
-      if (value<0) value=0; if (value>1) value=1;
       value = (6-2*dx)*value+dx;
       float R = max(0.0,(3-abs(value-4)-abs(value-5))/2);
       float G = max(0.0,(4-abs(value-2)-abs(value-4))/2);
