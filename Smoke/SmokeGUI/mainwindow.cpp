@@ -11,28 +11,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() {
   delete ui;
-  qDebug() << "✗✗ MainWindow destructor";
+  qDebug() <<    "✗✗ MainWindow destructor";
 }
 
-void MainWindow::on_showRho_stateChanged(int state)
+void MainWindow::on_showSmoke_stateChanged(int state)
 {
     ui->mainView->draw_smoke = state;
     this->setFocus();
 }
 
-void MainWindow::on_showV_stateChanged(int state)
+void MainWindow::on_showGlyph_stateChanged(int state)
 {
     ui->mainView->draw_vecs = state;
     this->setFocus();
 }
 
-void MainWindow::on_showF_stateChanged(int state)
-{
-    ui->mainView->draw_force_field = state;
-    this->setFocus();
-}
+//void MainWindow::on_showF_stateChanged(int state)
+//{
+//    ui->mainView->draw_force_field = state;
+//    this->setFocus();
+//}
 
-void MainWindow::on_selectColormapRho_currentIndexChanged(int index)
+void MainWindow::on_selectColormapSmoke_currentIndexChanged(int index)
 {
     ui->mainView->scalar_col = index;
     ui->mainView->updateUniformsRequired = true;
@@ -40,7 +40,7 @@ void MainWindow::on_selectColormapRho_currentIndexChanged(int index)
     this->setFocus();
 }
 
-void MainWindow::on_selectNColorsRho_valueChanged(int value)
+void MainWindow::on_selectNColorsSmoke_valueChanged(int value)
 {
     ui->mainView->levels_rho = value;
     ui->mainView->updateUniformsRequired = true;
@@ -48,17 +48,25 @@ void MainWindow::on_selectNColorsRho_valueChanged(int value)
     this->setFocus();
 }
 
-void MainWindow::on_selectNColorsV_valueChanged(int value)
+void MainWindow::on_selectColormapGlyph_currentIndexChanged(int index)
+{
+//    ui->mainView->scalar_col = index;
+//    ui->mainView->updateUniformsRequired = true;
+//    setColorLegend();
+//    this->setFocus();
+}
+
+void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
 {
     ui->mainView->levels_v = value;
     this->setFocus();
 }
 
-void MainWindow::on_selectNColorsF_valueChanged(int value)
-{
-    ui->mainView->levels_f = value;
-    this->setFocus();
-}
+//void MainWindow::on_selectNColorsF_valueChanged(int value)
+//{
+//    ui->mainView->levels_f = value;
+//    this->setFocus();
+//}
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
@@ -73,7 +81,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::setColorLegend()
 {
     qDebug() << "setColorLegend";
-    QLinearGradient grBtoY(0, 0, 240, 0);
+    QLinearGradient grBtoY(0, 0, 260, 0);
     for(int x = 0; x <= ui->mainView->levels_rho;x++) {
         float fx = static_cast<float>(x);
         float flevels = static_cast<float>(ui->mainView->levels_rho);
@@ -82,11 +90,11 @@ void MainWindow::setColorLegend()
         QColor color = QColor(static_cast<int>(rgb.x()*255), static_cast<int>(rgb.y()*255), static_cast<int>(rgb.z()*255));
         grBtoY.setColorAt(static_cast<double>(fx/flevels), color);
     }
-    QPixmap pm(240, 30);
+    QPixmap pm(260, 30);
     QPainter pmp(&pm);
     pmp.setBrush(QBrush(grBtoY));
     pmp.setPen(Qt::NoPen);
-    pmp.drawRect(0, 0, 240, 30);
-    ui->legendView->setIcon(QIcon(pm));
-    ui->legendView->setIconSize(QSize(240, 30));
+    pmp.drawRect(0, 0, 260, 30);
+    ui->legendSmoke->setIcon(QIcon(pm));
+    ui->legendSmoke->setIconSize(QSize(260, 30));
 }

@@ -22,15 +22,14 @@ public:
   void setColorLegend();
 
 private slots:
-  void on_selectNColorsRho_valueChanged(int value);
-  void on_selectNColorsF_valueChanged(int value);
-  void on_selectNColorsV_valueChanged(int value);
-  void on_selectColormapRho_currentIndexChanged(int index);
-//  void on_selectColormapV_currentIndexChanged(int index);
-//  void on_selectColormapF_currentIndexChanged(int index);
-  void on_showRho_stateChanged(int state);
-  void on_showV_stateChanged(int state);
-  void on_showF_stateChanged(int state);
+  void on_selectNColorsSmoke_valueChanged(int value);
+  void on_selectColormapSmoke_currentIndexChanged(int index);
+  void on_showSmoke_stateChanged(int state);
+
+  void on_selectNColorsGlyph_valueChanged(int value);
+  void on_selectColormapGlyph_currentIndexChanged(int index);
+  void on_showGlyph_stateChanged(int state);
+
   void keyPressEvent(QKeyEvent* event);
 
 
