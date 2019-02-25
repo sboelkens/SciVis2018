@@ -56,6 +56,9 @@ void MainView::createShaderPrograms() {
   uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
   uniNLevels_cMap = glGetUniformLocation(cMapShaderProg->programId(), "levels");
   uniColorMap_cMap = glGetUniformLocation(cMapShaderProg->programId(), "mode");
+  uniClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
+  uniClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
+  uniClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
 }
 
 void MainView::createBuffers() {
@@ -247,6 +250,9 @@ void MainView::updateUniforms() {
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
   glUniform1i(uniNLevels_cMap, levels_rho);
   glUniform1i(uniColorMap_cMap, scalar_col);
+  glUniform1i(uniClamping, clamp_cmap);
+  glUniform1f(uniClampMin, clamp_min);
+  glUniform1f(uniClampMax, clamp_max);
   cMapShaderProg->release();
   updateUniformsRequired = false;
 }
@@ -320,6 +326,10 @@ void MainView::initializeGL() {
   levels_rho = 10;
   levels_v = 10;
   levels_f = 10;
+
+  clamp_cmap = true;
+  clamp_min = 0.0;
+  clamp_max = 1.0;
 
   do_one_simulation_step();
   this->startTimer(0);
