@@ -5,6 +5,7 @@
 
 #include <QPainter>
 #include <QLinearGradient>
+#include <QPushButton>
 
 #include "mainview.h"
 
@@ -19,7 +20,7 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-  void setColorLegend(int width = 260, int height = 30);
+  QIcon setColorLegend(int width, int height, int levels, int color);
 
 private slots:
   void on_selectNColorsSmoke_valueChanged(int value);
@@ -34,7 +35,6 @@ private slots:
   void on_viscositySlider_valueChanged(int value);
 
   void keyPressEvent(QKeyEvent* event);
-
 
 private:
   Ui::MainWindow *ui;
