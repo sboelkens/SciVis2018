@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
-  void setColorLegend();
+  void setColorLegend(int width = 260, int height = 30);
 
 private slots:
   void on_selectNColorsSmoke_valueChanged(int value);
@@ -29,6 +29,9 @@ private slots:
   void on_selectNColorsGlyph_valueChanged(int value);
   void on_selectColormapGlyph_currentIndexChanged(int index);
   void on_showGlyph_stateChanged(int state);
+
+  void on_timeStepSlider_valueChanged(int value);
+  void on_viscositySlider_valueChanged(int value);
 
   void keyPressEvent(QKeyEvent* event);
 

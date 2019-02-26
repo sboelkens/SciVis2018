@@ -62,6 +62,16 @@ void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
     this->setFocus();
 }
 
+void MainWindow::on_timeStepSlider_valueChanged(int value)
+{
+    ui->mainView->dt = (static_cast<double>(value) / 10);
+}
+
+void MainWindow::on_viscositySlider_valueChanged(int value)
+{
+    ui->mainView->visc = (static_cast<float>(value) / 1000);
+}
+
 //void MainWindow::on_selectNColorsF_valueChanged(int value)
 //{
 //    ui->mainView->levels_f = value;
@@ -78,10 +88,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void MainWindow::setColorLegend()
+void MainWindow::setColorLegend(int width, int height)
 {
     qDebug() << "setColorLegend";
-    QLinearGradient grBtoY(0, 0, 260, 0);
+    QLinearGradient grBtoY(0, 0, width, 0);
     for(int x = 0; x <= ui->mainView->levels_rho;x++) {
         float fx = static_cast<float>(x);
         float flevels = static_cast<float>(ui->mainView->levels_rho);
@@ -90,11 +100,11 @@ void MainWindow::setColorLegend()
         QColor color = QColor(static_cast<int>(rgb.x()*255), static_cast<int>(rgb.y()*255), static_cast<int>(rgb.z()*255));
         grBtoY.setColorAt(static_cast<double>(fx/flevels), color);
     }
-    QPixmap pm(260, 30);
+    QPixmap pm(width, height);
     QPainter pmp(&pm);
     pmp.setBrush(QBrush(grBtoY));
     pmp.setPen(Qt::NoPen);
-    pmp.drawRect(0, 0, 260, 30);
+    pmp.drawRect(0, 0, width, height);
     ui->legendSmoke->setIcon(QIcon(pm));
-    ui->legendSmoke->setIconSize(QSize(260, 30));
+    ui->legendSmoke->setIconSize(QSize(width, height));
 }
