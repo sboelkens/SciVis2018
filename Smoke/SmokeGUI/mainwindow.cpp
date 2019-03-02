@@ -82,6 +82,21 @@ void MainWindow::on_viscositySlider_valueChanged(int value)
 //    this->setFocus();
 //}
 
+void MainWindow::on_radioSmokeRho_clicked()
+{
+    ui->mainView->smoke_var = 0;
+}
+
+void MainWindow::on_radioSmokeV_clicked()
+{
+    ui->mainView->smoke_var = 1;
+}
+
+void MainWindow::on_radioSmokeF_clicked()
+{
+    ui->mainView->smoke_var = 2;
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug() << event->key();

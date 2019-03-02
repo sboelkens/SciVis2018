@@ -26,6 +26,9 @@ private slots:
   void on_selectNColorsSmoke_valueChanged(int value);
   void on_selectColormapSmoke_currentIndexChanged(int index);
   void on_showSmoke_stateChanged(int state);
+  void on_radioSmokeRho_clicked();
+  void on_radioSmokeV_clicked();
+  void on_radioSmokeF_clicked();
 
   void on_selectNColorsGlyph_valueChanged(int value);
   void on_selectColormapGlyph_currentIndexChanged(int index);

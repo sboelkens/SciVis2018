@@ -23,14 +23,18 @@ public:
   MainView(QWidget *parent = 0);
   ~MainView();
 
+  void initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
+  void clearGridArrays();
+  void clearLineArrays();
 
   double dt;                        //simulation time step
   float visc;                       //fluid viscosity
   int   color_dir;                  //use direction color-coding or not
   float vec_scale;                  //scaling of hedgehogs
   int   draw_smoke;                 //draw the smoke or not
+  int   smoke_var;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
   int   draw_vecs;                  //draw the velocity field or not
   int   draw_force_field;           //draw the forcefield or not
   int   scalar_col;                 //method for scalar coloring
@@ -90,6 +94,7 @@ private:
   Simulation simulation;
   QTimer* timer;
 
+  void first_simulation_step();
   void do_one_simulation_step();
 
 private slots:

@@ -124,7 +124,7 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
+void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
 //    qDebug() << " call me call me";
 
   clearArrays();
@@ -227,6 +227,95 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*fLineIndices.size(), fLineIndices.data(), GL_DYNAMIC_DRAW);
 }
 
+void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
+//    qDebug() << " call me call me";
+
+  //clearArrays();
+
+  int n_points = (DIM) * (DIM); //= DIM*DIM
+  int n_trias = (DIM-1) * (DIM-1) * 6;
+
+  //triaCoords.reserve(n_points);
+  //triaColours.reserve(n_points);
+  triaVals.clear();
+  triaVals.squeeze();
+  triaVals.reserve(n_points);
+  //triaIndices.reserve(n_trias);
+
+  clearLineArrays();
+  lineCoords.reserve(n_points * 2);
+  lineColours.reserve(n_points * 2);
+  lineIndices.reserve(n_points * 2);
+
+  fLineCoords.reserve(n_points * 2);
+  fLineColours.reserve(n_points * 2);
+  fLineIndices.reserve(n_points * 2);
+
+  int idx0;
+  double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
+
+  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+
+  for (int j = 0; j < DIM; j++)            //draw smoke
+  {
+      for (int i = 0; i < DIM; i++)
+      {
+          px = wn + (fftw_real)i * wn - 1.0;
+          py = hn + (fftw_real)j * hn - 1.0;
+          idx0 = (j * DIM) + i;
+
+          if (smoke_var == SMOKE_RHO)
+          {
+              triaVals.append(rho[idx0]);
+          }
+          else if (smoke_var == SMOKE_MAG_V)
+          {
+              triaVals.append(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]));
+          }
+          else if (smoke_var == SMOKE_MAG_F)
+          {
+              triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
+          }
+
+          lineCoords.append(QVector2D(px, py));
+          lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
+          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
+          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
+          lineIndices.append(2*idx0);
+          lineIndices.append(2*idx0+1);
+
+          fLineCoords.append(QVector2D(px, py));
+          fLineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
+          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
+          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
+          fLineIndices.append(2*idx0);
+          fLineIndices.append(2*idx0+1);
+      }
+  }
+
+  glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, linesCoordsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*lineCoords.size(), lineCoords.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, linesColourBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*lineColours.size(), lineColours.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*fLineCoords.size(), fLineCoords.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*fLineColours.size(), fLineColours.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*fLineIndices.size(), fLineIndices.data(), GL_DYNAMIC_DRAW);
+}
+
 void MainView::updateMatrices() {
   modelViewMatrix.setToIdentity();
   projectionMatrix.setToIdentity();
@@ -257,29 +346,39 @@ void MainView::updateUniforms() {
   updateUniformsRequired = false;
 }
 
-void MainView::clearArrays() {
-  triaCoords.clear();
-  triaCoords.squeeze();
-  triaColours.clear();
-  triaColours.squeeze();
-  triaVals.clear();
-  triaVals.squeeze();
-  triaIndices.clear();
-  triaIndices.squeeze();
-  lineCoords.clear();
-  lineCoords.squeeze();
-  lineColours.clear();
-  lineColours.squeeze();
-  lineIndices.clear();
-  lineIndices.squeeze();
-  fLineCoords.clear();
-  fLineCoords.squeeze();
-  fLineColours.clear();
-  fLineColours.squeeze();
-  fLineIndices.clear();
-  fLineIndices.squeeze();
+void MainView::clearArrays()
+{
+    clearGridArrays();
+    clearLineArrays();
 }
 
+void MainView::clearGridArrays()
+{
+    triaCoords.clear();
+    triaCoords.squeeze();
+    triaColours.clear();
+    triaColours.squeeze();
+    triaVals.clear();
+    triaVals.squeeze();
+    triaIndices.clear();
+    triaIndices.squeeze();
+}
+
+void MainView::clearLineArrays()
+{
+    lineCoords.clear();
+    lineCoords.squeeze();
+    lineColours.clear();
+    lineColours.squeeze();
+    lineIndices.clear();
+    lineIndices.squeeze();
+    fLineCoords.clear();
+    fLineCoords.squeeze();
+    fLineColours.clear();
+    fLineColours.squeeze();
+    fLineIndices.clear();
+    fLineIndices.squeeze();
+}
 // ---
 
 void MainView::initializeGL() {
@@ -319,6 +418,7 @@ void MainView::initializeGL() {
   color_dir = 0;
   vec_scale = 1;
   draw_smoke = 1;
+  smoke_var = 0;
   draw_vecs = 1;
   draw_force_field = 0;
   scalar_col = 0;
@@ -331,34 +431,41 @@ void MainView::initializeGL() {
   clamp_min = 0.0;
   clamp_max = 1.0;
 
-  do_one_simulation_step();
+  first_simulation_step();
   this->startTimer(0);
   updateMatrices();
 }
 
 void MainView::do_one_simulation_step(void)
 {
-//    try
-//    {
     simulation.set_forces(DIM);
     Struct vdir = simulation.solve(DIM, visc, dt);
     fftw_real* rho = simulation.diffuse_matter(DIM, dt);
     Struct fdir = simulation.get_force();
-//    }
-//    catch (std::exception e)
-//    {
-//        qDebug() << "simulation step failed";
-//        qDebug() << e.what();
-//    }
     try
     {
-//    qDebug() <<" rho row: " << rho[0] << rho[1] << rho[50] << rho[51];
-    updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
-//    qDebug() << "check";
+        updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
     }
     catch (std::exception e)
     {
         qDebug() << "updating buffers failed";
+        qDebug() << e.what();
+    }
+}
+
+void MainView::first_simulation_step(void)
+{
+    simulation.set_forces(DIM);
+    Struct vdir = simulation.solve(DIM, visc, dt);
+    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
+    Struct fdir = simulation.get_force();
+    try
+    {
+        initBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
+    }
+    catch (std::exception e)
+    {
+        qDebug() << "initializing buffers failed";
         qDebug() << e.what();
     }
 }
