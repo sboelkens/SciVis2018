@@ -20,9 +20,14 @@ class MainWindow : public QMainWindow {
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
+
+  void setSmokeColorLegend();
+  void setGlyphColorLegend();
   QIcon setColorLegend(int width, int height, int levels, int color);
 
 private slots:
+  void waitForInitialization();
+
   void on_selectNColorsSmoke_valueChanged(int value);
   void on_selectColormapSmoke_currentIndexChanged(int index);
   void on_showSmoke_stateChanged(int state);
@@ -36,6 +41,7 @@ private slots:
 
   void on_timeStepSlider_valueChanged(int value);
   void on_viscositySlider_valueChanged(int value);
+
 
   void keyPressEvent(QKeyEvent* event);
 

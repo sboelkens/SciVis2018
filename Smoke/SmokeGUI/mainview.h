@@ -37,16 +37,17 @@ public:
   int   smoke_var;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
   int   draw_vecs;                  //draw the velocity field or not
   int   draw_force_field;           //draw the forcefield or not
-  int   scalar_col;                 //method for scalar coloring
+  int   smoke_col;
+  int   glyph_col;                 //method for scalar coloring
   int   frozen;                     //toggles on/off the animation
-  int   levels_rho;
-  int   levels_v;
-  int   levels_f;
+  int   levels_smoke;
+  int   levels_glyph;
   bool updateUniformsRequired;
   // scaling/clamping
   bool clamp_cmap;                  // if false, scaling
   float clamp_min;
   float clamp_max;
+  bool is_initialized = false;
 
 protected:
   void initializeGL();

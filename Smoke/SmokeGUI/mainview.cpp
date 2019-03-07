@@ -164,9 +164,8 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           idx3 = (j * DIM) + (i + 1);
 
           triaCoords.append(QVector2D(px, py));
-          triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
+          triaColours.append(set_colormap(rho[idx0], smoke_col, levels_smoke));
           triaVals.append(rho[idx0]);
-
 
           if (j + 1 < DIM && i + 1 < DIM)
           {
@@ -337,8 +336,8 @@ void MainView::updateUniforms() {
   cMapShaderProg->bind();
   glUniformMatrix4fv(uniMVMat_cMap, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
-  glUniform1i(uniNLevels_cMap, levels_rho);
-  glUniform1i(uniColorMap_cMap, scalar_col);
+  glUniform1i(uniNLevels_cMap, levels_smoke);
+  glUniform1i(uniColorMap_cMap, smoke_col);
   glUniform1i(uniClamping, clamp_cmap);
   glUniform1f(uniClampMin, clamp_min);
   glUniform1f(uniClampMax, clamp_max);
@@ -415,17 +414,17 @@ void MainView::initializeGL() {
   simulation = Simulation(DIM);
   dt = 0.4;
   visc = 0.001;
-  color_dir = 0;
+  color_dir = 1;
   vec_scale = 1;
   draw_smoke = 1;
   smoke_var = 0;
   draw_vecs = 1;
   draw_force_field = 0;
-  scalar_col = 0;
+  smoke_col = 0;
+  glyph_col = 1;
   frozen = 0;
-  levels_rho = 10;
-  levels_v = 10;
-  levels_f = 10;
+  levels_smoke = 10;
+  levels_glyph = 10;
 
   clamp_cmap = true;
   clamp_min = 0.0;
@@ -434,6 +433,7 @@ void MainView::initializeGL() {
   first_simulation_step();
   this->startTimer(0);
   updateMatrices();
+  is_initialized = true;
 }
 
 void MainView::do_one_simulation_step(void)

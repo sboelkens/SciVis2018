@@ -712,6 +712,9 @@ QGroupBox::title {
        <property name="text">
         <string>Fluid Velocity ||v||</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroupGlyph</string>
        </attribute>
@@ -724,6 +727,9 @@ QGroupBox::title {
          <width>121</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="currentText">
+        <string>rainbow</string>
        </property>
        <item>
         <property name="text">

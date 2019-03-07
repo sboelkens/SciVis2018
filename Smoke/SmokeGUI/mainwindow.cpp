@@ -1,17 +1,34 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "QTime"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+  qDebug() << "✓✓ MainWindow constructor";
+
   ui->setupUi(this);
   this->setFocus();
-//  setColorLegend();
 
-  qDebug() << "✓✓ MainWindow constructor";
+  this->waitForInitialization();
+
 }
 
 MainWindow::~MainWindow() {
   delete ui;
   qDebug() <<    "✗✗ MainWindow destructor";
+}
+
+void MainWindow::waitForInitialization()
+{
+    if(ui->mainView->is_initialized) {
+        this->setSmokeColorLegend();
+        this->setGlyphColorLegend();
+    } else {
+        QTimer *timer = new QTimer;
+        timer->setSingleShot(true);
+        connect(timer, SIGNAL(timeout()), this, SLOT(waitForInitialization()));
+        timer->start(100);
+    }
+
 }
 
 void MainWindow::on_showSmoke_stateChanged(int state)
@@ -26,44 +43,28 @@ void MainWindow::on_showGlyph_stateChanged(int state)
     this->setFocus();
 }
 
-//void MainWindow::on_showF_stateChanged(int state)
-//{
-//    ui->mainView->draw_force_field = state;
-//    this->setFocus();
-//}
-
 void MainWindow::on_selectColormapSmoke_currentIndexChanged(int index)
 {
-    ui->mainView->scalar_col = index;
-    ui->mainView->updateUniformsRequired = true;
-    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_rho, index);
-    ui->legendSmoke->setIcon(pm);
-    ui->legendSmoke->setIconSize(QSize(260, 30));
-    this->setFocus();
+    ui->mainView->smoke_col = index;
+    this->setSmokeColorLegend();
 }
 
 void MainWindow::on_selectNColorsSmoke_valueChanged(int value)
 {
-    ui->mainView->levels_rho = value;
-    ui->mainView->updateUniformsRequired = true;
-    QIcon pm = setColorLegend(260, 30, value, ui->mainView->scalar_col);
-    ui->legendSmoke->setIcon(pm);
-    ui->legendSmoke->setIconSize(QSize(260, 30));
-    this->setFocus();
+    ui->mainView->levels_smoke = value;
+    this->setSmokeColorLegend();
 }
 
 void MainWindow::on_selectColormapGlyph_currentIndexChanged(int index)
 {
-//    ui->mainView->scalar_col = index;
-//    ui->mainView->updateUniformsRequired = true;
-//    setColorLegend();
-//    this->setFocus();
+    ui->mainView->glyph_col = index;
+    this->setGlyphColorLegend();
 }
 
 void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
 {
-    ui->mainView->levels_v = value;
-    this->setFocus();
+    ui->mainView->levels_glyph = value;
+    this->setGlyphColorLegend();
 }
 
 void MainWindow::on_timeStepSlider_valueChanged(int value)
@@ -75,12 +76,6 @@ void MainWindow::on_viscositySlider_valueChanged(int value)
 {
     ui->mainView->visc = (static_cast<float>(value) / 1000);
 }
-
-//void MainWindow::on_selectNColorsF_valueChanged(int value)
-//{
-//    ui->mainView->levels_f = value;
-//    this->setFocus();
-//}
 
 void MainWindow::on_radioSmokeRho_clicked()
 {
@@ -107,9 +102,26 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void MainWindow::setSmokeColorLegend()
+{
+    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_smoke, ui->mainView->smoke_col);
+    ui->legendSmoke->setIcon(pm);
+    ui->legendSmoke->setIconSize(QSize(260, 30));
+    this->setFocus();
+}
+
+void MainWindow::setGlyphColorLegend()
+{
+    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_glyph, ui->mainView->glyph_col);
+    ui->legendGlyph->setIcon(pm);
+    ui->legendGlyph->setIconSize(QSize(260, 30));
+    this->setFocus();
+}
+
 QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
 {
     qDebug() << "setColorLegend";
+    ui->mainView->updateUniformsRequired = true;
 
     QPixmap pm(width, height);
     QPainter pmp(&pm);
