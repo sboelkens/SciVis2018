@@ -35,13 +35,15 @@ public:
   float vec_scale;                  //scaling of hedgehogs
   int   draw_smoke;                 //draw the smoke or not
   int   smoke_var;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
+  int   glyph_var;
+  int   glyph_vector_var;
   int   draw_vecs;                  //draw the velocity field or not
   int   draw_force_field;           //draw the forcefield or not
-  int   scalar_col;                 //method for scalar coloring
+  int   smoke_col;
+  int   glyph_col;                 //method for scalar coloring
   int   frozen;                     //toggles on/off the animation
-  int   levels_rho;
-  int   levels_v;
-  int   levels_f;
+  int   levels_smoke;
+  int   levels_glyph;
   bool updateUniformsRequired;
   // scaling/clamping
   bool clamp_cmap;                  // if false, scaling
@@ -49,7 +51,7 @@ public:
   float clamp_max;
   int scale_window;
   int scale_cnt;
-
+  bool is_initialized = false;
 
 protected:
   void initializeGL();
@@ -81,9 +83,6 @@ private:
   QVector<QVector2D> lineCoords;
   QVector<QVector3D> lineColours;
   QVector<unsigned short> lineIndices;
-  QVector<QVector2D> fLineCoords;
-  QVector<QVector3D> fLineColours;
-  QVector<unsigned short> fLineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;

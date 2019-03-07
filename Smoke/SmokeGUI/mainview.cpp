@@ -17,10 +17,6 @@ MainView::~MainView() {
   glDeleteBuffers(1, &linesColourBO);
   glDeleteBuffers(1, &linesIndexBO);
   glDeleteVertexArrays(1, &linesVAO);
-  glDeleteBuffers(1, &fLinesCoordsBO);
-  glDeleteBuffers(1, &fLinesColourBO);
-  glDeleteBuffers(1, &fLinesIndexBO);
-  glDeleteVertexArrays(1, &fLinesVAO);
 
   delete mainShaderProg;
 
@@ -104,24 +100,6 @@ void MainView::createBuffers() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
 
   glBindVertexArray(0);
-
-  glGenVertexArrays(1, &fLinesVAO);
-  glBindVertexArray(fLinesVAO);
-
-  glGenBuffers(1, &fLinesCoordsBO);
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-  glGenBuffers(1, &fLinesColourBO);
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-  glGenBuffers(1, &fLinesIndexBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
-
-  glBindVertexArray(0);
 }
 
 void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
@@ -140,18 +118,14 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
   lineColours.reserve(n_points * 2);
   lineIndices.reserve(n_points * 2);
 
-  fLineCoords.reserve(n_points * 2);
-  fLineColours.reserve(n_points * 2);
-  fLineIndices.reserve(n_points * 2);
-
   int idx0, idx1, idx2, idx3;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
 
   fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
 
-  float rho_max, vnorm_max, fnorm_max = 0.0;
-  float rho_min, vnorm_min, fnorm_min = 9999.0;
+  float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
+  float rho_min = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
   float vnorm, fnorm;
 
   for (int j = 0; j < DIM; j++)            //draw smoke
@@ -167,7 +141,7 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           idx3 = (j * DIM) + (i + 1);
 
           triaCoords.append(QVector2D(px, py));
-          triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
+          triaColours.append(set_colormap(rho[idx0], smoke_col, levels_smoke));
           triaVals.append(rho[idx0]);
 
           if (rho[idx0] > rho_max)
@@ -197,7 +171,6 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
               fnorm_min = fnorm;
           }
 
-
           if (j + 1 < DIM && i + 1 < DIM)
           {
               //first tria
@@ -216,13 +189,6 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
           lineIndices.append(2*idx0);
           lineIndices.append(2*idx0+1);
-
-          fLineCoords.append(QVector2D(px, py));
-          fLineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
-          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
-          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
-          fLineIndices.append(2*idx0);
-          fLineIndices.append(2*idx0+1);
       }
   }
 
@@ -253,15 +219,6 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*fLineCoords.size(), fLineCoords.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*fLineColours.size(), fLineColours.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*fLineIndices.size(), fLineIndices.data(), GL_DYNAMIC_DRAW);
 }
 
 void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
@@ -271,21 +228,14 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   int n_points = (DIM) * (DIM); //= DIM*DIM
   int n_trias = (DIM-1) * (DIM-1) * 6;
 
-  //triaCoords.reserve(n_points);
-  //triaColours.reserve(n_points);
   triaVals.clear();
   triaVals.squeeze();
   triaVals.reserve(n_points);
-  //triaIndices.reserve(n_trias);
 
   clearLineArrays();
   lineCoords.reserve(n_points * 2);
   lineColours.reserve(n_points * 2);
   lineIndices.reserve(n_points * 2);
-
-  fLineCoords.reserve(n_points * 2);
-  fLineColours.reserve(n_points * 2);
-  fLineIndices.reserve(n_points * 2);
 
   int idx0;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
@@ -332,32 +282,39 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
               fnorm_min = fnorm;
           }
 
-          if (smoke_var == SMOKE_RHO)
+          if (smoke_var == RHO)
           {
               triaVals.append(rho[idx0]);
           }
-          else if (smoke_var == SMOKE_MAG_V)
+          else if (smoke_var == V)
           {
               triaVals.append(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]));
           }
-          else if (smoke_var == SMOKE_MAG_F)
+          else if (smoke_var == F)
           {
               triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
           }
 
-          lineCoords.append(QVector2D(px, py));
-          lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
-          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
-          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
+          if(glyph_vector_var == V) {
+              lineCoords.append(QVector2D(px, py));
+              lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
+          } else if(glyph_vector_var == F) {
+              lineCoords.append(QVector2D(px, py));
+              lineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
+          }
+
+          float val;
+          if(glyph_var == RHO) {
+            val = rho[idx0];
+          } else if(glyph_var == V) {
+              val = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+          } else if(glyph_var == F) {
+              val = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+          }
+          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
+          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
           lineIndices.append(2*idx0);
           lineIndices.append(2*idx0+1);
-
-          fLineCoords.append(QVector2D(px, py));
-          fLineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
-          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
-          fLineColours.append(direction_to_color(fx[idx0], fy[idx0], color_dir));
-          fLineIndices.append(2*idx0);
-          fLineIndices.append(2*idx0+1);
       }
   }
 
@@ -380,15 +337,6 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesCoordsBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*fLineCoords.size(), fLineCoords.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, fLinesColourBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*fLineColours.size(), fLineColours.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fLinesIndexBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*fLineIndices.size(), fLineIndices.data(), GL_DYNAMIC_DRAW);
 }
 
 void MainView::updateMatrices() {
@@ -412,8 +360,8 @@ void MainView::updateUniforms() {
   cMapShaderProg->bind();
   glUniformMatrix4fv(uniMVMat_cMap, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
-  glUniform1i(uniNLevels_cMap, levels_rho);
-  glUniform1i(uniColorMap_cMap, scalar_col);
+  glUniform1i(uniNLevels_cMap, levels_smoke);
+  glUniform1i(uniColorMap_cMap, smoke_col);
   glUniform1i(uniClamping, clamp_cmap);
   glUniform1f(uniClampMin, clamp_min);
   glUniform1f(uniClampMax, clamp_max);
@@ -447,12 +395,6 @@ void MainView::clearLineArrays()
     lineColours.squeeze();
     lineIndices.clear();
     lineIndices.squeeze();
-    fLineCoords.clear();
-    fLineCoords.squeeze();
-    fLineColours.clear();
-    fLineColours.squeeze();
-    fLineIndices.clear();
-    fLineIndices.squeeze();
 }
 // ---
 
@@ -490,17 +432,19 @@ void MainView::initializeGL() {
   simulation = Simulation(DIM);
   dt = 0.4;
   visc = 0.001;
-  color_dir = 0;
+  color_dir = 1;
   vec_scale = 1;
   draw_smoke = 1;
   smoke_var = 0;
+  glyph_var = 0;
+  glyph_vector_var = 1;
   draw_vecs = 1;
   draw_force_field = 0;
-  scalar_col = 0;
+  smoke_col = 0;
+  glyph_col = 1;
   frozen = 0;
-  levels_rho = 10;
-  levels_v = 10;
-  levels_f = 10;
+  levels_smoke = 10;
+  levels_glyph = 10;
 
   clamp_cmap = true;
   clamp_min = 0.0;
@@ -523,6 +467,7 @@ void MainView::initializeGL() {
   first_simulation_step();
   this->startTimer(0);
   updateMatrices();
+  is_initialized = true;
 }
 
 void MainView::do_one_simulation_step(void)
@@ -542,17 +487,17 @@ void MainView::do_one_simulation_step(void)
     }
     if (!clamp_cmap)
     {
-        if (smoke_var == SMOKE_RHO)
+        if (smoke_var == RHO)
         {
             clamp_max = findMean(scale_maxvals_rho);
             clamp_min = findMean(scale_minvals_rho);
         }
-        else if (smoke_var == SMOKE_MAG_V)
+        else if (smoke_var == V)
         {
             clamp_max = findMean(scale_maxvals_vnorm);
             clamp_min = findMean(scale_minvals_vnorm);
         }
-        else if (smoke_var == SMOKE_MAG_F)
+        else if (smoke_var == F)
         {
             clamp_max = findMean(scale_maxvals_fnorm);
             clamp_min = findMean(scale_minvals_fnorm);
@@ -611,13 +556,6 @@ void MainView::paintGL() {
           glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
       }
-      if (draw_force_field)
-      {
-          glBindVertexArray(fLinesVAO);
-          glDrawElements(GL_LINES, fLineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-          glBindVertexArray(0);
-      }
-
       mainShaderProg->release();
     }
     catch (std::exception e)
