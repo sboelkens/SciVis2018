@@ -79,17 +79,54 @@ void MainWindow::on_viscositySlider_valueChanged(int value)
 
 void MainWindow::on_radioSmokeRho_clicked()
 {
-    ui->mainView->smoke_var = 0;
+    ui->mainView->smoke_var = RHO;
 }
 
 void MainWindow::on_radioSmokeV_clicked()
 {
-    ui->mainView->smoke_var = 1;
+    ui->mainView->smoke_var = V;
 }
 
 void MainWindow::on_radioSmokeF_clicked()
 {
-    ui->mainView->smoke_var = 2;
+    ui->mainView->smoke_var = F;
+}
+
+void MainWindow::on_radioGlyphRho_clicked()
+{
+    ui->mainView->glyph_var = RHO;
+}
+
+void MainWindow::on_radioGlyphV_clicked()
+{
+    ui->mainView->glyph_var = V;
+}
+
+void MainWindow::on_radioGlyphF_clicked()
+{
+    ui->mainView->glyph_var = F;
+}
+
+void MainWindow::on_radioGlyphVectorV_clicked()
+{
+    ui->mainView->glyph_vector_var = V;
+}
+
+void MainWindow::on_radioGlyphVectorF_clicked()
+{
+    ui->mainView->glyph_vector_var = F;
+}
+
+void MainWindow::on_clampMinValue_valueChanged(double value)
+{
+    qDebug() << "on_clampMinValue_valueChanged" << value;
+    ui->mainView->clamp_min = value;
+}
+
+void MainWindow::on_clampMaxValue_valueChanged(double value)
+{
+    qDebug() << "on_clampMaxValue_valueChanged" << value;
+    ui->mainView->clamp_max = value;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

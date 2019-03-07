@@ -35,6 +35,8 @@ public:
   float vec_scale;                  //scaling of hedgehogs
   int   draw_smoke;                 //draw the smoke or not
   int   smoke_var;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
+  int   glyph_var;
+  int   glyph_vector_var;
   int   draw_vecs;                  //draw the velocity field or not
   int   draw_force_field;           //draw the forcefield or not
   int   smoke_col;
@@ -79,9 +81,6 @@ private:
   QVector<QVector2D> lineCoords;
   QVector<QVector3D> lineColours;
   QVector<unsigned short> lineIndices;
-  QVector<QVector2D> fLineCoords;
-  QVector<QVector3D> fLineColours;
-  QVector<unsigned short> fLineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;

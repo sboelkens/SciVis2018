@@ -8,9 +8,9 @@ const int COLOR_BLACKWHITE = 0;   //different types of color mapping: black-and-
 const int COLOR_RAINBOW    = 1;
 const int COLOR_HEATMAP    = 2;
 
-const int SMOKE_RHO        = 0;
-const int SMOKE_MAG_V      = 1;
-const int SMOKE_MAG_F      = 2;
+const int RHO = 0;
+const int V   = 1;
+const int F   = 2;
 
 QVector3D rainbow(double val);
 QVector3D set_colormap(float val, int scalar_col, int nlevels = 7);
