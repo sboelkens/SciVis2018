@@ -125,7 +125,6 @@ void MainView::createBuffers() {
 }
 
 void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
-//    qDebug() << " call me call me";
 
   clearArrays();
 
@@ -151,6 +150,10 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
   fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
 
+  float rho_max, vnorm_max, fnorm_max = 0.0;
+  float rho_min, vnorm_min, fnorm_min = 9999.0;
+  float vnorm, fnorm;
+
   for (int j = 0; j < DIM; j++)            //draw smoke
   {
       for (int i = 0; i < DIM; i++)
@@ -166,6 +169,33 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           triaCoords.append(QVector2D(px, py));
           triaColours.append(set_colormap(rho[idx0], scalar_col, levels_rho));
           triaVals.append(rho[idx0]);
+
+          if (rho[idx0] > rho_max)
+          {
+              rho_max = rho[idx0];
+          }
+          if (rho[idx0] < rho_min)
+          {
+              rho_min = rho[idx0];
+          }
+          vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+          fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+          if (vnorm > vnorm_max)
+          {
+              vnorm_max = vnorm;
+          }
+          if (vnorm < vnorm_min)
+          {
+              vnorm_min = vnorm;
+          }
+          if (fnorm > fnorm_max)
+          {
+              fnorm_max = fnorm;
+          }
+          if (fnorm > fnorm_min)
+          {
+              fnorm_min = fnorm;
+          }
 
 
           if (j + 1 < DIM && i + 1 < DIM)
@@ -195,6 +225,13 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           fLineIndices.append(2*idx0+1);
       }
   }
+
+  scale_maxvals_rho[scale_cnt] = rho_max;
+  scale_minvals_rho[scale_cnt] = rho_min;
+  scale_maxvals_vnorm[scale_cnt] = vnorm_max;
+  scale_minvals_vnorm[scale_cnt] = vnorm_min;
+  scale_maxvals_fnorm[scale_cnt] = fnorm_max;
+  scale_minvals_fnorm[scale_cnt] = fnorm_min;
 
   glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*triaCoords.size(), triaCoords.data(), GL_DYNAMIC_DRAW);
@@ -228,7 +265,6 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
 }
 
 void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
-//    qDebug() << " call me call me";
 
   //clearArrays();
 
@@ -254,6 +290,10 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   int idx0;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
 
+  float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
+  float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
+  float vnorm, fnorm;
+
   fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
 
@@ -264,6 +304,33 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
           px = wn + (fftw_real)i * wn - 1.0;
           py = hn + (fftw_real)j * hn - 1.0;
           idx0 = (j * DIM) + i;
+
+          if (rho[idx0] > rho_max)
+          {
+              rho_max = rho[idx0];
+          }
+          if (rho[idx0] < rho_min)
+          {
+              rho_min = rho[idx0];
+          }
+          vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+          fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+          if (vnorm > vnorm_max)
+          {
+              vnorm_max = vnorm;
+          }
+          if (vnorm < vnorm_min)
+          {
+              vnorm_min = vnorm;
+          }
+          if (fnorm > fnorm_max)
+          {
+              fnorm_max = fnorm;
+          }
+          if (fnorm > fnorm_min)
+          {
+              fnorm_min = fnorm;
+          }
 
           if (smoke_var == SMOKE_RHO)
           {
@@ -293,6 +360,14 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
           fLineIndices.append(2*idx0+1);
       }
   }
+
+  scale_maxvals_rho[scale_cnt] = rho_max;
+  scale_minvals_rho[scale_cnt] = rho_min;
+  scale_maxvals_vnorm[scale_cnt] = vnorm_max;
+  scale_minvals_vnorm[scale_cnt] = vnorm_min;
+  scale_maxvals_fnorm[scale_cnt] = fnorm_max;
+  scale_minvals_fnorm[scale_cnt] = fnorm_min;
+
 
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
@@ -386,14 +461,14 @@ void MainView::initializeGL() {
   qDebug() << ":: Initializing OpenGL";
   initializeOpenGLFunctions();
 
-  debugLogger = new QOpenGLDebugLogger();
-  connect( debugLogger, SIGNAL( messageLogged( QOpenGLDebugMessage ) ), this, SLOT( onMessageLogged( QOpenGLDebugMessage ) ), Qt::DirectConnection );
+  //debugLogger = new QOpenGLDebugLogger();
+  //connect( debugLogger, SIGNAL( messageLogged( QOpenGLDebugMessage ) ), this, SLOT( onMessageLogged( QOpenGLDebugMessage ) ), Qt::DirectConnection );
 
-  if ( debugLogger->initialize() ) {
-    qDebug() << ":: Logging initialized";
-    debugLogger->startLogging( QOpenGLDebugLogger::SynchronousLogging );
-    debugLogger->enableMessages();
-  }
+  //if ( debugLogger->initialize() ) {
+  //  qDebug() << ":: Logging initialized";
+  //   debugLogger->startLogging( QOpenGLDebugLogger::SynchronousLogging );
+  //  debugLogger->enableMessages();
+  //}
 
   QString glVersion;
   glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -430,6 +505,20 @@ void MainView::initializeGL() {
   clamp_cmap = true;
   clamp_min = 0.0;
   clamp_max = 1.0;
+  scale_window = 1000;
+  scale_cnt = 0;
+  scale_maxvals_rho.reserve(scale_window);
+  scale_minvals_rho.reserve(scale_window);
+  scale_maxvals_vnorm.reserve(scale_window);
+  scale_minvals_vnorm.reserve(scale_window);
+  scale_maxvals_fnorm.reserve(scale_window);
+  scale_minvals_fnorm.reserve(scale_window);
+  scale_maxvals_rho.resize(scale_window);
+  scale_minvals_rho.resize(scale_window);
+  scale_maxvals_vnorm.resize(scale_window);
+  scale_minvals_vnorm.resize(scale_window);
+  scale_maxvals_fnorm.resize(scale_window);
+  scale_minvals_fnorm.resize(scale_window);
 
   first_simulation_step();
   this->startTimer(0);
@@ -450,6 +539,33 @@ void MainView::do_one_simulation_step(void)
     {
         qDebug() << "updating buffers failed";
         qDebug() << e.what();
+    }
+    if (!clamp_cmap)
+    {
+        if (smoke_var == SMOKE_RHO)
+        {
+            clamp_max = findMean(scale_maxvals_rho);
+            clamp_min = findMean(scale_minvals_rho);
+        }
+        else if (smoke_var == SMOKE_MAG_V)
+        {
+            clamp_max = findMean(scale_maxvals_vnorm);
+            clamp_min = findMean(scale_minvals_vnorm);
+        }
+        else if (smoke_var == SMOKE_MAG_F)
+        {
+            clamp_max = findMean(scale_maxvals_fnorm);
+            clamp_min = findMean(scale_minvals_fnorm);
+        }
+        updateUniformsRequired = true;
+    }
+    if (scale_cnt < scale_window - 1)
+    {
+        scale_cnt++;
+    }
+    else
+    {
+        scale_cnt = 0;
     }
 }
 

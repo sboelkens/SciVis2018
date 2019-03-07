@@ -47,6 +47,9 @@ public:
   bool clamp_cmap;                  // if false, scaling
   float clamp_min;
   float clamp_max;
+  int scale_window;
+  int scale_cnt;
+
 
 protected:
   void initializeGL();
@@ -93,6 +96,13 @@ private:
   QPoint lastpos;
   Simulation simulation;
   QTimer* timer;
+
+  QVector<float> scale_maxvals_rho;
+  QVector<float> scale_minvals_rho;
+  QVector<float> scale_maxvals_vnorm;
+  QVector<float> scale_minvals_vnorm;
+  QVector<float> scale_maxvals_fnorm;
+  QVector<float> scale_minvals_fnorm;
 
   void first_simulation_step();
   void do_one_simulation_step();

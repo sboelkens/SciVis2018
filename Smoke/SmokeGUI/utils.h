@@ -2,6 +2,7 @@
 #define UTILS_H
 
 //#include <algorithm>
+#include <QVector>
 #include <QVector3D>
 
 const int COLOR_BLACKWHITE = 0;   //different types of color mapping: black-and-white, rainbow, banded
@@ -16,5 +17,7 @@ QVector3D rainbow(double val);
 QVector3D set_colormap(float val, int scalar_col, int nlevels = 7);
 QVector3D direction_to_color(float x, float y, int method);
 QVector3D getHeatMapColor(float value);
+
+float findMean(QVector<float>);
 
 #endif // UTILS_H

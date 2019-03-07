@@ -97,6 +97,28 @@ void MainWindow::on_radioSmokeF_clicked()
     ui->mainView->smoke_var = 2;
 }
 
+void MainWindow::on_radioClamp_clicked()
+{
+    ui->mainView->clamp_cmap = true;
+}
+
+void MainWindow::on_radioScale_clicked()
+{
+    ui->mainView->clamp_cmap = false;
+}
+
+void MainWindow::on_clampMaxValue_valueChanged(double value)
+{
+    qDebug() << "mlalala";
+    ui->mainView->clamp_max = value;
+}
+
+void MainWindow::on_clampMinValue_valueChanged(double value)
+{
+    qDebug() << "llalala";
+    ui->mainView->clamp_min = value;
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug() << event->key();

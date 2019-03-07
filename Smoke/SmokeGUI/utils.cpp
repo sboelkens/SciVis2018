@@ -72,3 +72,14 @@ QVector3D getHeatMapColor(float value)
 
   return QVector3D(red, green, blue);
 }
+
+float findMean(QVector<float> list)
+{
+    float sum = 0.0;
+    for(int i = 0; i < list.length(); i++)
+    {
+        sum += list[i];
+    }
+    sum /= list.length();
+    return sum;
+}
