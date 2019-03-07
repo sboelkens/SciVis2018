@@ -15,22 +15,16 @@ out vec4 fColor;
 void main() {
 
   float value = vertattrib_in;
+
+  //scale values between zero and one
+  if (value<minval) value=minval; if (value>maxval) value=maxval;
+  value = value - minval;
+  value = value/(maxval-minval);
+
+  //subdivide values into levels
   value *= levels;
   value = int(value);
   value/= levels;
-
-  if (clamp == 0)
-  {
-      if (value<minval) value=minval; if (value>maxval) value=maxval;
-      value = value - minval;
-      value = value/(maxval-minval);
-  }
-  else
-  {
-      if (value<minval) value=minval; if (value>maxval) value=maxval;
-      value = value - minval;
-      value = value/(maxval-minval);
-  }
 
   if (mode == 0) //grayscale
   {
