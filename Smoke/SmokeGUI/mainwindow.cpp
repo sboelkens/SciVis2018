@@ -69,11 +69,13 @@ void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
 void MainWindow::on_timeStepSlider_valueChanged(int value)
 {
     ui->mainView->dt = (static_cast<double>(value) / 10);
+    this->setFocus();
 }
 
 void MainWindow::on_viscositySlider_valueChanged(int value)
 {
     ui->mainView->visc = (static_cast<float>(value) / 1000);
+    this->setFocus();
 }
 
 //void MainWindow::on_selectNColorsF_valueChanged(int value)
@@ -85,38 +87,49 @@ void MainWindow::on_viscositySlider_valueChanged(int value)
 void MainWindow::on_radioSmokeRho_clicked()
 {
     ui->mainView->smoke_var = 0;
+    this->setFocus();
 }
 
 void MainWindow::on_radioSmokeV_clicked()
 {
     ui->mainView->smoke_var = 1;
+    this->setFocus();
 }
 
 void MainWindow::on_radioSmokeF_clicked()
 {
     ui->mainView->smoke_var = 2;
+    this->setFocus();
 }
 
 void MainWindow::on_radioClamp_clicked()
 {
     ui->mainView->clamp_cmap = true;
+    ui->mainView->clamp_max = ui->clampMaxValue->value();
+    ui->mainView->clamp_min = ui->clampMinValue->value();
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
 }
 
 void MainWindow::on_radioScale_clicked()
 {
     ui->mainView->clamp_cmap = false;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
 }
 
 void MainWindow::on_clampMaxValue_valueChanged(double value)
 {
-    qDebug() << "mlalala";
     ui->mainView->clamp_max = value;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
 }
 
 void MainWindow::on_clampMinValue_valueChanged(double value)
 {
-    qDebug() << "llalala";
     ui->mainView->clamp_min = value;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

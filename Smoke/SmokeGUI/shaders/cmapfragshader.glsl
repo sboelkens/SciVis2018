@@ -19,11 +19,18 @@ void main() {
   value = int(value);
   value/= levels;
 
-  //if (clamp == 1)
-  //{
+  if (clamp == 0)
+  {
       if (value<minval) value=minval; if (value>maxval) value=maxval;
+      value = value - minval;
       value = value/(maxval-minval);
-  //}
+  }
+  else
+  {
+      if (value<minval) value=minval; if (value>maxval) value=maxval;
+      value = value - minval;
+      value = value/(maxval-minval);
+  }
 
   if (mode == 0) //grayscale
   {
