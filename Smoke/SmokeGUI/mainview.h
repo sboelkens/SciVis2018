@@ -51,7 +51,10 @@ public:
   float clamp_max;
   int scale_window;
   int scale_cnt;
+
   bool is_initialized = false;
+  int nr_glyphs_x;
+  int nr_glyphs_y;
 
 protected:
   void initializeGL();
@@ -75,6 +78,8 @@ private:
   void createBuffers();
   void updateMatrices();
   void updateUniforms();
+
+  float glyph_interpolation(int, int, fftw_real*);
 
   QVector<QVector2D> triaCoords;
   QVector<QVector3D> triaColours;

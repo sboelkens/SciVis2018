@@ -114,9 +114,9 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
   triaVals.reserve(n_points);
   triaIndices.reserve(n_trias);
 
-  lineCoords.reserve(n_points * 2);
-  lineColours.reserve(n_points * 2);
-  lineIndices.reserve(n_points * 2);
+  lineCoords.reserve(nr_glyphs_x * nr_glyphs_y * 2);
+  lineColours.reserve(nr_glyphs_x * nr_glyphs_y * 2);
+  lineIndices.reserve(nr_glyphs_x * nr_glyphs_y * 2);
 
   int idx0, idx1, idx2, idx3;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
@@ -182,13 +182,33 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
               triaIndices.append(idx2);
               triaIndices.append(idx3);
           }
+      }
+  }
+
+  fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
+  fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+
+  int idx_glyphs;
+  float tx, ty, x_inter, y_inter, col_inter;
+
+
+  for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
+  {
+      for (int i = 0; i < nr_glyphs_x; i++)
+      {
+          px = w_glyphs + (fftw_real)i * w_glyphs - 1.0;
+          py = h_glyphs + (fftw_real)j * h_glyphs - 1.0;
+
+          x_inter = glyph_interpolation(i, j, vx);
+          y_inter = glyph_interpolation(i, j, vy);
+          col_inter = glyph_interpolation(i, j, rho);
 
           lineCoords.append(QVector2D(px, py));
-          lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
-          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
-          lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
-          lineIndices.append(2*idx0);
-          lineIndices.append(2*idx0+1);
+          lineCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
+          lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+          lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+          lineIndices.append(2*idx_glyphs);
+          lineIndices.append(2*idx_glyphs+1);
       }
   }
 
@@ -233,9 +253,9 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   triaVals.reserve(n_points);
 
   clearLineArrays();
-  lineCoords.reserve(n_points * 2);
-  lineColours.reserve(n_points * 2);
-  lineIndices.reserve(n_points * 2);
+  lineCoords.reserve(nr_glyphs_x*nr_glyphs_y * 2);
+  lineColours.reserve(nr_glyphs_x*nr_glyphs_y * 2);
+  lineIndices.reserve(nr_glyphs_x*nr_glyphs_y * 2);
 
   int idx0;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
@@ -295,26 +315,26 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
               triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
           }
 
-          if(glyph_vector_var == V) {
-              lineCoords.append(QVector2D(px, py));
-              lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
-          } else if(glyph_vector_var == F) {
-              lineCoords.append(QVector2D(px, py));
-              lineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
-          }
+//          if(glyph_vector_var == V) {
+//              lineCoords.append(QVector2D(px, py));
+//              lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
+//          } else if(glyph_vector_var == F) {
+//              lineCoords.append(QVector2D(px, py));
+//              lineCoords.append(QVector2D(px + vec_scale * fx[idx0], py + vec_scale * fy[idx0]));
+//          }
 
-          float val;
-          if(glyph_var == RHO) {
-            val = rho[idx0];
-          } else if(glyph_var == V) {
-              val = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
-          } else if(glyph_var == F) {
-              val = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
-          }
-          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
-          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
-          lineIndices.append(2*idx0);
-          lineIndices.append(2*idx0+1);
+//          float val;
+//          if(glyph_var == RHO) {
+//            val = rho[idx0];
+//          } else if(glyph_var == V) {
+//              val = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+//          } else if(glyph_var == F) {
+//              val = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+//          }
+//          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
+//          lineColours.append(set_colormap(val, glyph_col, levels_glyph));
+//          lineIndices.append(2*idx0);
+//          lineIndices.append(2*idx0+1);
       }
   }
 
@@ -324,6 +344,51 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   scale_minvals_vnorm[scale_cnt] = vnorm_min;
   scale_maxvals_fnorm[scale_cnt] = fnorm_max;
   scale_minvals_fnorm[scale_cnt] = fnorm_min;
+
+  fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
+  fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+
+  int idx_glyphs;
+  float x_inter, y_inter, col_inter;
+
+  for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
+  {
+      for (int i = 0; i < nr_glyphs_x; i++)
+      {
+          px = w_glyphs + (fftw_real)i * w_glyphs - 1.0;
+          py = h_glyphs + (fftw_real)j * h_glyphs - 1.0;
+
+          idx_glyphs = (j * nr_glyphs_x) + i;
+
+          lineCoords.append(QVector2D(px, py));
+          if(glyph_vector_var == V) {
+              x_inter = glyph_interpolation(i, j, vx);
+              y_inter = glyph_interpolation(i, j, vy);
+
+          } else if(glyph_vector_var == F) {
+              x_inter = glyph_interpolation(i, j, fx);
+              y_inter = glyph_interpolation(i, j, fy);
+          }
+          lineCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
+
+          if(glyph_var == RHO) {
+              col_inter = glyph_interpolation(i, j, rho);
+          } else if(glyph_var == V) {
+              x_inter = glyph_interpolation(i, j, vx);
+              y_inter = glyph_interpolation(i, j, vy);
+              col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+          } else if(glyph_var == F) {
+              x_inter = glyph_interpolation(i, j, fx);
+              y_inter = glyph_interpolation(i, j, fy);
+              col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+          }
+          lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+          lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+          lineIndices.append(2*idx_glyphs);
+          lineIndices.append(2*idx_glyphs+1);
+      }
+  }
+
 
 
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
@@ -445,6 +510,9 @@ void MainView::initializeGL() {
   frozen = 0;
   levels_smoke = 10;
   levels_glyph = 10;
+
+  nr_glyphs_x = DIM;
+  nr_glyphs_y = DIM;
 
   clamp_cmap = true;
   clamp_min = 0.0;
@@ -596,6 +664,36 @@ void MainView::timerEvent(QTimerEvent *e)
         do_one_simulation_step();
         this->update();
     }
+}
+
+// ---
+
+float MainView::glyph_interpolation(int i, int j, fftw_real* mat)
+{
+    fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
+    fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+    float x_pct, y_pct, x_pos_grid, y_pos_grid, x_under, y_under, x_over, y_over;
+    float tx, ty, q11, q12, q21, q22, inter;
+
+    x_pct = (fftw_real)i / nr_glyphs_x;
+    y_pct = (fftw_real)j / nr_glyphs_y;
+    x_pos_grid = x_pct * DIM;
+    y_pos_grid = y_pct * DIM;
+    x_under = floorf(x_pos_grid);
+    y_under = floorf(y_pos_grid);
+    x_over = ceilf(x_pos_grid);
+    y_over = ceilf(y_pos_grid);
+
+    tx = (x_pos_grid - x_under);
+    ty = (y_pos_grid - y_under);
+
+    q11 = mat[(int)y_under * DIM + (int)x_under];
+    q12 = mat[(int)y_under * DIM + (int)x_over];
+    q21 = mat[(int)y_over * DIM + (int)x_under];
+    q22 = mat[(int)y_over * DIM + (int)x_over];
+    inter = (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q12 +
+            (1 - tx) * ty * q21 + tx * ty * q22;
+    return inter;
 }
 
 // ---

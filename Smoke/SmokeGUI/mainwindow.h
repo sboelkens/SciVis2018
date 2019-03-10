@@ -51,6 +51,9 @@ private slots:
   void on_timeStepSlider_valueChanged(int value);
   void on_viscositySlider_valueChanged(int value);
 
+  void on_nrGlyphsX_valueChanged(int value);
+  void on_nrGlyphsY_valueChanged(int value);
+
 
   void keyPressEvent(QKeyEvent* event);
 

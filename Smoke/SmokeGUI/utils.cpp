@@ -83,3 +83,4 @@ float findMean(QVector<float> list)
     sum /= list.length();
     return sum;
 }
+

@@ -152,6 +152,18 @@ void MainWindow::on_clampMaxValue_valueChanged(double value)
     this->setFocus();
 }
 
+void MainWindow::on_nrGlyphsX_valueChanged(int value)
+{
+    ui->mainView->nr_glyphs_x = value;
+    this->setFocus();
+}
+
+void MainWindow::on_nrGlyphsY_valueChanged(int value)
+{
+    ui->mainView->nr_glyphs_y = value;
+    this->setFocus();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug() << event->key();
