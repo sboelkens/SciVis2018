@@ -12,6 +12,9 @@
 #include <QTimerEvent>
 #include <QKeyEvent>
 
+#include <stdlib.h>
+#include <time.h>
+
 #include "simulation.h"
 #include "utils.h"
 
@@ -55,6 +58,8 @@ public:
   bool is_initialized = false;
   int nr_glyphs_x;
   int nr_glyphs_y;
+  int nr_glyphs_p;
+  bool nr_glyphs_changed;
 
 protected:
   void initializeGL();
@@ -79,12 +84,13 @@ private:
   void updateMatrices();
   void updateUniforms();
 
-  float glyph_interpolation(int, int, fftw_real*);
+  float glyph_interpolation(float, float, fftw_real*);
 
   QVector<QVector2D> triaCoords;
   QVector<QVector3D> triaColours;
   QVector<float> triaVals;
   QVector<unsigned short> triaIndices;
+  QVector<float> lineShifts;
   QVector<QVector2D> lineCoords;
   QVector<QVector3D> lineColours;
   QVector<unsigned short> lineIndices;
@@ -96,6 +102,7 @@ private:
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
   const int DIM = 50;               //size of simulation grid
+  const float MAX_SAMPLE_DIST = 0.02;
 
   QPoint lastpos;
   Simulation simulation;
