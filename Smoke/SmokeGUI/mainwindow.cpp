@@ -177,6 +177,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     qDebug() << event->key();
     switch(event->key()) {
     case 'A':
+    case Qt::Key_Space:
         ui->mainView->frozen = !ui->mainView->frozen;
         break;
     }

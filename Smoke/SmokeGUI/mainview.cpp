@@ -412,33 +412,8 @@ void MainView::initializeGL() {
 
   // Parameter initialization
   simulation = Simulation(DIM);
-  dt = 0.4;
-  visc = 0.001;
-  color_dir = 1;
-  vec_scale = 1;
-  draw_smoke = 1;
-  smoke_var = 0;
-  glyph_var = 0;
-  glyph_vector_var = 1;
-  draw_vecs = 1;
-  draw_force_field = 0;
-  smoke_col = 0;
-  glyph_col = 1;
-  frozen = 0;
-  levels_smoke = 10;
-  levels_glyph = 10;
-
-  nr_glyphs_x = DIM;
-  nr_glyphs_y = DIM;
-  nr_glyphs_p = 4;
-  nr_glyphs_changed = true;
   srand(time(NULL)); // initialize seed for rng
 
-  clamp_cmap = true;
-  clamp_min = 0.0;
-  clamp_max = 1.0;
-  scale_window = 1000;
-  scale_cnt = 0;
   scale_maxvals_rho.reserve(scale_window);
   scale_minvals_rho.reserve(scale_window);
   scale_maxvals_vnorm.reserve(scale_window);
