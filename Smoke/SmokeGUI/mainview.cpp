@@ -9,14 +9,14 @@ MainView::~MainView() {
   clearArrays();
 
   glDeleteBuffers(1, &gridCoordsBO);
-  glDeleteBuffers(1, &gridColourBO);
+//  glDeleteBuffers(1, &gridColourBO);
   glDeleteBuffers(1, &gridValBO);
   glDeleteBuffers(1, &gridIndexBO);
   glDeleteVertexArrays(1, &gridVAO);
-  glDeleteBuffers(1, &linesCoordsBO);
-  glDeleteBuffers(1, &linesColourBO);
-  glDeleteBuffers(1, &linesIndexBO);
-  glDeleteVertexArrays(1, &linesVAO);
+  glDeleteBuffers(1, &glyphCoordsBO);
+  glDeleteBuffers(1, &glyphColourBO);
+  glDeleteBuffers(1, &glyphIndexBO);
+  glDeleteVertexArrays(1, &glyphsVAO);
 
   delete mainShaderProg;
 
@@ -68,66 +68,57 @@ void MainView::createBuffers() {
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-  glGenBuffers(1, &gridColourBO);
-  glBindBuffer(GL_ARRAY_BUFFER, gridColourBO);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
   glGenBuffers(1, &gridValBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
-  glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
   glGenBuffers(1, &gridIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
 
   glBindVertexArray(0);
 
-  glGenVertexArrays(1, &linesVAO);
-  glBindVertexArray(linesVAO);
+  glGenVertexArrays(1, &glyphsVAO);
+  glBindVertexArray(glyphsVAO);
 
-  glGenBuffers(1, &linesCoordsBO);
-  glBindBuffer(GL_ARRAY_BUFFER, linesCoordsBO);
+  glGenBuffers(1, &glyphCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-  glGenBuffers(1, &linesColourBO);
-  glBindBuffer(GL_ARRAY_BUFFER, linesColourBO);
+  glGenBuffers(1, &glyphColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  glGenBuffers(1, &linesIndexBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
+  glGenBuffers(1, &glyphIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
 
   glBindVertexArray(0);
 }
 
-void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
-
-  clearArrays();
+void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
 
   int n_points = (DIM) * (DIM); //= DIM*DIM
   int n_trias = (DIM-1) * (DIM-1) * 6;
 
-  triaCoords.reserve(n_points);
-  triaColours.reserve(n_points);
+  if (!is_initialized)
+  {
+      clearArrays();
+      triaCoords.reserve(n_points);
+      triaIndices.reserve(n_trias);
+  }
+  triaVals.clear();
+  triaVals.squeeze();
   triaVals.reserve(n_points);
-  triaIndices.reserve(n_trias);
 
-  lineShifts.reserve(nr_glyphs_x * nr_glyphs_y * nr_glyphs_p * 2);
-  lineCoords.reserve(nr_glyphs_x * nr_glyphs_y * nr_glyphs_p * 2);
-  lineColours.reserve(nr_glyphs_x * nr_glyphs_y * nr_glyphs_p * 2);
-  lineIndices.reserve(nr_glyphs_x * nr_glyphs_y * nr_glyphs_p * 2);
+  updateAverages(rho, vx, vy, fx, fy);
 
   int idx0, idx1, idx2, idx3;
-  double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
+  double px, py;
 
   fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
-
-  float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
-  float rho_min = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
-  float vnorm, fnorm;
 
   for (int j = 0; j < DIM; j++)            //draw smoke
   {
@@ -141,190 +132,6 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           idx2 = ((j + 1) * DIM) + (i + 1);
           idx3 = (j * DIM) + (i + 1);
 
-          triaCoords.append(QVector2D(px, py));
-          triaColours.append(set_colormap(rho[idx0], smoke_col, levels_smoke));
-          triaVals.append(rho[idx0]);
-
-          if (rho[idx0] > rho_max)
-          {
-              rho_max = rho[idx0];
-          }
-          if (rho[idx0] < rho_min)
-          {
-              rho_min = rho[idx0];
-          }
-          vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
-          fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
-          if (vnorm > vnorm_max)
-          {
-              vnorm_max = vnorm;
-          }
-          if (vnorm < vnorm_min)
-          {
-              vnorm_min = vnorm;
-          }
-          if (fnorm > fnorm_max)
-          {
-              fnorm_max = fnorm;
-          }
-          if (fnorm > fnorm_min)
-          {
-              fnorm_min = fnorm;
-          }
-
-          if (j + 1 < DIM && i + 1 < DIM)
-          {
-              //first tria
-              triaIndices.append(idx0);
-              triaIndices.append(idx1);
-              triaIndices.append(idx2);
-              // second tria
-              triaIndices.append(idx0);
-              triaIndices.append(idx2);
-              triaIndices.append(idx3);
-          }
-      }
-  }
-
-  fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
-  fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
-
-  int idx_glyphs;
-  float x_pct, y_pct, x_inter, y_inter, col_inter;
-  float x_shift, y_shift;
-
-  for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
-  {
-      for (int i = 0; i < nr_glyphs_x; i++)
-      {
-          for (int k = 0; k < nr_glyphs_p; k++)
-          {
-              x_pct = (fftw_real)i / nr_glyphs_x;
-              y_pct = (fftw_real)j / nr_glyphs_y;
-
-              idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
-
-              x_shift = -MAX_SAMPLE_DIST + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(MAX_SAMPLE_DIST*2)));
-              y_shift = -MAX_SAMPLE_DIST + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(MAX_SAMPLE_DIST*2)));
-              x_pct += x_shift;
-              y_pct += y_shift;
-
-
-              px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
-              py = h_glyphs + y_pct * (float)nr_glyphs_x * h_glyphs - 1.0;
-
-              x_inter = glyph_interpolation(x_pct, y_pct, vx);
-              y_inter = glyph_interpolation(x_pct, y_pct, vy);
-              col_inter = glyph_interpolation(x_pct, y_pct, rho);
-
-              lineCoords.append(QVector2D(px, py));
-              lineCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
-              lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-              lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-              lineIndices.append(2*idx_glyphs);
-              lineIndices.append(2*idx_glyphs+1);
-              lineShifts.append(x_shift);
-              lineShifts.append(y_shift);
-          }
-      }
-  }
-
-  scale_maxvals_rho[scale_cnt] = rho_max;
-  scale_minvals_rho[scale_cnt] = rho_min;
-  scale_maxvals_vnorm[scale_cnt] = vnorm_max;
-  scale_minvals_vnorm[scale_cnt] = vnorm_min;
-  scale_maxvals_fnorm[scale_cnt] = fnorm_max;
-  scale_minvals_fnorm[scale_cnt] = fnorm_min;
-
-  glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*triaCoords.size(), triaCoords.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, gridColourBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*triaColours.size(), triaColours.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, linesCoordsBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*lineCoords.size(), lineCoords.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, linesColourBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*lineColours.size(), lineColours.data(), GL_DYNAMIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
-}
-
-void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
-
-  //clearArrays();
-
-  int n_points = (DIM) * (DIM); //= DIM*DIM
-  int n_trias = (DIM-1) * (DIM-1) * 6;
-
-  triaVals.clear();
-  triaVals.squeeze();
-  triaVals.reserve(n_points);
-
-  clearLineArrays();
-  lineCoords.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-  lineColours.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-  lineIndices.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-  if (nr_glyphs_changed)
-  {
-      lineShifts.clear();
-      lineShifts.squeeze();
-      lineShifts.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-  }
-
-  int idx0;
-  double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
-
-  float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
-  float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
-  float vnorm, fnorm;
-
-  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
-
-  for (int j = 0; j < DIM; j++)            //draw smoke
-  {
-      for (int i = 0; i < DIM; i++)
-      {
-          px = wn + (fftw_real)i * wn - 1.0;
-          py = hn + (fftw_real)j * hn - 1.0;
-          idx0 = (j * DIM) + i;
-
-          if (rho[idx0] > rho_max)
-          {
-              rho_max = rho[idx0];
-          }
-          if (rho[idx0] < rho_min)
-          {
-              rho_min = rho[idx0];
-          }
-          vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
-          fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
-          if (vnorm > vnorm_max)
-          {
-              vnorm_max = vnorm;
-          }
-          if (vnorm < vnorm_min)
-          {
-              vnorm_min = vnorm;
-          }
-          if (fnorm > fnorm_max)
-          {
-              fnorm_max = fnorm;
-          }
-          if (fnorm > fnorm_min)
-          {
-              fnorm_min = fnorm;
-          }
-
           if (smoke_var == RHO)
           {
               triaVals.append(rho[idx0]);
@@ -337,103 +144,185 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
           {
               triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
           }
-      }
-  }
 
-  scale_maxvals_rho[scale_cnt] = rho_max;
-  scale_minvals_rho[scale_cnt] = rho_min;
-  scale_maxvals_vnorm[scale_cnt] = vnorm_max;
-  scale_minvals_vnorm[scale_cnt] = vnorm_min;
-  scale_maxvals_fnorm[scale_cnt] = fnorm_max;
-  scale_minvals_fnorm[scale_cnt] = fnorm_min;
-
-  fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
-  fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
-
-  int idx_glyphs;
-  float x_pct, y_pct, x_inter, y_inter, col_inter;
-  float x_shift, y_shift;
-
-  for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
-  {
-      for (int i = 0; i < nr_glyphs_x; i++)
-      {
-          for (int k = 0; k < nr_glyphs_p; k++)
+          if (!is_initialized)
           {
-              x_pct = (fftw_real)i / nr_glyphs_x;
-              y_pct = (fftw_real)j / nr_glyphs_y;
-
-              idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
-
-              if (nr_glyphs_changed)
+              triaCoords.append(QVector2D(px, py));
+              if (j + 1 < DIM && i + 1 < DIM)
               {
-                  x_shift = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_SAMPLE_DIST));
-                  y_shift = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_SAMPLE_DIST));
-              }
-              else
-              {
-                  x_shift = lineShifts[2 * idx_glyphs];
-                  y_shift = lineShifts[2 * idx_glyphs + 1];
-              }
-
-              x_pct += x_shift;
-              y_pct += y_shift;
-              x_pct = std::min(std::max(0.0f, x_pct),0.98f);
-              y_pct = std::min(std::max(0.0f, y_pct),1.0f);
-
-              px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
-              py = h_glyphs + y_pct * (float)nr_glyphs_x * h_glyphs - 1.0;
-
-
-
-              lineCoords.append(QVector2D(px, py));
-              if(glyph_vector_var == V) {
-                  x_inter = glyph_interpolation(x_pct, y_pct, vx);
-                  y_inter = glyph_interpolation(x_pct, y_pct, vy);
-
-              } else if(glyph_vector_var == F) {
-                  x_inter = glyph_interpolation(x_pct, y_pct, fx);
-                  y_inter = glyph_interpolation(x_pct, y_pct, fy);
-              }
-              lineCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
-
-              if(glyph_var == RHO) {
-                  col_inter = glyph_interpolation(x_pct, y_pct, rho);
-              } else if(glyph_var == V) {
-                  x_inter = glyph_interpolation(x_pct, y_pct, vx);
-                  y_inter = glyph_interpolation(x_pct, y_pct, vy);
-                  col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
-              } else if(glyph_var == F) {
-                  x_inter = glyph_interpolation(x_pct, y_pct, fx);
-                  y_inter = glyph_interpolation(x_pct, y_pct, fy);
-                  col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
-              }
-              lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-              lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-              lineIndices.append(2*idx_glyphs);
-              lineIndices.append(2*idx_glyphs+1);
-              if (nr_glyphs_changed)
-              {
-                  lineShifts.append(x_shift);
-                  lineShifts.append(y_shift);
+                  //first tria
+                  triaIndices.append(idx0);
+                  triaIndices.append(idx1);
+                  triaIndices.append(idx2);
+                  // second tria
+                  triaIndices.append(idx0);
+                  triaIndices.append(idx2);
+                  triaIndices.append(idx3);
               }
           }
       }
   }
 
-  nr_glyphs_changed = false;
-
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, linesCoordsBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*lineCoords.size(), lineCoords.data(), GL_DYNAMIC_DRAW);
+  if (!is_initialized)
+  {
+      glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*triaCoords.size(), triaCoords.data(), GL_DYNAMIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, linesColourBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*lineColours.size(), lineColours.data(), GL_DYNAMIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
+  }
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, linesIndexBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*lineIndices.size(), lineIndices.data(), GL_DYNAMIC_DRAW);
+  updateGlyphs(rho, vx, vy, fx, fy);
+}
+
+void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy)
+{
+    clearLineArrays();
+    glyphCoords.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
+    glyphColours.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
+    glyphIndices.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
+    if (nr_glyphs_changed)
+    {
+        glyphShifts.clear();
+        glyphShifts.squeeze();
+        glyphShifts.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
+    }
+
+    float px, py;
+    fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
+    fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+
+    int idx_glyphs;
+    float x_pct, y_pct, x_inter, y_inter, col_inter;
+    float x_shift, y_shift;
+
+    for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
+    {
+        for (int i = 0; i < nr_glyphs_x; i++)
+        {
+            for (int k = 0; k < nr_glyphs_p; k++)
+            {
+                x_pct = (fftw_real)i / nr_glyphs_x;
+                y_pct = (fftw_real)j / nr_glyphs_y;
+
+                idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
+
+                if (nr_glyphs_changed)
+                {
+                    x_shift = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_SAMPLE_DIST));
+                    y_shift = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/MAX_SAMPLE_DIST));
+                }
+                else
+                {
+                    x_shift = glyphShifts[2 * idx_glyphs];
+                    y_shift = glyphShifts[2 * idx_glyphs + 1];
+                }
+
+                x_pct += x_shift;
+                y_pct += y_shift;
+                x_pct = std::min(std::max(0.0f, x_pct),0.98f);
+                y_pct = std::min(std::max(0.0f, y_pct),1.0f);
+
+                px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
+                py = h_glyphs + y_pct * (float)nr_glyphs_x * h_glyphs - 1.0;
+
+                glyphCoords.append(QVector2D(px, py));
+                if(glyph_vector_var == V) {
+                    x_inter = glyph_interpolation(x_pct, y_pct, vx);
+                    y_inter = glyph_interpolation(x_pct, y_pct, vy);
+
+                } else if(glyph_vector_var == F) {
+                    x_inter = glyph_interpolation(x_pct, y_pct, fx);
+                    y_inter = glyph_interpolation(x_pct, y_pct, fy);
+                }
+                glyphCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
+
+                if(glyph_var == RHO) {
+                    col_inter = glyph_interpolation(x_pct, y_pct, rho);
+                } else if(glyph_var == V) {
+                    x_inter = glyph_interpolation(x_pct, y_pct, vx);
+                    y_inter = glyph_interpolation(x_pct, y_pct, vy);
+                    col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+                } else if(glyph_var == F) {
+                    x_inter = glyph_interpolation(x_pct, y_pct, fx);
+                    y_inter = glyph_interpolation(x_pct, y_pct, fy);
+                    col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+                }
+                glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                glyphIndices.append(2*idx_glyphs);
+                glyphIndices.append(2*idx_glyphs+1);
+                if (nr_glyphs_changed)
+                {
+                    glyphShifts.append(x_shift);
+                    glyphShifts.append(y_shift);
+                }
+            }
+        }
+    }
+
+    nr_glyphs_changed = false;
+
+    glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*glyphCoords.size(), glyphCoords.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*glyphColours.size(), glyphColours.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*glyphIndices.size(), glyphIndices.data(), GL_DYNAMIC_DRAW);
+}
+
+void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw_real *fx, fftw_real *fy)
+{
+    float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
+    float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
+    float vnorm, fnorm;
+
+    int idx0;
+    for (int j = 0; j < DIM; j++)            //draw smoke
+    {
+        for (int i = 0; i < DIM; i++)
+        {
+            idx0 = (j * DIM) + i;
+            if (rho[idx0] > rho_max)
+            {
+                rho_max = rho[idx0];
+            }
+            if (rho[idx0] < rho_min)
+            {
+                rho_min = rho[idx0];
+            }
+            vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+            fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+            if (vnorm > vnorm_max)
+            {
+                vnorm_max = vnorm;
+            }
+            if (vnorm < vnorm_min)
+            {
+                vnorm_min = vnorm;
+            }
+            if (fnorm > fnorm_max)
+            {
+                fnorm_max = fnorm;
+            }
+            if (fnorm > fnorm_min)
+            {
+                fnorm_min = fnorm;
+            }
+        }
+    }
+
+    scale_maxvals_rho[scale_cnt] = rho_max;
+    scale_minvals_rho[scale_cnt] = rho_min;
+    scale_maxvals_vnorm[scale_cnt] = vnorm_max;
+    scale_minvals_vnorm[scale_cnt] = vnorm_min;
+    scale_maxvals_fnorm[scale_cnt] = fnorm_max;
+    scale_minvals_fnorm[scale_cnt] = fnorm_min;
 }
 
 void MainView::updateMatrices() {
@@ -445,11 +334,6 @@ void MainView::updateMatrices() {
 
 void MainView::updateUniforms() {
 
-  // Qt wrappers
-  // mainShaderProg->setUniformValue(uniModelViewMatrix, modelViewMatrix);
-  // mainShaderProg->setUniformValue(uniProjectionMatrix, projectionMatrix);
-
-  // Pure OpenGL
   mainShaderProg->bind();
   glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
@@ -476,25 +360,23 @@ void MainView::clearGridArrays()
 {
     triaCoords.clear();
     triaCoords.squeeze();
-    triaColours.clear();
-    triaColours.squeeze();
     triaVals.clear();
     triaVals.squeeze();
     triaIndices.clear();
     triaIndices.squeeze();
     // clear line displacements when clearing grid
-    lineShifts.clear();
-    lineShifts.squeeze();
+    glyphShifts.clear();
+    glyphShifts.squeeze();
 }
 
 void MainView::clearLineArrays()
 {
-    lineCoords.clear();
-    lineCoords.squeeze();
-    lineColours.clear();
-    lineColours.squeeze();
-    lineIndices.clear();
-    lineIndices.squeeze();
+    glyphCoords.clear();
+    glyphCoords.squeeze();
+    glyphColours.clear();
+    glyphColours.squeeze();
+    glyphIndices.clear();
+    glyphIndices.squeeze();
 }
 // ---
 
@@ -549,7 +431,7 @@ void MainView::initializeGL() {
   nr_glyphs_x = DIM;
   nr_glyphs_y = DIM;
   nr_glyphs_p = 4;
-  nr_glyphs_changed = false;
+  nr_glyphs_changed = true;
   srand(time(NULL)); // initialize seed for rng
 
   clamp_cmap = true;
@@ -570,7 +452,7 @@ void MainView::initializeGL() {
   scale_maxvals_fnorm.resize(scale_window);
   scale_minvals_fnorm.resize(scale_window);
 
-  first_simulation_step();
+  do_one_simulation_step();
   this->startTimer(0);
   updateMatrices();
   is_initialized = true;
@@ -591,49 +473,35 @@ void MainView::do_one_simulation_step(void)
         qDebug() << "updating buffers failed";
         qDebug() << e.what();
     }
-    if (!clamp_cmap)
+    if (is_initialized)
     {
-        if (smoke_var == RHO)
+        if (!clamp_cmap)
         {
-            clamp_max = findMean(scale_maxvals_rho);
-            clamp_min = findMean(scale_minvals_rho);
+            if (smoke_var == RHO)
+            {
+                clamp_max = findMean(scale_maxvals_rho);
+                clamp_min = findMean(scale_minvals_rho);
+            }
+            else if (smoke_var == V)
+            {
+                clamp_max = findMean(scale_maxvals_vnorm);
+                clamp_min = findMean(scale_minvals_vnorm);
+            }
+            else if (smoke_var == F)
+            {
+                clamp_max = findMean(scale_maxvals_fnorm);
+                clamp_min = findMean(scale_minvals_fnorm);
+            }
+            updateUniformsRequired = true;
         }
-        else if (smoke_var == V)
+        if (scale_cnt < scale_window - 1)
         {
-            clamp_max = findMean(scale_maxvals_vnorm);
-            clamp_min = findMean(scale_minvals_vnorm);
+            scale_cnt++;
         }
-        else if (smoke_var == F)
+        else
         {
-            clamp_max = findMean(scale_maxvals_fnorm);
-            clamp_min = findMean(scale_minvals_fnorm);
+            scale_cnt = 0;
         }
-        updateUniformsRequired = true;
-    }
-    if (scale_cnt < scale_window - 1)
-    {
-        scale_cnt++;
-    }
-    else
-    {
-        scale_cnt = 0;
-    }
-}
-
-void MainView::first_simulation_step(void)
-{
-    simulation.set_forces(DIM);
-    Struct vdir = simulation.solve(DIM, visc, dt);
-    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
-    Struct fdir = simulation.get_force();
-    try
-    {
-        initBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
-    }
-    catch (std::exception e)
-    {
-        qDebug() << "initializing buffers failed";
-        qDebug() << e.what();
     }
 }
 
@@ -658,8 +526,8 @@ void MainView::paintGL() {
       mainShaderProg->bind();
       if (draw_vecs)
       {
-          glBindVertexArray(linesVAO);
-          glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          glBindVertexArray(glyphsVAO);
+          glDrawElements(GL_LINES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
       }
       mainShaderProg->release();

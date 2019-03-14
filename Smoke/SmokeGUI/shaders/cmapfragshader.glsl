@@ -1,8 +1,7 @@
 #version 410
 // Fragment shader
 
-layout (location = 1) in vec3 vertcolour_in;
-layout (location = 2) in float vertattrib_in;
+layout (location = 1) in float vertattrib_in;
 
 uniform int levels;
 uniform int mode;

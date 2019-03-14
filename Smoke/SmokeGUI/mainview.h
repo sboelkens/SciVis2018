@@ -26,8 +26,9 @@ public:
   MainView(QWidget *parent = 0);
   ~MainView();
 
-  void initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+  void updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+  void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
   void clearGridArrays();
   void clearLineArrays();
@@ -75,8 +76,8 @@ private:
 
   QOpenGLShaderProgram* mainShaderProg;
   QOpenGLShaderProgram* cMapShaderProg;
-  GLuint gridVAO, gridCoordsBO, gridColourBO, gridValBO, gridIndexBO;
-  GLuint linesVAO, linesCoordsBO, linesColourBO, linesIndexBO;
+  GLuint gridVAO, gridCoordsBO, gridValBO, gridIndexBO;
+  GLuint glyphsVAO, glyphCoordsBO, glyphColourBO, glyphIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
 
   void createShaderPrograms();
@@ -87,13 +88,12 @@ private:
   float glyph_interpolation(float, float, fftw_real*);
 
   QVector<QVector2D> triaCoords;
-  QVector<QVector3D> triaColours;
   QVector<float> triaVals;
   QVector<unsigned short> triaIndices;
-  QVector<float> lineShifts;
-  QVector<QVector2D> lineCoords;
-  QVector<QVector3D> lineColours;
-  QVector<unsigned short> lineIndices;
+  QVector<float> glyphShifts;
+  QVector<QVector2D> glyphCoords;
+  QVector<QVector3D> glyphColours;
+  QVector<unsigned short> glyphIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
@@ -115,7 +115,6 @@ private:
   QVector<float> scale_maxvals_fnorm;
   QVector<float> scale_minvals_fnorm;
 
-  void first_simulation_step();
   void do_one_simulation_step();
 
 private slots:
