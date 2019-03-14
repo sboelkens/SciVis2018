@@ -1,11 +1,13 @@
 #include "mainview.h"
 //#include "math.h"
+#include "QJsonValue"
 
 MainView::MainView(QWidget *parent) : QOpenGLWidget(parent) {
   qDebug() << "✓✓ MainView constructor";
 }
 
 MainView::~MainView() {
+    qDebug() << "~MainView";
   clearArrays();
 
   glDeleteBuffers(1, &gridCoordsBO);
@@ -27,6 +29,7 @@ MainView::~MainView() {
 // ---
 
 void MainView::createShaderPrograms() {
+    qDebug() << "createShaderPrograms";
 
   // Qt approach
   mainShaderProg = new QOpenGLShaderProgram();
@@ -58,6 +61,7 @@ void MainView::createShaderPrograms() {
 }
 
 void MainView::createBuffers() {
+    qDebug() << "createBuffers";
 
   // Pure OpenGL
   glGenVertexArrays(1, &gridVAO);
@@ -104,10 +108,13 @@ void MainView::createBuffers() {
 
 void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
 
+//    qDebug() << "initBuffers";
   clearArrays();
 
-  int n_points = (DIM) * (DIM); //= DIM*DIM
-  int n_trias = (DIM-1) * (DIM-1) * 6;
+  int n_points = (dim_h) * (dim_v); //= DIM*DIM
+  int n_trias = (dim_h-1) * (dim_v-1) * 6;
+
+//  qDebug() << "initBuffers2";
 
   triaCoords.reserve(n_points);
   triaColours.reserve(n_points);
@@ -118,31 +125,41 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
   lineColours.reserve(n_points * 2);
   lineIndices.reserve(n_points * 2);
 
+//  qDebug() << "initBuffers3";
   int idx0, idx1, idx2, idx3;
   double px, py;//px0, py0, px1, py1, px2, py2, px3, py3;
 
-  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+  fftw_real  wn = 2.0 / (fftw_real)(dim_h + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / (fftw_real)(dim_v + 1);  // Grid cell height
 
+//  qDebug() << "initBuffers4";
   float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
   float rho_min = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
   float vnorm, fnorm;
 
-  for (int j = 0; j < DIM; j++)            //draw smoke
+//  qDebug() << "initBuffers5";
+  for (int j = 0; j < dim_v; j++)            //draw smoke
   {
-      for (int i = 0; i < DIM; i++)
+      for (int i = 0; i < dim_h; i++)
       {
           px = wn + (fftw_real)i * wn - 1.0;
           py = hn + (fftw_real)j * hn - 1.0;
 
-          idx0 = (j * DIM) + i;
-          idx1 = ((j + 1) * DIM) + i;
-          idx2 = ((j + 1) * DIM) + (i + 1);
-          idx3 = (j * DIM) + (i + 1);
+//          qDebug() << "initBuffers6";
+          idx0 = (j * dim_h) + i;
+          idx1 = ((j + 1) * dim_h) + i;
+          idx2 = ((j + 1) * dim_h) + (i + 1);
+          idx3 = (j * dim_h) + (i + 1);
+
+
+//          qDebug() << "initBuffers7";
 
           triaCoords.append(QVector2D(px, py));
           triaColours.append(set_colormap(rho[idx0], smoke_col, levels_smoke));
           triaVals.append(rho[idx0]);
+
+
+//          qDebug() << "initBuffers8";
 
           if (rho[idx0] > rho_max)
           {
@@ -152,6 +169,8 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           {
               rho_min = rho[idx0];
           }
+
+//          qDebug() << "initBuffers9";
           vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
           fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
           if (vnorm > vnorm_max)
@@ -171,7 +190,8 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
               fnorm_min = fnorm;
           }
 
-          if (j + 1 < DIM && i + 1 < DIM)
+//          qDebug() << "initBuffers10";
+          if (j + 1 < dim_v && i + 1 < dim_h)
           {
               //first tria
               triaIndices.append(idx0);
@@ -182,6 +202,7 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
               triaIndices.append(idx2);
               triaIndices.append(idx3);
           }
+//          qDebug() << "initBuffers11";
 
           lineCoords.append(QVector2D(px, py));
           lineCoords.append(QVector2D(px + vec_scale * vx[idx0], py + vec_scale * vy[idx0]));
@@ -189,6 +210,13 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
           lineColours.append(direction_to_color(vx[idx0], vy[idx0], color_dir));
           lineIndices.append(2*idx0);
           lineIndices.append(2*idx0+1);
+//          qDebug() << "initBuffers12" << j << i;
+
+//          if(j == 49 && i == 99){
+//              qDebug() << "lineCoords" << lineCoords.length();
+//              qDebug() << "triaIndices" << triaIndices.length();
+//              qDebug() << "triaCoords" << triaCoords.length();
+//          }
       }
   }
 
@@ -223,10 +251,12 @@ void MainView::initBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_re
 
 void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
 
+//    qDebug() << "updateBuffers";
+
   //clearArrays();
 
-  int n_points = (DIM) * (DIM); //= DIM*DIM
-  int n_trias = (DIM-1) * (DIM-1) * 6;
+  int n_points = (dim_h) * (dim_v); //= DIM*DIM
+  int n_trias = (dim_h-1) * (dim_v-1) * 6;
 
   triaVals.clear();
   triaVals.squeeze();
@@ -244,16 +274,16 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
   float vnorm, fnorm;
 
-  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+  fftw_real  wn = 2.0 / (fftw_real)(dim_h + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / (fftw_real)(dim_v + 1);  // Grid cell height
 
-  for (int j = 0; j < DIM; j++)            //draw smoke
+  for (int j = 0; j < dim_v; j++)            //draw smoke
   {
-      for (int i = 0; i < DIM; i++)
+      for (int i = 0; i < dim_h; i++)
       {
           px = wn + (fftw_real)i * wn - 1.0;
           py = hn + (fftw_real)j * hn - 1.0;
-          idx0 = (j * DIM) + i;
+          idx0 = (j * dim_h) + i;
 
           if (rho[idx0] > rho_max)
           {
@@ -340,6 +370,7 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 }
 
 void MainView::updateMatrices() {
+//    qDebug() << "updateMatrices";
   modelViewMatrix.setToIdentity();
   projectionMatrix.setToIdentity();
 
@@ -347,6 +378,7 @@ void MainView::updateMatrices() {
 }
 
 void MainView::updateUniforms() {
+//    qDebug() << "updateUniforms";
 
   // Qt wrappers
   // mainShaderProg->setUniformValue(uniModelViewMatrix, modelViewMatrix);
@@ -371,12 +403,14 @@ void MainView::updateUniforms() {
 
 void MainView::clearArrays()
 {
+//    qDebug() << "clearArrays";
     clearGridArrays();
     clearLineArrays();
 }
 
 void MainView::clearGridArrays()
 {
+//    qDebug() << "clearGridArrays";
     triaCoords.clear();
     triaCoords.squeeze();
     triaColours.clear();
@@ -389,6 +423,7 @@ void MainView::clearGridArrays()
 
 void MainView::clearLineArrays()
 {
+//    qDebug() << "clearLineArrays";
     lineCoords.clear();
     lineCoords.squeeze();
     lineColours.clear();
@@ -400,6 +435,7 @@ void MainView::clearLineArrays()
 
 void MainView::initializeGL() {
 
+    qDebug() << "initializeGL";
   qDebug() << ":: Initializing OpenGL";
   initializeOpenGLFunctions();
 
@@ -429,28 +465,8 @@ void MainView::initializeGL() {
   createBuffers();
 
   // Parameter initialization
-  simulation = Simulation(DIM);
-  dt = 0.4;
-  visc = 0.001;
-  color_dir = 1;
-  vec_scale = 1;
-  draw_smoke = 1;
-  smoke_var = 0;
-  glyph_var = 0;
-  glyph_vector_var = 1;
-  draw_vecs = 1;
-  draw_force_field = 0;
-  smoke_col = 0;
-  glyph_col = 1;
-  frozen = 0;
-  levels_smoke = 10;
-  levels_glyph = 10;
+  simulation = Simulation(dim_h, dim_v);
 
-  clamp_cmap = true;
-  clamp_min = 0.0;
-  clamp_max = 1.0;
-  scale_window = 1000;
-  scale_cnt = 0;
   scale_maxvals_rho.reserve(scale_window);
   scale_minvals_rho.reserve(scale_window);
   scale_maxvals_vnorm.reserve(scale_window);
@@ -472,9 +488,10 @@ void MainView::initializeGL() {
 
 void MainView::do_one_simulation_step(void)
 {
-    simulation.set_forces(DIM);
-    Struct vdir = simulation.solve(DIM, visc, dt);
-    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
+//    qDebug() << "do_one_simulation_step";
+    simulation.set_forces(dim_h, dim_v);
+    Struct vdir = simulation.solve(dim_h, dim_v, visc, dt);
+    fftw_real* rho = simulation.diffuse_matter(dim_h, dim_v, dt);
     Struct fdir = simulation.get_force();
     try
     {
@@ -516,9 +533,10 @@ void MainView::do_one_simulation_step(void)
 
 void MainView::first_simulation_step(void)
 {
-    simulation.set_forces(DIM);
-    Struct vdir = simulation.solve(DIM, visc, dt);
-    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
+    qDebug() << "first_simulation_step";
+    simulation.set_forces(dim_h, dim_v);
+    Struct vdir = simulation.solve(dim_h, dim_v, visc, dt);
+    fftw_real* rho = simulation.diffuse_matter(dim_h, dim_v, dt);
     Struct fdir = simulation.get_force();
     try
     {
@@ -532,6 +550,7 @@ void MainView::first_simulation_step(void)
 }
 
 void MainView::paintGL() {
+//    qDebug() << "paintGL";
   try
     {
       glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -544,17 +563,21 @@ void MainView::paintGL() {
       cMapShaderProg->bind();
       if (draw_smoke)
       {
+//          qDebug() << "draw_smoke" << triaIndices.length();
           glBindVertexArray(gridVAO);
           glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
+//          qDebug() << "draw_smoke2";
       }
       cMapShaderProg->release();
       mainShaderProg->bind();
       if (draw_vecs)
       {
+//          qDebug() << "draw_vecs" << lineIndices.length();
           glBindVertexArray(linesVAO);
           glDrawElements(GL_LINES, lineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
+//          qDebug() << "draw_vecs2";
       }
       mainShaderProg->release();
     }
@@ -567,14 +590,16 @@ void MainView::paintGL() {
 }
 
 void MainView::resizeGL(int newWidth, int newHeight) {
+    qDebug() << "resizeGL";
   updateMatrices();
 }
 
 void MainView::mouseMoveEvent(QMouseEvent* event)
 {
+    qDebug() << "mouseMoveEvent";
     if (event->buttons() & Qt::LeftButton)
     {
-        simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        simulation.drag(dim_h, dim_v, width(), height(), event->pos().x(), event->pos().y());
     }
     lastpos = event->pos();
 
@@ -582,15 +607,17 @@ void MainView::mouseMoveEvent(QMouseEvent* event)
 
 void MainView::mousePressEvent(QMouseEvent *event)
 {
+    qDebug() << "mousePressEvent";
     if (event->buttons() & Qt::LeftButton)
     {
-        simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        simulation.drag(dim_h, dim_v, width(), height(), event->pos().x(), event->pos().y());
     }
     lastpos = event->pos();
 }
 
 void MainView::timerEvent(QTimerEvent *e)
 {
+//    qDebug() << "timerEvent";
     if (!frozen)
     {
         do_one_simulation_step();
@@ -602,4 +629,9 @@ void MainView::timerEvent(QTimerEvent *e)
 
 void MainView::onMessageLogged( QOpenGLDebugMessage Message ) {
   qDebug() << " → Log:" << Message;
+}
+
+void MainView::resetSimulation() {
+    this->clearArrays();
+    this->initializeGL();
 }

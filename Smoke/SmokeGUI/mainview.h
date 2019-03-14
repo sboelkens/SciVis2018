@@ -28,30 +28,33 @@ public:
   void clearArrays();
   void clearGridArrays();
   void clearLineArrays();
+  void resetSimulation();
 
-  double dt;                        //simulation time step
-  float visc;                       //fluid viscosity
-  int   color_dir;                  //use direction color-coding or not
-  float vec_scale;                  //scaling of hedgehogs
-  int   draw_smoke;                 //draw the smoke or not
-  int   smoke_var;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
-  int   glyph_var;
-  int   glyph_vector_var;
-  int   draw_vecs;                  //draw the velocity field or not
-  int   draw_force_field;           //draw the forcefield or not
-  int   smoke_col;
-  int   glyph_col;                 //method for scalar coloring
-  int   frozen;                     //toggles on/off the animation
-  int   levels_smoke;
-  int   levels_glyph;
+  double dt = 0.1;                        //simulation time step
+  float visc = 0.001;                       //fluid viscosity
+  int   color_dir = 1;                  //use direction color-coding or not
+  float vec_scale = 1;                  //scaling of hedgehogs
+  int   draw_smoke = 1;                 //draw the smoke or not
+  int   smoke_var = 0;                  //variable encoded by the smoke (rho, ||v|| or ||f||)
+  int   glyph_var = 0;
+  int   glyph_vector_var = 1;
+  int   draw_vecs = 0;                  //draw the velocity field or not
+  int   draw_force_field = 0;           //draw the forcefield or not
+  int   smoke_col = 0;
+  int   glyph_col = 1;                 //method for scalar coloring
+  int   frozen = 1;                     //toggles on/off the animation
+  int   levels_smoke = 10;
+  int   levels_glyph = 10;
   bool updateUniformsRequired;
   // scaling/clamping
-  bool clamp_cmap;                  // if false, scaling
-  float clamp_min;
-  float clamp_max;
-  int scale_window;
-  int scale_cnt;
+  bool clamp_cmap = true;                  // if false, scaling
+  float clamp_min = 0.0;
+  float clamp_max = 1.0;
+  int scale_window = 1000;
+  int scale_cnt = 0;
   bool is_initialized = false;
+  int dim_h = 100;
+  int dim_v = 50;
 
 protected:
   void initializeGL();
@@ -90,8 +93,6 @@ private:
   QMatrix4x4 modelViewMatrix, projectionMatrix;
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
-  const int DIM = 50;               //size of simulation grid
-
   QPoint lastpos;
   Simulation simulation;
   QTimer* timer;

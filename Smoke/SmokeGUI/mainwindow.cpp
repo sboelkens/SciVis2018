@@ -152,6 +152,22 @@ void MainWindow::on_clampMaxValue_valueChanged(double value)
     this->setFocus();
 }
 
+void MainWindow::on_dimHValue_valueChanged(int value)
+{
+    ui->mainView->dim_h = value;
+    ui->mainView->updateUniformsRequired = true;
+//    ui->mainView->resetSimulation();
+    this->setFocus();
+}
+
+void MainWindow::on_dimVValue_valueChanged(int value)
+{
+    ui->mainView->dim_v = value;
+    ui->mainView->updateUniformsRequired = true;
+//    ui->mainView->resetSimulation();
+    this->setFocus();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug() << event->key();
