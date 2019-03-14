@@ -53,6 +53,7 @@ private slots:
 
   void on_nrGlyphsX_valueChanged(int value);
   void on_nrGlyphsY_valueChanged(int value);
+  void on_nrGlyphsP_valueChanged(int value);
 
 
   void keyPressEvent(QKeyEvent* event);

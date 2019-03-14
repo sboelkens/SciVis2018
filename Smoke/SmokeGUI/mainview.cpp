@@ -412,11 +412,16 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
               lineColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
               lineIndices.append(2*idx_glyphs);
               lineIndices.append(2*idx_glyphs+1);
+              if (nr_glyphs_changed)
+              {
+                  lineShifts.append(x_shift);
+                  lineShifts.append(y_shift);
+              }
           }
       }
   }
 
-
+  nr_glyphs_changed = false;
 
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
