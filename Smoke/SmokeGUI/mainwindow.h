@@ -28,42 +28,44 @@ public:
 private slots:
   void waitForInitialization();
 
+  void on_selectSmoke_currentIndexChanged(int index);
   void on_selectNColorsSmoke_valueChanged(int value);
   void on_selectColormapSmoke_currentIndexChanged(int index);
   void on_showSmoke_stateChanged(int state);
-  void on_radioSmokeRho_clicked();
-  void on_radioSmokeV_clicked();
-  void on_radioSmokeF_clicked();
-  void on_radioSmokeDivV_clicked();
-  void on_radioSmokeDivF_clicked();
-  void on_radioGlyphRho_clicked();
-  void on_radioGlyphV_clicked();
-  void on_radioGlyphF_clicked();
-  void on_radioGlyphDivV_clicked();
-  void on_radioGlyphDivF_clicked();
-  void on_radioGlyphVectorV_clicked();
-  void on_radioGlyphVectorF_clicked();
-  void on_clampMinValue_valueChanged(double value);
-  void on_clampMaxValue_valueChanged(double value);
-  void on_radioScale_clicked();
-  void on_radioClamp_clicked();
 
+  void on_radioSmokeScale_clicked();
+  void on_radioSmokeClamp_clicked();
+  void on_clampSmokeMinValue_valueChanged(double value);
+  void on_clampSmokeMaxValue_valueChanged(double value);
+
+  void on_selectGlyph_currentIndexChanged(int index);
   void on_selectNColorsGlyph_valueChanged(int value);
   void on_selectColormapGlyph_currentIndexChanged(int index);
   void on_showGlyph_stateChanged(int state);
 
-  void on_timeStepSlider_valueChanged(int value);
-  void on_viscositySlider_valueChanged(int value);
+  void on_radioGlyphScale_clicked();
+  void on_radioGlyphClamp_clicked();
+  void on_clampGlyphMinValue_valueChanged(double value);
+  void on_clampGlyphMaxValue_valueChanged(double value);
+
+  void on_radioGlyphVectorV_clicked();
+  void on_radioGlyphVectorF_clicked();
 
   void on_nrGlyphsX_valueChanged(int value);
   void on_nrGlyphsY_valueChanged(int value);
   void on_nrGlyphsP_valueChanged(int value);
+
+  void on_timeStepSlider_valueChanged(int value);
+  void on_viscositySlider_valueChanged(int value);
 
 
   void keyPressEvent(QKeyEvent* event);
 
 private:
   Ui::MainWindow *ui;
+
+  void setPresetOne();
+  void setPresetTwo();
 };
 
 #endif // MAINWINDOW_H
