@@ -12,6 +12,8 @@ const int COLOR_HEATMAP    = 2;
 const int RHO = 0;
 const int V   = 1;
 const int F   = 2;
+const int DIVV   = 3;
+const int DIVF   = 4;
 
 QVector3D rainbow(double val);
 QVector3D set_colormap(float val, int scalar_col, int nlevels = 7);

@@ -97,10 +97,16 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
+void MainView::updateBuffers() {
 
   int n_points = (DIM) * (DIM); //= DIM*DIM
   int n_trias = (DIM-1) * (DIM-1) * 6;
+
+  fftw_real* rho = simulation.getRho();
+  fftw_real* vx = simulation.getVx();
+  fftw_real* vy = simulation.getVy();
+  fftw_real* fx = simulation.getFx();
+  fftw_real* fy = simulation.getFy();
 
   if (!is_initialized)
   {
@@ -144,6 +150,14 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
           {
               triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
           }
+          else if (smoke_var == DIVV)
+          {
+              triaVals.append(simulation.getDivV()[idx0]);
+          }
+          else if (smoke_var == DIVF)
+          {
+              triaVals.append(simulation.getDivF()[idx0]);
+          }
 
           if (!is_initialized)
           {
@@ -174,11 +188,9 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
   }
-
-  updateGlyphs(rho, vx, vy, fx, fy);
 }
 
-void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy)
+void MainView::updateGlyphs()
 {
     clearLineArrays();
     glyphCoords.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
@@ -190,6 +202,12 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
         glyphShifts.squeeze();
         glyphShifts.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
     }
+
+    fftw_real* rho = simulation.getRho();
+    fftw_real* vx = simulation.getVx();
+    fftw_real* vy = simulation.getVy();
+    fftw_real* fx = simulation.getFx();
+    fftw_real* fy = simulation.getFy();
 
     float px, py;
     fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
@@ -250,6 +268,10 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                     x_inter = glyph_interpolation(x_pct, y_pct, fx);
                     y_inter = glyph_interpolation(x_pct, y_pct, fy);
                     col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+                } else if(glyph_var == DIVV) {
+                    col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivV());
+                } else if(glyph_var == DIVF) {
+                    col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivF());
                 }
                 glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
                 glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
@@ -436,12 +458,14 @@ void MainView::initializeGL() {
 void MainView::do_one_simulation_step(void)
 {
     simulation.set_forces(DIM);
-    Struct vdir = simulation.solve(DIM, visc, dt);
-    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
-    Struct fdir = simulation.get_force();
+    simulation.solve(DIM, visc, dt);
+    simulation.diffuse_matter(DIM, dt);
+    simulation.divergenceV(DIM);
+    simulation.divergenceF(DIM);
     try
     {
-        updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
+        updateBuffers();
+        updateGlyphs();
     }
     catch (std::exception e)
     {

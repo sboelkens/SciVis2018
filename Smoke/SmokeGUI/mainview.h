@@ -26,8 +26,8 @@ public:
   MainView(QWidget *parent = 0);
   ~MainView();
 
-  void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
-  void updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+  void updateBuffers();
+  void updateGlyphs();
   void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
   void clearGridArrays();
@@ -51,8 +51,8 @@ public:
   bool updateUniformsRequired;
   // scaling/clamping
   bool clamp_cmap = true;                  // if false, scaling
-  float clamp_min = 0.0;
-  float clamp_max = 1.0;
+  float clamp_min = 0.000;
+  float clamp_max = 1.000;
   int scale_window = 1000;
   int scale_cnt = 0;
 
@@ -60,7 +60,7 @@ public:
   int nr_glyphs_x = 50;
   int nr_glyphs_y = 50;
   int nr_glyphs_p = 4;
-  bool nr_glyphs_changed = false;
+  bool nr_glyphs_changed = true;
 
 protected:
   void initializeGL();

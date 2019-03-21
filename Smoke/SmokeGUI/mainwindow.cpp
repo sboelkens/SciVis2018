@@ -97,6 +97,18 @@ void MainWindow::on_radioSmokeF_clicked()
     this->setFocus();
 }
 
+void MainWindow::on_radioSmokeDivV_clicked()
+{
+    ui->mainView->smoke_var = DIVV;
+    this->setFocus();
+}
+
+void MainWindow::on_radioSmokeDivF_clicked()
+{
+    ui->mainView->smoke_var = DIVF;
+    this->setFocus();
+}
+
 void MainWindow::on_radioClamp_clicked()
 {
     ui->mainView->clamp_cmap = true;
@@ -126,6 +138,16 @@ void MainWindow::on_radioGlyphV_clicked()
 void MainWindow::on_radioGlyphF_clicked()
 {
     ui->mainView->glyph_var = F;
+}
+
+void MainWindow::on_radioGlyphDivV_clicked()
+{
+    ui->mainView->glyph_var = DIVV;
+}
+
+void MainWindow::on_radioGlyphDivF_clicked()
+{
+    ui->mainView->glyph_var = DIVF;
 }
 
 void MainWindow::on_radioGlyphVectorV_clicked()

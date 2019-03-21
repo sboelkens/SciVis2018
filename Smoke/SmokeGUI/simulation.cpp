@@ -10,6 +10,51 @@ Simulation::Simulation(int n)
     init_simulation(n);
 }
 
+fftw_real* Simulation::getRho()
+{
+    return rho;
+}
+fftw_real* Simulation::getVx()
+{
+    return vx;
+}
+fftw_real* Simulation::getVy()
+{
+    return vy;
+}
+Struct Simulation::getV()
+{
+    Struct velocity2d;
+    velocity2d.x = vx;
+    velocity2d.y = vy;
+
+    return velocity2d;
+}
+fftw_real* Simulation::getFx()
+{
+    return fx;
+}
+fftw_real* Simulation::getFy()
+{
+    return fy;
+}
+Struct Simulation::getF()
+{
+    Struct force2d;
+    force2d.x = fx;
+    force2d.y = fy;
+
+    return force2d;
+}
+fftw_real* Simulation::getDivV()
+{
+    return divV;
+}
+fftw_real* Simulation::getDivF()
+{
+    return divF;
+}
+
 void Simulation::init_simulation(int n)
 {
     int i; size_t dim;
@@ -24,11 +69,13 @@ void Simulation::init_simulation(int n)
     fy      = (fftw_real*) malloc(dim);
     rho     = (fftw_real*) malloc(dim);
     rho0    = (fftw_real*) malloc(dim);
+    divV     = (fftw_real*) malloc(dim);
+    divF    = (fftw_real*) malloc(dim);
     plan_rc = rfftw2d_create_plan(n, n, FFTW_REAL_TO_COMPLEX, FFTW_IN_PLACE);
     plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
     for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = 0.0f; }
+    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = 0.0f; }
 }
 
 //FFT: Execute the Fast Fourier Transform on the dataset 'vx'.
@@ -43,7 +90,7 @@ int Simulation::clamp(float x)
 { return ((x)>=0.0?((int)(x)):(-((int)(1-(x))))); }
 
 //solve: Solve (compute) one step of the fluid flow simulation
-Struct Simulation::solve(int n, fftw_real visc, fftw_real dt)
+void Simulation::solve(int n, fftw_real visc, fftw_real dt)
 {
     fftw_real x, y, x0, y0, f, r, U[2], V[2], s, t;
     int i, j, i0, j0, i1, j1;
@@ -99,18 +146,65 @@ Struct Simulation::solve(int n, fftw_real visc, fftw_real dt)
     for (i=0;i<n;i++)
        for (j=0;j<n;j++)
        { vx[i+n*j] = f*vx0[i+(n+2)*j]; vy[i+n*j] = f*vy0[i+(n+2)*j]; }
+}
 
-    Struct velocity2d;
-    velocity2d.x = vx;
-    velocity2d.y = vy;
+void Simulation::divergenceV(int n)
+{
+    for (int j = 0; j < n; j++)            //draw smoke
+    {
+        for (int i = 0; i < n; i++)
+        {
+            divV[(j * n) + i] = this->divergence(j, i, n, vx, vy);
+        }
+    }
+}
 
-    return velocity2d;
+void Simulation::divergenceF(int n)
+{
+    for (int j = 0; j < n; j++)            //draw smoke
+    {
+        for (int i = 0; i < n; i++)
+        {
+            divF[(j * n) + i] = this->divergence(j, i, n, fx, fy);
+        }
+    }
+}
+
+fftw_real Simulation::divergence(int j, int i, int n, fftw_real* x,fftw_real* y)
+{
+    int idx, idxL, idxR, idxU, idxD;
+    if(i == 0) {
+      idxL = (j * n) + (n-1);
+    } else {
+      idxL = (j * n) + (i-1);
+    }
+    if(i == n-1) {
+      idxR = (j * n) + 0;
+    } else {
+      idxR = (j * n) + (i+1);
+    }
+    if(j == 0) {
+      idxU = ((n-1) * n) + i;
+    } else {
+      idxU = ((j-1) * n) + i;
+    }
+    if(j == n-1) {
+      idxD = ((0) * n) + i;
+    } else {
+      idxD = ((j+1) * n) + i;
+    }
+    idx = (j * n) + i;
+
+    fftw_real diffX = (x[idxR] - x[idx]) - (x[idxL] - x[idx]);
+    fftw_real diffY = (y[idxD] - y[idx]) - (y[idxU] - y[idx]);
+
+    return (diffX / 2) + (diffY / 2);
 }
 
 
 // diffuse_matter: This function diffuses matter that has been placed in the velocity field. It's almost identical to the
 // velocity diffusion step in the function above. The input matter densities are in rho0 and the result is written into rho.
-fftw_real* Simulation::diffuse_matter(int n, fftw_real dt)
+void Simulation::diffuse_matter(int n, fftw_real dt)
 {
     fftw_real x, y, x0, y0, s, t;
     int i, j, i0, j0, i1, j1;
@@ -130,8 +224,6 @@ fftw_real* Simulation::diffuse_matter(int n, fftw_real dt)
             j1 = (j0+1)%n;
             rho[i+n*j] = (1-s)*((1-t)*rho0[i0+n*j0]+t*rho0[i0+n*j1])+s*((1-t)*rho0[i1+n*j0]+t*rho0[i1+n*j1]);
         }
-
-    return rho;
 }
 
 //set_forces: copy user-controlled forces to the force vectors that are sent to the solver.
@@ -173,13 +265,3 @@ void Simulation::drag(int n, int winWidth, int winHeight, int mx, int my)
     rho[Y * n + X] = 10.0f;
     lmx = mx; lmy = my;
 }
-
-Struct Simulation::get_force()
-{
-    Struct force2d;
-    force2d.x = fx;
-    force2d.y = fy;
-
-    return force2d;
-}
-

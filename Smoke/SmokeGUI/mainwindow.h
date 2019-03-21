@@ -34,9 +34,13 @@ private slots:
   void on_radioSmokeRho_clicked();
   void on_radioSmokeV_clicked();
   void on_radioSmokeF_clicked();
+  void on_radioSmokeDivV_clicked();
+  void on_radioSmokeDivF_clicked();
   void on_radioGlyphRho_clicked();
   void on_radioGlyphV_clicked();
   void on_radioGlyphF_clicked();
+  void on_radioGlyphDivV_clicked();
+  void on_radioGlyphDivF_clicked();
   void on_radioGlyphVectorV_clicked();
   void on_radioGlyphVectorF_clicked();
   void on_clampMinValue_valueChanged(double value);

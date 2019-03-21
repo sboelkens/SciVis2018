@@ -17,10 +17,21 @@ public:
     Simulation();
     Simulation(int n);
 
-    Struct solve(int n, fftw_real visc, fftw_real dt);
-    fftw_real* diffuse_matter(int n, fftw_real dt);
-    Struct get_force();
+    fftw_real* getRho();
+    fftw_real* getVx();
+    fftw_real* getVy();
+    Struct getV();
+    fftw_real* getFx();
+    fftw_real* getFy();
+    Struct getF();
+    fftw_real* getDivV();
+    fftw_real* getDivF();
+
+    void solve(int n, fftw_real visc, fftw_real dt);
+    void diffuse_matter(int n, fftw_real dt);
     void set_forces(int n);
+    void divergenceV(int n);
+    void divergenceF(int n);
     void drag(int n, int winWidth, int winHeight, int mx, int my);
 
 
@@ -31,10 +42,12 @@ private:
     fftw_real *fx, *fy;	            //(fx,fy)   = user-controlled simulation forces, steered with the mouse
     fftw_real *rho, *rho0;			//smoke density at the current (rho) and previous (rho0) moment
     rfftwnd_plan plan_rc, plan_cr;  //simulation domain discretization
+    fftw_real *divV, *divF;
 
     void init_simulation(int n);
     void FFT(int direction, void* vx);
     int clamp(float x);
+    fftw_real divergence(int j, int i, int n, fftw_real *x, fftw_real *y);
 };
 
 #endif // SIMULATION_H
