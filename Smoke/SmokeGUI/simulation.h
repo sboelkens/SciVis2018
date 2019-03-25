@@ -1,6 +1,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <rfftw.h>
 

@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     mainview.cpp \
     fluids.c \
     simulation.cpp \
-    utils.cpp
+    utils.cpp \
+    objfile.cpp
 
 HEADERS  += mainwindow.h \
     mainview.h \
     fluids.h \
     simulation.h \
-    utils.h
+    utils.h \
+    objfile.h
 
 FORMS    += mainwindow.ui
 
