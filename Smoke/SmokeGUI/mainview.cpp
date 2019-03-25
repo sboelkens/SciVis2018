@@ -52,9 +52,12 @@ void MainView::createShaderPrograms() {
   uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
   uniNLevels_cMap = glGetUniformLocation(cMapShaderProg->programId(), "levels");
   uniColorMap_cMap = glGetUniformLocation(cMapShaderProg->programId(), "mode");
-  uniClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
-  uniClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
-  uniClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
+  uniGlyphClamping = glGetUniformLocation(cMapShaderProg->programId(), "glyphclamp");
+  uniGlyphClampMax = glGetUniformLocation(cMapShaderProg->programId(), "glyphmaxval");
+  uniGlyphClampMin = glGetUniformLocation(cMapShaderProg->programId(), "glyphminval");
+  uniSmokeClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
+  uniSmokeClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
+  uniSmokeClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
 }
 
 void MainView::createBuffers() {
@@ -66,12 +69,12 @@ void MainView::createBuffers() {
   glGenBuffers(1, &gridCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridValBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
@@ -84,12 +87,12 @@ void MainView::createBuffers() {
   glGenBuffers(1, &glyphCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphColourBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
@@ -339,12 +342,12 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
         }
     }
 
-    scale_maxvals_rho[scale_cnt] = rho_max;
-    scale_minvals_rho[scale_cnt] = rho_min;
-    scale_maxvals_vnorm[scale_cnt] = vnorm_max;
-    scale_minvals_vnorm[scale_cnt] = vnorm_min;
-    scale_maxvals_fnorm[scale_cnt] = fnorm_max;
-    scale_minvals_fnorm[scale_cnt] = fnorm_min;
+    scale_maxvals_rho[scale_smoke_cnt] = rho_max;
+    scale_minvals_rho[scale_smoke_cnt] = rho_min;
+    scale_maxvals_vnorm[scale_smoke_cnt] = vnorm_max;
+    scale_minvals_vnorm[scale_smoke_cnt] = vnorm_min;
+    scale_maxvals_fnorm[scale_smoke_cnt] = fnorm_max;
+    scale_minvals_fnorm[scale_smoke_cnt] = fnorm_min;
 }
 
 void MainView::updateMatrices() {
@@ -365,9 +368,12 @@ void MainView::updateUniforms() {
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
   glUniform1i(uniNLevels_cMap, levels_smoke);
   glUniform1i(uniColorMap_cMap, smoke_col);
-  glUniform1i(uniClamping, clamp_cmap);
-  glUniform1f(uniClampMin, clamp_min);
-  glUniform1f(uniClampMax, clamp_max);
+  glUniform1i(uniGlyphClamping, clamp_glyph_cmap);
+  glUniform1f(uniGlyphClampMin, clamp_glyph_min);
+  glUniform1f(uniGlyphClampMax, clamp_glyph_max);
+  glUniform1i(uniSmokeClamping, clamp_smoke_cmap);
+  glUniform1f(uniSmokeClampMin, clamp_smoke_min);
+  glUniform1f(uniSmokeClampMax, clamp_smoke_max);
   cMapShaderProg->release();
   updateUniformsRequired = false;
 }
@@ -401,7 +407,6 @@ void MainView::clearLineArrays()
     glyphIndices.squeeze();
 }
 // ---
-
 void MainView::initializeGL() {
 
   qDebug() << ":: Initializing OpenGL";
@@ -436,18 +441,18 @@ void MainView::initializeGL() {
   simulation = Simulation(DIM);
   srand(time(NULL)); // initialize seed for rng
 
-  scale_maxvals_rho.reserve(scale_window);
-  scale_minvals_rho.reserve(scale_window);
-  scale_maxvals_vnorm.reserve(scale_window);
-  scale_minvals_vnorm.reserve(scale_window);
-  scale_maxvals_fnorm.reserve(scale_window);
-  scale_minvals_fnorm.reserve(scale_window);
-  scale_maxvals_rho.resize(scale_window);
-  scale_minvals_rho.resize(scale_window);
-  scale_maxvals_vnorm.resize(scale_window);
-  scale_minvals_vnorm.resize(scale_window);
-  scale_maxvals_fnorm.resize(scale_window);
-  scale_minvals_fnorm.resize(scale_window);
+  scale_maxvals_rho.reserve(scale_smoke_window);
+  scale_minvals_rho.reserve(scale_smoke_window);
+  scale_maxvals_vnorm.reserve(scale_smoke_window);
+  scale_minvals_vnorm.reserve(scale_smoke_window);
+  scale_maxvals_fnorm.reserve(scale_smoke_window);
+  scale_minvals_fnorm.reserve(scale_smoke_window);
+  scale_maxvals_rho.resize(scale_smoke_window);
+  scale_minvals_rho.resize(scale_smoke_window);
+  scale_maxvals_vnorm.resize(scale_smoke_window);
+  scale_minvals_vnorm.resize(scale_smoke_window);
+  scale_maxvals_fnorm.resize(scale_smoke_window);
+  scale_minvals_fnorm.resize(scale_smoke_window);
 
   do_one_simulation_step();
   this->startTimer(0);
@@ -474,32 +479,52 @@ void MainView::do_one_simulation_step(void)
     }
     if (is_initialized)
     {
-        if (!clamp_cmap)
+        if (!clamp_smoke_cmap)
         {
             if (smoke_var == RHO)
             {
-                clamp_max = findMean(scale_maxvals_rho);
-                clamp_min = findMean(scale_minvals_rho);
+                clamp_smoke_max = findMean(scale_maxvals_rho);
+                clamp_smoke_min = findMean(scale_minvals_rho);
             }
             else if (smoke_var == V)
             {
-                clamp_max = findMean(scale_maxvals_vnorm);
-                clamp_min = findMean(scale_minvals_vnorm);
+                clamp_smoke_max = findMean(scale_maxvals_vnorm);
+                clamp_smoke_min = findMean(scale_minvals_vnorm);
             }
             else if (smoke_var == F)
             {
-                clamp_max = findMean(scale_maxvals_fnorm);
-                clamp_min = findMean(scale_minvals_fnorm);
+                clamp_smoke_max = findMean(scale_maxvals_fnorm);
+                clamp_smoke_min = findMean(scale_minvals_fnorm);
             }
             updateUniformsRequired = true;
         }
-        if (scale_cnt < scale_window - 1)
+        if (scale_smoke_cnt < scale_smoke_window - 1)
         {
-            scale_cnt++;
+            scale_smoke_cnt++;
         }
         else
         {
-            scale_cnt = 0;
+            scale_smoke_cnt = 0;
+        }
+
+        if (!clamp_glyph_cmap)
+        {
+            if (glyph_var == RHO)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_rho);
+                clamp_glyph_min = findMean(scale_minvals_rho);
+            }
+            else if (glyph_var == V)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_vnorm);
+                clamp_glyph_min = findMean(scale_minvals_vnorm);
+            }
+            else if (glyph_var == F)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_fnorm);
+                clamp_glyph_min = findMean(scale_minvals_fnorm);
+            }
+            updateUniformsRequired = true;
         }
     }
 }

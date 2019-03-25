@@ -50,11 +50,17 @@ public:
   int   levels_glyph = 10;
   bool updateUniformsRequired;
   // scaling/clamping
-  bool clamp_cmap = true;                  // if false, scaling
-  float clamp_min = 0.000;
-  float clamp_max = 1.000;
-  int scale_window = 1000;
-  int scale_cnt = 0;
+  bool clamp_smoke_cmap = true;                  // if false, scaling
+  float clamp_smoke_min = 0.000;
+  float clamp_smoke_max = 1.000;
+  int scale_smoke_window = 1000;
+  int scale_smoke_cnt = 0;
+
+  bool clamp_glyph_cmap = true;                  // if false, scaling
+  float clamp_glyph_min = 0.000;
+  float clamp_glyph_max = 1.000;
+  int scale_glyph_window = 1000;
+  int scale_glyph_cnt = 0;
 
   bool is_initialized = false;
   int nr_glyphs_x = 50;
@@ -97,7 +103,8 @@ private:
 
   GLint uniModelViewMatrix, uniProjectionMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
-  GLint uniClamping, uniClampMin, uniClampMax; // scaling/clamping uniforms
+  GLint uniSmokeClamping, uniSmokeClampMin, uniSmokeClampMax;
+  GLint uniGlyphClamping, uniGlyphClampMin, uniGlyphClampMax;// scaling/clamping uniforms
   QMatrix4x4 modelViewMatrix, projectionMatrix;
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------

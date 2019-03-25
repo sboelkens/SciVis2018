@@ -6,6 +6,9 @@ layout (location = 1) in vec3 vertcolour_in;
 
 uniform mat4 modelviewmatrix;
 uniform mat4 projectionmatrix;
+uniform int glyphclamp;
+uniform float glyphminval;
+uniform float glyphmaxval;
 
 layout (location = 1) out vec3 vertcolour_out;
 

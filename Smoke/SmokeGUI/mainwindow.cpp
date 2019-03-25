@@ -54,27 +54,33 @@ void MainWindow::on_showSmoke_stateChanged(int state)
 
 void MainWindow::on_radioSmokeScale_clicked()
 {
-    ui->mainView->clamp_cmap = false;
+    ui->mainView->clamp_smoke_cmap = false;
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_radioSmokeClamp_clicked()
 {
-    ui->mainView->clamp_cmap = true;
-    ui->mainView->clamp_max = ui->clampSmokeMaxValue->value();
-    ui->mainView->clamp_min = ui->clampSmokeMinValue->value();
+    ui->mainView->clamp_smoke_cmap = true;
+    ui->mainView->clamp_smoke_max = static_cast<float>(ui->clampSmokeMaxValue->value());
+    ui->mainView->clamp_smoke_min = static_cast<float>(ui->clampSmokeMinValue->value());
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
 {
-    ui->mainView->clamp_min = value;
+    ui->mainView->clamp_smoke_min = static_cast<float>(value);
+    ui->labelSmokeLegendMin->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
 {
-    ui->mainView->clamp_max = value;
+    ui->mainView->clamp_smoke_max = static_cast<float>(value);
+    ui->labelSmokeLegendMax->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
@@ -104,27 +110,33 @@ void MainWindow::on_showGlyph_stateChanged(int state)
 
 void MainWindow::on_radioGlyphScale_clicked()
 {
-    ui->mainView->clamp_cmap = false;
+    ui->mainView->clamp_glyph_cmap = false;
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_radioGlyphClamp_clicked()
 {
-    ui->mainView->clamp_cmap = true;
-    ui->mainView->clamp_max = ui->clampGlyphMaxValue->value();
-    ui->mainView->clamp_min = ui->clampGlyphMinValue->value();
+    ui->mainView->clamp_glyph_cmap = true;
+    ui->mainView->clamp_glyph_max = static_cast<float>(ui->clampGlyphMaxValue->value());
+    ui->mainView->clamp_glyph_min = static_cast<float>(ui->clampGlyphMinValue->value());
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 {
-    ui->mainView->clamp_min = value;
+    ui->mainView->clamp_glyph_min = static_cast<float>(value);
+    ui->labelGlyphLegendMin->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampGlyphMaxValue_valueChanged(double value)
 {
-    ui->mainView->clamp_max = value;
+    ui->mainView->clamp_glyph_max = static_cast<float>(value);
+    ui->labelGlyphLegendMax->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
@@ -222,9 +234,15 @@ QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
         pmp.setBrush(QBrush(color));
         pmp.setPen(Qt::NoPen);
         if ( x % 2 == 0) {
-            pmp.drawRect(floor(x*color_width), 0, floor(color_width+10), height);
+            pmp.drawRect(static_cast<int>(floor(x*color_width)),
+                         0,
+                         static_cast<int>(floor(color_width+10)),
+                         height);
         } else {
-            pmp.drawRect(ceil(x*color_width), 0, ceil(color_width+10), height);
+            pmp.drawRect(static_cast<int>(ceil(x*color_width)),
+                         0,
+                         static_cast<int>(ceil(color_width+10)),
+                         height);
         }
     }
 

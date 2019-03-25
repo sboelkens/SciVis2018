@@ -10,7 +10,6 @@ uniform mat4 projectionmatrix;
 layout (location = 1) out float vertattrib_out;
 
 void main() {
-
   gl_Position = projectionmatrix * modelviewmatrix * vec4(vertcoords_world_vs.x, vertcoords_world_vs.y, -1.0, 1.0);
   vertattrib_out = vertattrib_in;
 }

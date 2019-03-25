@@ -1283,12 +1283,12 @@ QGroupBox::title {
         <string>0.1</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="labelSmokeLegendMin">
        <property name="geometry">
         <rect>
          <x>20</x>
          <y>160</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -1296,12 +1296,12 @@ QGroupBox::title {
         <string>0</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="labelSmokeLegendMax">
        <property name="geometry">
         <rect>
          <x>270</x>
          <y>160</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -1309,12 +1309,12 @@ QGroupBox::title {
         <string>1</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="labelSmokeLegendMid">
        <property name="geometry">
         <rect>
          <x>140</x>
          <y>160</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -1427,12 +1427,12 @@ QGroupBox::title {
         <string>max:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_13">
+      <widget class="QLabel" name="labelGlyphLegendMin">
        <property name="geometry">
         <rect>
          <x>20</x>
          <y>360</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -1440,12 +1440,12 @@ QGroupBox::title {
         <string>0</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="labelGlyphLegendMid">
        <property name="geometry">
         <rect>
          <x>140</x>
          <y>360</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -1466,12 +1466,12 @@ QGroupBox::title {
         <string/>
        </property>
       </widget>
-      <widget class="QLabel" name="label_15">
+      <widget class="QLabel" name="labelGlyphLegendMax">
        <property name="geometry">
         <rect>
          <x>270</x>
          <y>360</y>
-         <width>16</width>
+         <width>21</width>
          <height>16</height>
         </rect>
        </property>
@@ -2227,7 +2227,7 @@ QGroupBox::title {
         <string>Clamp</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="clampGlyphMaxValue">
@@ -2276,8 +2276,6 @@ QGroupBox::title {
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupGlyphVector"/>
-  <buttongroup name="buttonGroupGlyph"/>
-  <buttongroup name="buttonGroupSmoke"/>
   <buttongroup name="buttonGroupSmokeValues"/>
  </buttongroups>
 </ui>
