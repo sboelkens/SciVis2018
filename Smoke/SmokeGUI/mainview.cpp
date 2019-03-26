@@ -239,8 +239,10 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
 //                y_pct = (fftw_real)j / nr_glyphs_y;
                 px = w_glyphs + (fftw_real)i * w_glyphs - 1.0;
                 py = h_glyphs + (fftw_real)j * h_glyphs - 1.0;
-                x_pct = (px+1.0)/2.0;
-                y_pct = (py+1.0)/2.0;
+//                x_pct = (px+1.0)/2.0;
+//                y_pct = (py+1.0)/2.0;
+                x_pct = (px - (w_glyphs - 1.0))/(w_glyphs*(nr_glyphs_x-1));
+                y_pct = (py - (h_glyphs - 1.0))/(h_glyphs*(nr_glyphs_y-1));
 
                 idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
 
@@ -257,13 +259,19 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
 
                 x_pct += x_shift;
                 y_pct += y_shift;
-                x_pct = std::min(std::max(0.0f, x_pct),0.98f);
+                //x_pct = std::min(std::max(0.0f, x_pct),1.0f);
+                if (x_pct > 1.0f)
+                {
+                    x_pct -= 2*x_shift;
+                }
                 y_pct = std::min(std::max(0.0f, y_pct),1.0f);
 
 //                px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
 //                py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
-                px = x_pct*2.0-1.0;
-                py = y_pct*2.0-1.0;
+                //px = x_pct*2.0-1.0;
+                //py = y_pct*2.0-1.0;
+                px = -1.0 + w_glyphs + (w_glyphs*(nr_glyphs_x-1))*x_pct;
+                py = -1.0 + h_glyphs + (h_glyphs*(nr_glyphs_y-1))*y_pct;
                 if(glyph_vector_var == V) {
                     x_inter = glyph_interpolation(x_pct, y_pct, vx);
                     y_inter = glyph_interpolation(x_pct, y_pct, vy);
@@ -278,7 +286,7 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                 {
                     dir = QVector2D(x_inter, y_inter);
                     angle = acos(dir.dotProduct(dir, QVector2D(0.0, 1.0)) / sqrt(x_inter*x_inter + y_inter*y_inter))*360/(2*M_PI);
-                    d = 2*MAX_SAMPLE_DIST*scale_factor;
+                    d = glyphs3D_size*scale_factor;
                     if (x_inter > 0.0)
                     {
                         angle = -angle;
@@ -422,7 +430,7 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
 void MainView::updateMatrices() {
   modelViewMatrix.setToIdentity();
   projectionMatrix.setToIdentity();
-  float dispRatio = width()/height();
+  float dispRatio = 1.0;//width()/height();
   projectionMatrix.ortho(-1.0*dispRatio, 1.0*dispRatio, -1.0, 1.0, 0.0, 100.0);
   //projectionMatrix.perspective(60.0, dispRatio, 0.2, 4.0);//
   normalMatrix.setToIdentity();
@@ -680,8 +688,8 @@ float MainView::glyph_interpolation(float x_pct, float y_pct, fftw_real* mat)
 //    float px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
 //    float py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
 
-    x_pos_grid = x_pct * DIM;//(px+1.0)/2.0 * DIM;//
-    y_pos_grid = y_pct * DIM;//(py+1.0)/2.0 * DIM;//
+    x_pos_grid = x_pct * (DIM-1);//(px+1.0)/2.0 * DIM;//
+    y_pos_grid = y_pct * (DIM-1);//(py+1.0)/2.0 * DIM;//
     //qDebug() << "on grid " << x_pos_grid << y_pos_grid;
     x_under = floorf(x_pos_grid);
     y_under = floorf(y_pos_grid);

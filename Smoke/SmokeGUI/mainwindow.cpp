@@ -172,6 +172,30 @@ void MainWindow::on_nrGlyphsP_valueChanged(int value)
     ui->mainView->nr_glyphs_changed = true;
     this->setFocus();
 }
+
+void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
+{
+    if (index == 0)
+    {
+        ui->mainView->glyphs3D = true;
+        ui->mainView->nr_glyphs_x = 20;
+        ui->mainView->nr_glyphs_y = 20;
+        //ui->mainView->nr_glyphs_p = 4;
+        ui->nrGlyphsP->setValue(1);
+    }
+    else if (index == 1)
+    {
+        ui->mainView->glyphs3D = false;
+        ui->mainView->nr_glyphs_x = 50;
+        ui->mainView->nr_glyphs_y = 50;
+        //ui->mainView->nr_glyphs_p = 1;
+        ui->nrGlyphsP->setValue(4);
+    }
+    ui->mainView->nr_glyphs_changed = true;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     qDebug() << event->key();
