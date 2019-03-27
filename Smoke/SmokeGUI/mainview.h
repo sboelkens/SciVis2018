@@ -62,6 +62,8 @@ public:
   int scale_glyph_window = 1000;
   int scale_glyph_cnt = 0;
 
+  float rho_isoline_value = 0.500;
+
   bool is_initialized = false;
   int nr_glyphs_x = 50;
   int nr_glyphs_y = 50;

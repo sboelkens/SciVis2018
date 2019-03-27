@@ -54,6 +54,10 @@ fftw_real* Simulation::getDivF()
 {
     return divF;
 }
+fftw_real* Simulation::getIsoline()
+{
+    return isoline;
+}
 
 void Simulation::init_simulation(int n)
 {
@@ -71,11 +75,12 @@ void Simulation::init_simulation(int n)
     rho0    = (fftw_real*) malloc(dim);
     divV     = (fftw_real*) malloc(dim);
     divF    = (fftw_real*) malloc(dim);
+    isoline = (fftw_real*) malloc(dim);
     plan_rc = rfftw2d_create_plan(n, n, FFTW_REAL_TO_COMPLEX, FFTW_IN_PLACE);
     plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
     for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = 0.0f; }
+    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = isoline[i] = 0.0f; }
 }
 
 //FFT: Execute the Fast Fourier Transform on the dataset 'vx'.
@@ -99,44 +104,44 @@ void Simulation::solve(int n, fftw_real visc, fftw_real dt)
     { vx[i] += dt*vx0[i]; vx0[i] = vx[i]; vy[i] += dt*vy0[i]; vy0[i] = vy[i]; }
 
     for ( x=0.5f/n,i=0 ; i<n ; i++,x+=1.0f/n )
-       for ( y=0.5f/n,j=0 ; j<n ; j++,y+=1.0f/n )
-       {
-          x0 = n*(x-dt*vx0[i+n*j])-0.5f;
-          y0 = n*(y-dt*vy0[i+n*j])-0.5f;
-          i0 = clamp(x0); s = x0-i0;
-          i0 = (n+(i0%n))%n;
-          i1 = (i0+1)%n;
-          j0 = clamp(y0); t = y0-j0;
-          j0 = (n+(j0%n))%n;
-          j1 = (j0+1)%n;
-          vx[i+n*j] = (1-s)*((1-t)*vx0[i0+n*j0]+t*vx0[i0+n*j1])+s*((1-t)*vx0[i1+n*j0]+t*vx0[i1+n*j1]);
-          vy[i+n*j] = (1-s)*((1-t)*vy0[i0+n*j0]+t*vy0[i0+n*j1])+s*((1-t)*vy0[i1+n*j0]+t*vy0[i1+n*j1]);
-       }
+        for ( y=0.5f/n,j=0 ; j<n ; j++,y+=1.0f/n )
+        {
+            x0 = n*(x-dt*vx0[i+n*j])-0.5f;
+            y0 = n*(y-dt*vy0[i+n*j])-0.5f;
+            i0 = clamp(x0); s = x0-i0;
+            i0 = (n+(i0%n))%n;
+            i1 = (i0+1)%n;
+            j0 = clamp(y0); t = y0-j0;
+            j0 = (n+(j0%n))%n;
+            j1 = (j0+1)%n;
+            vx[i+n*j] = (1-s)*((1-t)*vx0[i0+n*j0]+t*vx0[i0+n*j1])+s*((1-t)*vx0[i1+n*j0]+t*vx0[i1+n*j1]);
+            vy[i+n*j] = (1-s)*((1-t)*vy0[i0+n*j0]+t*vy0[i0+n*j1])+s*((1-t)*vy0[i1+n*j0]+t*vy0[i1+n*j1]);
+        }
 
     for(i=0; i<n; i++)
-      for(j=0; j<n; j++)
-      {  vx0[i+(n+2)*j] = vx[i+n*j]; vy0[i+(n+2)*j] = vy[i+n*j]; }
+        for(j=0; j<n; j++)
+        {  vx0[i+(n+2)*j] = vx[i+n*j]; vy0[i+(n+2)*j] = vy[i+n*j]; }
 
     FFT(1,vx0);
     FFT(1,vy0);
 
     for (i=0;i<=n;i+=2)
     {
-       x = 0.5f*i;
-       for (j=0;j<n;j++)
-       {
-          y = j<=n/2 ? (fftw_real)j : (fftw_real)j-n;
-          r = x*x+y*y;
-          if ( r==0.0f ) continue;
-          f = (fftw_real)exp(-r*dt*visc);
-          U[0] = vx0[i  +(n+2)*j]; V[0] = vy0[i  +(n+2)*j];
-          U[1] = vx0[i+1+(n+2)*j]; V[1] = vy0[i+1+(n+2)*j];
+        x = 0.5f*i;
+        for (j=0;j<n;j++)
+        {
+            y = j<=n/2 ? (fftw_real)j : (fftw_real)j-n;
+            r = x*x+y*y;
+            if ( r==0.0f ) continue;
+            f = (fftw_real)exp(-r*dt*visc);
+            U[0] = vx0[i  +(n+2)*j]; V[0] = vy0[i  +(n+2)*j];
+            U[1] = vx0[i+1+(n+2)*j]; V[1] = vy0[i+1+(n+2)*j];
 
-          vx0[i  +(n+2)*j] = f*((1-x*x/r)*U[0]     -x*y/r *V[0]);
-          vx0[i+1+(n+2)*j] = f*((1-x*x/r)*U[1]     -x*y/r *V[1]);
-          vy0[i+  (n+2)*j] = f*(  -y*x/r *U[0] + (1-y*y/r)*V[0]);
-          vy0[i+1+(n+2)*j] = f*(  -y*x/r *U[1] + (1-y*y/r)*V[1]);
-       }
+            vx0[i  +(n+2)*j] = f*((1-x*x/r)*U[0]     -x*y/r *V[0]);
+            vx0[i+1+(n+2)*j] = f*((1-x*x/r)*U[1]     -x*y/r *V[1]);
+            vy0[i+  (n+2)*j] = f*(  -y*x/r *U[0] + (1-y*y/r)*V[0]);
+            vy0[i+1+(n+2)*j] = f*(  -y*x/r *U[1] + (1-y*y/r)*V[1]);
+        }
     }
 
     FFT(-1,vx0);
@@ -144,8 +149,8 @@ void Simulation::solve(int n, fftw_real visc, fftw_real dt)
 
     f = 1.0/(n*n);
     for (i=0;i<n;i++)
-       for (j=0;j<n;j++)
-       { vx[i+n*j] = f*vx0[i+(n+2)*j]; vy[i+n*j] = f*vy0[i+(n+2)*j]; }
+        for (j=0;j<n;j++)
+        { vx[i+n*j] = f*vx0[i+(n+2)*j]; vy[i+n*j] = f*vy0[i+(n+2)*j]; }
 }
 
 void Simulation::divergenceV(int n)
@@ -174,24 +179,24 @@ fftw_real Simulation::divergence(int j, int i, int n, fftw_real* x,fftw_real* y)
 {
     int idx, idxL, idxR, idxU, idxD;
     if(i == 0) {
-      idxL = (j * n) + (n-1);
+        idxL = (j * n) + (n-1);
     } else {
-      idxL = (j * n) + (i-1);
+        idxL = (j * n) + (i-1);
     }
     if(i == n-1) {
-      idxR = (j * n) + 0;
+        idxR = (j * n) + 0;
     } else {
-      idxR = (j * n) + (i+1);
+        idxR = (j * n) + (i+1);
     }
     if(j == 0) {
-      idxU = ((n-1) * n) + i;
+        idxU = ((n-1) * n) + i;
     } else {
-      idxU = ((j-1) * n) + i;
+        idxU = ((j-1) * n) + i;
     }
     if(j == n-1) {
-      idxD = ((0) * n) + i;
+        idxD = ((0) * n) + i;
     } else {
-      idxD = ((j+1) * n) + i;
+        idxD = ((j+1) * n) + i;
     }
     idx = (j * n) + i;
 
@@ -199,6 +204,53 @@ fftw_real Simulation::divergence(int j, int i, int n, fftw_real* x,fftw_real* y)
     fftw_real diffY = (y[idxD] - y[idx]) - (y[idxU] - y[idx]);
 
     return (diffX / 2) + (diffY / 2);
+}
+
+void Simulation::calcIsoline(int n, fftw_real rhoVal)
+{
+    for (int j = 0; j < (n-1); j++)            //draw smoke
+    {
+        for (int i = 0; i < (n-1); i++)
+        {
+            int idx = (j*n) + i;
+            int idxR = (j * n) + (i+1);
+            int idxD = ((j+1) * n) + i;
+            int idxDR = ((j+1) * n) + (i+1);
+
+            if( (rho[idx] > rhoVal && rho[idxR] < rhoVal) ||
+                    (rho[idxR] > rhoVal && rho[idx] < rhoVal) )
+            {
+                isoline[idx] = rhoVal;
+            }
+            else if( (rho[idxD] > rhoVal && rho[idxDR] < rhoVal) ||
+                     (rho[idxDR] > rhoVal && rho[idxD] < rhoVal) ) {
+                isoline[idx] = rhoVal;
+            }
+            else if( (rho[idx] > rhoVal && rho[idxD] < rhoVal) ||
+                     (rho[idxD] > rhoVal && rho[idx] < rhoVal) )
+            {
+                isoline[idx] = rhoVal;
+            }
+            else if( (rho[idxR] > rhoVal && rho[idxDR] < rhoVal) ||
+                     (rho[idxDR] > rhoVal && rho[idxR] < rhoVal) )
+            {
+                isoline[idx] = rhoVal;
+            }
+            else if( (rho[idx] > rhoVal && rho[idxDR] < rhoVal) ||
+                     (rho[idxDR] > rhoVal && rho[idx] < rhoVal) )
+            {
+                isoline[idx] = rhoVal;
+            }
+            else if( (rho[idxR] > rhoVal && rho[idxD] < rhoVal) ||
+                     (rho[idxD] > rhoVal && rho[idxR] < rhoVal) )
+            {
+                isoline[idx] = rhoVal;
+            }
+            else {
+                isoline[idx] = 0;
+            }
+        }
+    }
 }
 
 

@@ -110,6 +110,7 @@ void MainView::updateBuffers() {
   fftw_real* vy = simulation.getVy();
   fftw_real* fx = simulation.getFx();
   fftw_real* fy = simulation.getFy();
+  fftw_real* isoline = simulation.getIsoline();
 
   if (!is_initialized)
   {
@@ -126,15 +127,15 @@ void MainView::updateBuffers() {
   int idx0, idx1, idx2, idx3;
   double px, py;
 
-  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+  fftw_real  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / static_cast<double>(DIM + 1);  // Grid cell height
 
   for (int j = 0; j < DIM; j++)            //draw smoke
   {
       for (int i = 0; i < DIM; i++)
       {
-          px = wn + (fftw_real)i * wn - 1.0;
-          py = hn + (fftw_real)j * hn - 1.0;
+          px = wn + static_cast<double>(i) * wn - 1.0;
+          py = hn + static_cast<double>(j) * hn - 1.0;
 
           idx0 = (j * DIM) + i;
           idx1 = ((j + 1) * DIM) + i;
@@ -143,28 +144,29 @@ void MainView::updateBuffers() {
 
           if (smoke_var == RHO)
           {
-              triaVals.append(rho[idx0]);
+//              triaVals.append(static_cast<float>(rho[idx0]));
+              triaVals.append(static_cast<float>(isoline[idx0]));
           }
           else if (smoke_var == V)
           {
-              triaVals.append(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]));
+              triaVals.append(static_cast<float>(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0])));
           }
           else if (smoke_var == F)
           {
-              triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
+              triaVals.append(static_cast<float>(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0])));
           }
           else if (smoke_var == DIVV)
           {
-              triaVals.append(simulation.getDivV()[idx0]);
+              triaVals.append(static_cast<float>(simulation.getDivV()[idx0]));
           }
           else if (smoke_var == DIVF)
           {
-              triaVals.append(simulation.getDivF()[idx0]);
+              triaVals.append(static_cast<float>(simulation.getDivF()[idx0]));
           }
 
           if (!is_initialized)
           {
-              triaCoords.append(QVector2D(px, py));
+              triaCoords.append(QVector2D(static_cast<float>(px), static_cast<float>(py)));
               if (j + 1 < DIM && i + 1 < DIM)
               {
                   //first tria
@@ -213,8 +215,8 @@ void MainView::updateGlyphs()
     fftw_real* fy = simulation.getFy();
 
     float px, py;
-    fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
-    fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+    fftw_real  w_glyphs = 2.0 / static_cast<double>(nr_glyphs_x + 1);   // Grid cell width
+    fftw_real  h_glyphs = 2.0 / static_cast<double>(nr_glyphs_y + 1);  // Grid cell height
 
     int idx_glyphs;
     float x_pct, y_pct, x_inter, y_inter, col_inter;
@@ -467,6 +469,7 @@ void MainView::do_one_simulation_step(void)
     simulation.diffuse_matter(DIM, dt);
     simulation.divergenceV(DIM);
     simulation.divergenceF(DIM);
+    simulation.calcIsoline(DIM, static_cast<double>(rho_isoline_value));
     try
     {
         updateBuffers();

@@ -174,6 +174,14 @@ void MainWindow::on_nrGlyphsP_valueChanged(int value)
 }
 
 
+void MainWindow::on_rhoIsolineValue_valueChanged(double value)
+{
+    ui->mainView->rho_isoline_value = static_cast<float>(value);
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+
+
 void MainWindow::on_timeStepSlider_valueChanged(int value)
 {
     ui->mainView->dt = (static_cast<double>(value) / 10);
