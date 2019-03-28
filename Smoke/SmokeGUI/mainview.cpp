@@ -89,7 +89,7 @@ void MainView::createBuffers() {
   glGenBuffers(1, &glyphCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphColourBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
@@ -99,7 +99,7 @@ void MainView::createBuffers() {
   glGenBuffers(1, &glyphNormalsBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphNormalsBO);
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
@@ -152,8 +152,7 @@ void MainView::updateBuffers() {
 
           if (smoke_var == RHO)
           {
-//              triaVals.append(static_cast<float>(rho[idx0]));
-              triaVals.append(static_cast<float>(isoline[idx0]));
+              triaVals.append(static_cast<float>(rho[idx0]));
           }
           else if (smoke_var == V)
           {
