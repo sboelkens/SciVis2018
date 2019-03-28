@@ -308,6 +308,8 @@ void MainWindow::setPresetOne()
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
 
+    ui->selectGlyphShape->setCurrentIndex(1);
+
     ui->timeStepSlider->setValue(1);
     ui->viscositySlider->setValue(4);
 }
@@ -337,6 +339,8 @@ void MainWindow::setPresetTwo()
 
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
+
+    ui->selectGlyphShape->setCurrentIndex(1);
 
     ui->timeStepSlider->setValue(1);
     ui->viscositySlider->setValue(4);

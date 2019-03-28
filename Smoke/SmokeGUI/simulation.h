@@ -29,14 +29,12 @@ public:
     Struct getF();
     fftw_real* getDivV();
     fftw_real* getDivF();
-    fftw_real* getIsoline();
 
     void solve(int n, fftw_real visc, fftw_real dt);
     void diffuse_matter(int n, fftw_real dt);
     void set_forces(int n);
     void divergenceV(int n);
     void divergenceF(int n);
-    void calcIsoline(int n, fftw_real rhoVal);
     void drag(int n, int winWidth, int winHeight, int mx, int my);
 
 
@@ -48,7 +46,6 @@ private:
     fftw_real *rho, *rho0;			//smoke density at the current (rho) and previous (rho0) moment
     rfftwnd_plan plan_rc, plan_cr;  //simulation domain discretization
     fftw_real *divV, *divF;
-    fftw_real *isoline;
 
     void init_simulation(int n);
     void FFT(int direction, void* vx);
