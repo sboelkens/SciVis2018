@@ -502,20 +502,31 @@ void MainView::updateGlyphs()
 
 void MainView::updateIsolines()
 {
-    int n_points = (DIM) * (DIM) * 2; //= DIM*DIM
+    int n_points = (DIM) * (DIM) * 2 * nr_isolines; //= DIM*DIM
 
     clearIsolineArrays();
     isolineCoords.reserve(n_points);
     isolineColours.reserve(n_points);
     isolineIndices.reserve(n_points);
 
-    QVector<QVector2D> isolines = marchingSquare.calcIsoline(simulation.getRho(), DIM, static_cast<double>(rho_isoline_value));
+    double isoline_min = static_cast<double>((isoline_min_value < isoline_max_value) ? isoline_min_value : isoline_max_value);
+    double isoline_diff = static_cast<double>((abs(isoline_max_value - isoline_min_value)) / (nr_isolines + 1));
 
-    for (int i = 0; i < isolines.size(); i++)
+    double isolineVal = isoline_min;
+    unsigned short idx = 0;
+
+    for(int k = 0; k < nr_isolines; k++)
     {
-        isolineCoords.append(QVector3D(static_cast<float>(isolines[i].x()), static_cast<float>(isolines[i].y()), -1));
-        isolineColours.append(set_colormap(rho_isoline_value, COLOR_RAINBOW, 10));
-        isolineIndices.append(i);
+        isolineVal += isoline_diff;
+        QVector<QVector2D> isolines = marchingSquare.calcIsoline(simulation.getRho(), DIM, isolineVal);
+
+        for (int i = 0; i < isolines.size(); i++)
+        {
+            isolineCoords.append(QVector3D(static_cast<float>(isolines[i].x()), static_cast<float>(isolines[i].y()), -1));
+            isolineColours.append(set_colormap(static_cast<float>(isolineVal), isoline_col, levels_isoline));
+            isolineIndices.append(idx);
+            idx++;
+        }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, isolinesCoordsBO);

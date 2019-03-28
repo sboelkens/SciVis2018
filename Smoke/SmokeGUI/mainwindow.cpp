@@ -30,6 +30,11 @@ void MainWindow::waitForInitialization()
 }
 
 
+void MainWindow::on_showSmoke_stateChanged(int state)
+{
+    ui->mainView->draw_smoke = state;
+    this->setFocus();
+}
 void MainWindow::on_selectSmoke_currentIndexChanged(int index)
 {
     ui->mainView->smoke_var = index;
@@ -44,11 +49,6 @@ void MainWindow::on_selectColormapSmoke_currentIndexChanged(int index)
 {
     ui->mainView->smoke_col = index;
     this->setSmokeColorLegend();
-}
-void MainWindow::on_showSmoke_stateChanged(int state)
-{
-    ui->mainView->draw_smoke = state;
-    this->setFocus();
 }
 
 
@@ -86,6 +86,11 @@ void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
 }
 
 
+void MainWindow::on_showGlyph_stateChanged(int state)
+{
+    ui->mainView->draw_vecs = state;
+    this->setFocus();
+}
 void MainWindow::on_selectGlyph_currentIndexChanged(int index)
 {
     ui->mainView->glyph_var = index;
@@ -100,11 +105,6 @@ void MainWindow::on_selectColormapGlyph_currentIndexChanged(int index)
 {
     ui->mainView->glyph_col = index;
     this->setGlyphColorLegend();
-}
-void MainWindow::on_showGlyph_stateChanged(int state)
-{
-    ui->mainView->draw_vecs = state;
-    this->setFocus();
 }
 
 
@@ -172,15 +172,6 @@ void MainWindow::on_nrGlyphsP_valueChanged(int value)
     ui->mainView->nr_glyphs_changed = true;
     this->setFocus();
 }
-
-
-void MainWindow::on_rhoIsolineValue_valueChanged(double value)
-{
-    ui->mainView->rho_isoline_value = static_cast<float>(value);
-    ui->mainView->updateUniformsRequired = true;
-    this->setFocus();
-}
-
 void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
 {
     if (index == 0)
@@ -203,6 +194,43 @@ void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
+
+
+void MainWindow::on_showIsoline_stateChanged(int state)
+{
+    ui->mainView->draw_isolines = state;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_isolineMinValue_valueChanged(double value)
+{
+    ui->mainView->isoline_min_value = static_cast<float>(value);
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_isolineMaxValue_valueChanged(double value)
+{
+    ui->mainView->isoline_max_value = static_cast<float>(value);
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_nrIsolines_valueChanged(int value)
+{
+    ui->mainView->nr_isolines = value;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_selectNColorsIsoline_valueChanged(int value)
+{
+    ui->mainView->levels_isoline = value;
+    this->setFocus();
+}
+void MainWindow::on_selectColormapIsoline_currentIndexChanged(int index)
+{
+    ui->mainView->isoline_col = index;
+    this->setFocus();
+}
+
 
 
 void MainWindow::on_timeStepSlider_valueChanged(int value)

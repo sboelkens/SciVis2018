@@ -28,20 +28,20 @@ public:
 private slots:
   void waitForInitialization();
 
+  void on_showSmoke_stateChanged(int state);
   void on_selectSmoke_currentIndexChanged(int index);
   void on_selectNColorsSmoke_valueChanged(int value);
   void on_selectColormapSmoke_currentIndexChanged(int index);
-  void on_showSmoke_stateChanged(int state);
 
   void on_radioSmokeScale_clicked();
   void on_radioSmokeClamp_clicked();
   void on_clampSmokeMinValue_valueChanged(double value);
   void on_clampSmokeMaxValue_valueChanged(double value);
 
+  void on_showGlyph_stateChanged(int state);
   void on_selectGlyph_currentIndexChanged(int index);
   void on_selectNColorsGlyph_valueChanged(int value);
   void on_selectColormapGlyph_currentIndexChanged(int index);
-  void on_showGlyph_stateChanged(int state);
 
   void on_radioGlyphScale_clicked();
   void on_radioGlyphClamp_clicked();
@@ -51,13 +51,17 @@ private slots:
   void on_radioGlyphVectorV_clicked();
   void on_radioGlyphVectorF_clicked();
 
-  void on_selectGlyphShape_currentIndexChanged(int index);
-
   void on_nrGlyphsX_valueChanged(int value);
   void on_nrGlyphsY_valueChanged(int value);
   void on_nrGlyphsP_valueChanged(int value);
+  void on_selectGlyphShape_currentIndexChanged(int index);
 
-  void on_rhoIsolineValue_valueChanged(double value);
+  void on_showIsoline_stateChanged(int state);
+  void on_isolineMinValue_valueChanged(double value);
+  void on_isolineMaxValue_valueChanged(double value);
+  void on_nrIsolines_valueChanged(int value);
+  void on_selectNColorsIsoline_valueChanged(int value);
+  void on_selectColormapIsoline_currentIndexChanged(int index);
 
   void on_timeStepSlider_valueChanged(int value);
   void on_viscositySlider_valueChanged(int value);

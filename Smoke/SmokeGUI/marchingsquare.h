@@ -24,7 +24,7 @@ class MarchingSquare
 public:
     MarchingSquare();
 
-    QVector<QVector2D> calcIsoline(double *rho, int n, double rhoVal);
+    QVector<QVector2D> calcIsoline(double *rho, int n, double isoline_value);
     void lineFromBinary(double l, double r, double dl, double dr, QString code, double px, double py);
     QVector2D interpolateSide(double l, double r, double dl, double dr, int side, double px, double py);
 private:

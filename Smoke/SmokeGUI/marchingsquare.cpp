@@ -4,17 +4,19 @@ MarchingSquare::MarchingSquare()
 {
 }
 
-QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double rhoIsoVal)
+QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double isoline_value)
 {
     isolines.clear();
     isolines.squeeze();
 
     wn = 2.0 / static_cast<double>(n + 1);   // Grid cell width
     hn = 2.0 / static_cast<double>(n + 1);
-    rhoVal = rhoIsoVal;
+
     double px, py;
 
-    for (int j = 0; j < (n-1); j++)            //draw smoke
+    rhoVal = isoline_value;
+
+    for (int j = 0; j < (n-1); j++)
     {
         for (int i = 0; i < (n-1); i++)
         {

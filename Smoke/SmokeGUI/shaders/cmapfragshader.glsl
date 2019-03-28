@@ -71,6 +71,35 @@ void main() {
 
       fColor = vec4(red, green, blue, 1.0);
   }
+  else if (mode == 3) //heat map
+  {
+      int NUM_COLORS = 3;
+      mat3 color;
+      color[0] = vec3(0.0,0.0,1.0);
+      color[1] = vec3(1.0,1.0,1.0);
+      color[2] = vec3(1.0,0.0,0.0);
+        // A static array of 3 colors:  (black, red, white) using {r,g,b} for each.
+
+      int idx1;        // |-- Our desired color will be between these two indexes in "color".
+      int idx2;        // |
+      float fractBetween = 0.0;  // Fraction between "idx1" and "idx2" where our value is.
+
+      if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
+      else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
+      else
+      {
+        value = value * (NUM_COLORS-1.0);        // Will multiply value by 3.
+        idx1  = int(floor(value));                  // Our desired color will be after this index.
+        idx2  = idx1+1;                        // ... and before this index (inclusive).
+        fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
+      }
+
+      float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
+      float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
+      float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
+
+      fColor = vec4(red, green, blue, 1.0);
+  }
   else //unknown colormap
   {
       fColor = vec4(0.0, 0.0, 0.0, 1.0);
