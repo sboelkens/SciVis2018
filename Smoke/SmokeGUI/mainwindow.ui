@@ -2257,6 +2257,38 @@ QGroupBox::title {
         </property>
        </item>
       </widget>
+      <widget class="QLabel" name="label_isoline">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>550</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Isoline value:</string>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="rhoIsolineValue">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>550</y>
+         <width>51</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
@@ -2283,7 +2315,7 @@ QGroupBox::title {
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupSmokeValues"/>
   <buttongroup name="buttonGroupGlyphVector"/>
+  <buttongroup name="buttonGroupSmokeValues"/>
  </buttongroups>
 </ui>
