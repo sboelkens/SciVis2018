@@ -54,10 +54,6 @@ fftw_real* Simulation::getDivF()
 {
     return divF;
 }
-fftw_real* Simulation::getIsoline()
-{
-    return isoline;
-}
 
 void Simulation::init_simulation(int n)
 {
@@ -75,12 +71,11 @@ void Simulation::init_simulation(int n)
     rho0    = (fftw_real*) malloc(dim);
     divV     = (fftw_real*) malloc(dim);
     divF    = (fftw_real*) malloc(dim);
-    isoline = (fftw_real*) malloc(dim);
     plan_rc = rfftw2d_create_plan(n, n, FFTW_REAL_TO_COMPLEX, FFTW_IN_PLACE);
     plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
     for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = isoline[i] = 0.0f; }
+    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = 0.0f; }
 }
 
 //FFT: Execute the Fast Fourier Transform on the dataset 'vx'.
@@ -205,54 +200,6 @@ fftw_real Simulation::divergence(int j, int i, int n, fftw_real* x,fftw_real* y)
 
     return (diffX / 2) + (diffY / 2);
 }
-
-void Simulation::calcIsoline(int n, fftw_real rhoVal)
-{
-    for (int j = 0; j < (n-1); j++)            //draw smoke
-    {
-        for (int i = 0; i < (n-1); i++)
-        {
-            int idx = (j*n) + i;
-            int idxR = (j * n) + (i+1);
-            int idxD = ((j+1) * n) + i;
-            int idxDR = ((j+1) * n) + (i+1);
-
-            if( (rho[idx] > rhoVal && rho[idxR] < rhoVal) ||
-                    (rho[idxR] > rhoVal && rho[idx] < rhoVal) )
-            {
-                isoline[idx] = rhoVal;
-            }
-            else if( (rho[idxD] > rhoVal && rho[idxDR] < rhoVal) ||
-                     (rho[idxDR] > rhoVal && rho[idxD] < rhoVal) ) {
-                isoline[idx] = rhoVal;
-            }
-            else if( (rho[idx] > rhoVal && rho[idxD] < rhoVal) ||
-                     (rho[idxD] > rhoVal && rho[idx] < rhoVal) )
-            {
-                isoline[idx] = rhoVal;
-            }
-            else if( (rho[idxR] > rhoVal && rho[idxDR] < rhoVal) ||
-                     (rho[idxDR] > rhoVal && rho[idxR] < rhoVal) )
-            {
-                isoline[idx] = rhoVal;
-            }
-            else if( (rho[idx] > rhoVal && rho[idxDR] < rhoVal) ||
-                     (rho[idxDR] > rhoVal && rho[idx] < rhoVal) )
-            {
-                isoline[idx] = rhoVal;
-            }
-            else if( (rho[idxR] > rhoVal && rho[idxD] < rhoVal) ||
-                     (rho[idxD] > rhoVal && rho[idxR] < rhoVal) )
-            {
-                isoline[idx] = rhoVal;
-            }
-            else {
-                isoline[idx] = 0;
-            }
-        }
-    }
-}
-
 
 // diffuse_matter: This function diffuses matter that has been placed in the velocity field. It's almost identical to the
 // velocity diffusion step in the function above. The input matter densities are in rho0 and the result is written into rho.

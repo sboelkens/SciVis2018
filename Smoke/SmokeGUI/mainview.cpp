@@ -125,6 +125,8 @@ void MainView::createBuffers() {
 
   glGenBuffers(1, &isolinesIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, isolinesIndexBO);
+
+  glBindVertexArray(0);
 }
 
 void MainView::updateBuffers() {
@@ -137,7 +139,6 @@ void MainView::updateBuffers() {
   fftw_real* vy = simulation.getVy();
   fftw_real* fx = simulation.getFx();
   fftw_real* fy = simulation.getFy();
-  fftw_real* isoline = simulation.getIsoline();
 
   if (!is_initialized)
   {
@@ -428,44 +429,19 @@ void MainView::updateIsolines()
 {
     int n_points = (DIM) * (DIM) * 2; //= DIM*DIM
 
-    if (!is_initialized)
+    clearIsolineArrays();
+    isolineCoords.reserve(n_points);
+    isolineColours.reserve(n_points);
+    isolineIndices.reserve(n_points);
+
+    QVector<QVector2D> isolines = marchingSquare.calcIsoline(simulation.getRho(), DIM, static_cast<double>(rho_isoline_value));
+
+    for (int i = 0; i < isolines.size(); i++)
     {
-        clearIsolineArrays();
-        isolineCoords.reserve(n_points);
-        isolineColours.reserve(n_points);
-        isolineIndices.reserve(n_points);
+        isolineCoords.append(QVector3D(static_cast<float>(isolines[i].x()), static_cast<float>(isolines[i].y()), -1));
+        isolineColours.append(set_colormap(rho_isoline_value, COLOR_RAINBOW, 10));
+        isolineIndices.append(i);
     }
-
-    QVector4D* isolines = marchingSquare.calcIsoline(simulation.getRho(), DIM, static_cast<double>(rho_isoline_value));
-
-    double px1, py1, px2, py2;
-    unsigned short idx = 0;
-    double  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
-    double  hn = 2.0 / static_cast<double>(DIM + 1);
-    QVector4D line;
-
-    for (int j = 0; j < DIM; j++)            //draw smoke
-    {
-        for (int i = 0; i < DIM; i++)
-        {
-            line = isolines[((j*DIM) + i)];
-
-            px1 = wn + static_cast<double>(i) * wn - 1.0 + static_cast<double>(line.x());
-            py1 = hn + static_cast<double>(j) * hn - 1.0 + static_cast<double>(line.y());
-            isolineCoords.append(QVector3D(static_cast<float>(px1), static_cast<float>(py1), -1));
-            isolineColours.append(set_colormap(rho_isoline_value, 1, 10));
-            isolineIndices.append(idx);
-            idx++;
-
-            px2 = wn + static_cast<double>(i) * wn - 1.0 + static_cast<double>(line.z());
-            py2 = hn + static_cast<double>(j) * hn - 1.0 + static_cast<double>(line.w());
-            isolineCoords.append(QVector3D(static_cast<float>(px2), static_cast<float>(py2), -1));
-            isolineColours.append(set_colormap(rho_isoline_value, 1, 10));
-            isolineIndices.append(idx);
-            idx++;
-        }
-    }
-
 
     glBindBuffer(GL_ARRAY_BUFFER, isolinesCoordsBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*isolineCoords.size(), isolineCoords.data(), GL_DYNAMIC_DRAW);
@@ -633,7 +609,7 @@ void MainView::initializeGL() {
 
   // Parameter initialization
   simulation = Simulation(DIM);
-  marchingSquare = MarchingSquare(DIM);
+  marchingSquare = MarchingSquare();
 
   srand(time(NULL)); // initialize seed for rng
 
@@ -759,7 +735,6 @@ void MainView::paintGL() {
           }
           glBindVertexArray(0);
       }
-      mainShaderProg->release();
       if (draw_isolines)
       {
           glBindVertexArray(isolinesVAO);

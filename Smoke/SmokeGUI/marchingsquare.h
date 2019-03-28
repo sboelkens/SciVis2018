@@ -2,6 +2,7 @@
 #define MARCHINGSQUARE_H
 
 #include <QString>
+#include <QVector2D>
 #include <QVector4D>
 #include <QDebug>
 
@@ -9,7 +10,7 @@
 const int SIDE_LEFT = 0;
 const int SIDE_UP    = 1;
 const int SIDE_RIGHT    = 2;
-const int SIDE_DOWN    = 2;
+const int SIDE_DOWN    = 3;
 
 
 struct point {
@@ -22,16 +23,13 @@ class MarchingSquare
 
 public:
     MarchingSquare();
-    MarchingSquare(int n);
 
-    QVector4D* calcIsoline(double *rho, int n, double rhoVal);
-    QVector4D lineFromBinary(double l, double r, double dl, double dr, double rhoVal, QString code);
-    point interpolateSide(double l, double r, double dl, double dr, double rhoVal, int side);
+    QVector<QVector2D> calcIsoline(double *rho, int n, double rhoVal);
+    void lineFromBinary(double l, double r, double dl, double dr, QString code, double px, double py);
+    QVector2D interpolateSide(double l, double r, double dl, double dr, int side, double px, double py);
 private:
-    QVector4D *isoline;
-
-    void init(int n);
-
+    QVector<QVector2D> isolines;
+    double wn, hn, rhoVal;
 };
 
 #endif // MARCHINGSQUARE_H
