@@ -25,7 +25,7 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_1_Core {
     Q_OBJECT
 
 public:
-    MainView(QWidget *parent = 0);
+    MainView(QWidget *parent = nullptr);
     ~MainView();
 
     void updateBuffers();
@@ -39,7 +39,7 @@ public:
 
     // Simulation variables
     double dt = 0.4;                   // simulation time step
-    float visc = 0.001;                // fluid viscosity
+    float visc = 0.001f;               // fluid viscosity
     int   color_dir = 1;               // use direction color-coding or not
     int   draw_force_field = 0;        // draw the forcefield or not
     int   frozen = 0;                  // toggles on/off the animation

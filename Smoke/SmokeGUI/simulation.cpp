@@ -60,22 +60,22 @@ void Simulation::init_simulation(int n)
     int i; size_t dim;
 
     dim     = n * 2*(n/2+1)*sizeof(fftw_real);        //Allocate data structures
-    vx       = (fftw_real*) malloc(dim);
-    vy       = (fftw_real*) malloc(dim);
-    vx0      = (fftw_real*) malloc(dim);
-    vy0      = (fftw_real*) malloc(dim);
+    vx       = static_cast<fftw_real*>(malloc(dim));
+    vy       = static_cast<fftw_real*>(malloc(dim));
+    vx0      = static_cast<fftw_real*>(malloc(dim));
+    vy0      = static_cast<fftw_real*>(malloc(dim));
     dim     = n * n * sizeof(fftw_real);
-    fx      = (fftw_real*) malloc(dim);
-    fy      = (fftw_real*) malloc(dim);
-    rho     = (fftw_real*) malloc(dim);
-    rho0    = (fftw_real*) malloc(dim);
-    divV     = (fftw_real*) malloc(dim);
-    divF    = (fftw_real*) malloc(dim);
+    fx      = static_cast<fftw_real*>(malloc(dim));
+    fy      = static_cast<fftw_real*>(malloc(dim));
+    rho     = static_cast<fftw_real*>(malloc(dim));
+    rho0    = static_cast<fftw_real*>(malloc(dim));
+    divV     = static_cast<fftw_real*>(malloc(dim));
+    divF    = static_cast<fftw_real*>(malloc(dim));
     plan_rc = rfftw2d_create_plan(n, n, FFTW_REAL_TO_COMPLEX, FFTW_IN_PLACE);
     plan_cr = rfftw2d_create_plan(n, n, FFTW_COMPLEX_TO_REAL, FFTW_IN_PLACE);
 
     for (i = 0; i < n * n; i++)                      //Initialize data structures to 0
-    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = 0.0f; }
+    { vx[i] = vy[i] = vx0[i] = vy0[i] = fx[i] = fy[i] = rho[i] = rho0[i] = divV[i] = divF[i] = 0.0; }
 }
 
 //FFT: Execute the Fast Fourier Transform on the dataset 'vx'.
@@ -261,6 +261,6 @@ void Simulation::drag(int n, int winWidth, int winHeight, int mx, int my)
     if (len != 0.0) {  dx *= 0.1 / len; dy *= 0.1 / len; }
     fx[Y * n + X] += dx;
     fy[Y * n + X] += dy;
-    rho[Y * n + X] = 10.0f;
+    rho[Y * n + X] = 10.0;
     lmx = mx; lmy = my;
 }

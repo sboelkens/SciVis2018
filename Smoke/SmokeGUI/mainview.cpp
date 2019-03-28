@@ -214,7 +214,7 @@ void MainView::updateBuffers() {
           }
           if (heightplot)
           {
-              triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py), 0.0+rho[idx0]/10.0));
+              triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py), static_cast<float>(0.0+rho[idx0]/10.0)));
           }
           else
           {
@@ -227,21 +227,21 @@ void MainView::updateBuffers() {
               if (j + 1 < DIM && i + 1 < DIM)
               {
                   //first tria
-                  triaIndices.append(idx0);
-                  triaIndices.append(idx1);
-                  triaIndices.append(idx2);
+                  triaIndices.append(static_cast<unsigned short>(idx0));
+                  triaIndices.append(static_cast<unsigned short>(idx1));
+                  triaIndices.append(static_cast<unsigned short>(idx2));
                   // second tria
-                  triaIndices.append(idx0);
-                  triaIndices.append(idx2);
-                  triaIndices.append(idx3);
+                  triaIndices.append(static_cast<unsigned short>(idx0));
+                  triaIndices.append(static_cast<unsigned short>(idx2));
+                  triaIndices.append(static_cast<unsigned short>(idx3));
 
-                  triaVertFaces[idx0].append(idxT);
-                  triaVertFaces[idx1].append(idxT);
-                  triaVertFaces[idx2].append(idxT);
+                  triaVertFaces[idx0].append(static_cast<unsigned short>(idxT));
+                  triaVertFaces[idx1].append(static_cast<unsigned short>(idxT));
+                  triaVertFaces[idx2].append(static_cast<unsigned short>(idxT));
 
-                  triaVertFaces[idx0].append(idxT+1);
-                  triaVertFaces[idx2].append(idxT+1);
-                  triaVertFaces[idx3].append(idxT+1);
+                  triaVertFaces[idx0].append(static_cast<unsigned short>(idxT+1));
+                  triaVertFaces[idx2].append(static_cast<unsigned short>(idxT+1));
+                  triaVertFaces[idx3].append(static_cast<unsigned short>(idxT+1));
 
                   idxT += 2;
               }
@@ -398,6 +398,10 @@ void MainView::updateGlyphs()
                     x_inter = glyph_interpolation(x_pct, y_pct, fx);
                     y_inter = glyph_interpolation(x_pct, y_pct, fy);
                     scale_factor = std::min((float)sqrt(x_inter*x_inter + y_inter*y_inter), 0.1f)*10.0f;
+                } else {
+                    x_inter = 0;
+                    y_inter = 0;
+                    scale_factor = 1;
                 }
 
                 if (glyphs3D)
@@ -450,6 +454,8 @@ void MainView::updateGlyphs()
                     col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivV());
                 } else if(glyph_var == DIVF) {
                     col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivF());
+                } else {
+                    col_inter = 0.0;
                 }
                 for (int n = 0; n < glyphV; n++)
                 {
@@ -468,13 +474,13 @@ void MainView::updateGlyphs()
                 {
                     for (int n = 0; n < glyphT; n++)
                     {
-                        glyphIndices.append(cone.faceCoordInd[n] + glyphV*idx_glyphs);
+                        glyphIndices.append(static_cast<unsigned short>(cone.faceCoordInd[n] + static_cast<unsigned int>(glyphV*idx_glyphs)));
                     }
                 }
                 else
                 {
-                    glyphIndices.append(2*idx_glyphs);
-                    glyphIndices.append(2*idx_glyphs+1);
+                    glyphIndices.append(static_cast<unsigned short>(2*idx_glyphs));
+                    glyphIndices.append(static_cast<unsigned short>(2*idx_glyphs+1));
                 }
                 if (nr_glyphs_changed)
                 {
@@ -551,13 +557,13 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
         for (int i = 0; i < DIM; i++)
         {
             idx0 = (j * DIM) + i;
-            if (rho[idx0] > rho_max)
+            if (rho[idx0] > static_cast<double>(rho_max))
             {
-                rho_max = rho[idx0];
+                rho_max = static_cast<float>(rho[idx0]);
             }
-            if (rho[idx0] < rho_min)
+            if (rho[idx0] < static_cast<double>(rho_min))
             {
-                rho_min = rho[idx0];
+                rho_min = static_cast<float>(rho[idx0]);
             }
             vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
             fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
@@ -675,20 +681,11 @@ void MainView::clearIsolineArrays()
     isolineIndices.clear();
     isolineIndices.squeeze();
 }
-// ---
+
 void MainView::initializeGL() {
 
   qDebug() << ":: Initializing OpenGL";
   initializeOpenGLFunctions();
-
-  //debugLogger = new QOpenGLDebugLogger();
-  //connect( debugLogger, SIGNAL( messageLogged( QOpenGLDebugMessage ) ), this, SLOT( onMessageLogged( QOpenGLDebugMessage ) ), Qt::DirectConnection );
-
-  //if ( debugLogger->initialize() ) {
-  //  qDebug() << ":: Logging initialized";
-  //   debugLogger->startLogging( QOpenGLDebugLogger::SynchronousLogging );
-  //  debugLogger->enableMessages();
-  //}
 
   QString glVersion;
   glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -698,10 +695,7 @@ void MainView::initializeGL() {
   glEnable(GL_DEPTH_TEST);
   // Default is GL_LESS
   glDepthFunc(GL_LEQUAL);
-
   glPointSize(16);
-
-  // ---
 
   createShaderPrograms();
   createBuffers();
@@ -710,7 +704,7 @@ void MainView::initializeGL() {
   simulation = Simulation(DIM);
   marchingSquare = MarchingSquare();
 
-  srand(time(NULL)); // initialize seed for rng
+  srand(static_cast<unsigned int>(time(nullptr))); // initialize seed for rng
 
   scale_maxvals_rho.reserve(scale_smoke_window);
   scale_minvals_rho.reserve(scale_smoke_window);
@@ -734,11 +728,10 @@ void MainView::initializeGL() {
 void MainView::do_one_simulation_step(void)
 {
     simulation.set_forces(DIM);
-    simulation.solve(DIM, visc, dt);
+    simulation.solve(DIM, static_cast<double>(visc), dt);
     simulation.diffuse_matter(DIM, dt);
     simulation.divergenceV(DIM);
     simulation.divergenceF(DIM);
-//    simulation.calcIsoline(DIM, static_cast<double>(rho_isoline_value));
     try
     {
         updateBuffers();
@@ -807,7 +800,6 @@ void MainView::paintGL() {
     {
       glClearColor(0.0, 0.0, 0.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      //glLoadIdentity();
 
       if (updateUniformsRequired) {
         updateUniforms();
@@ -848,7 +840,6 @@ void MainView::paintGL() {
         qDebug() << "update failed";
         qDebug() << e.what();
     }
-  //glFlush();
 }
 
 void MainView::resizeGL(int newWidth, int newHeight) {
@@ -892,44 +883,31 @@ void MainView::timerEvent(QTimerEvent *e)
     }
 }
 
-// ---
-
 float MainView::glyph_interpolation(float x_pct, float y_pct, fftw_real* mat)
 {
-    //qDebug() << "in glyph interpolation";
-    //qDebug() << "pctages" << x_pct << y_pct;
-    //fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-    //fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
     float x_pos_grid, y_pos_grid, x_under, y_under, x_over, y_over;
     float tx, ty, q11, q12, q21, q22, inter;
 
-//    fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
-//    fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
-//    float px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
-//    float py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
+    x_pos_grid = x_pct * (DIM-1);
+    y_pos_grid = y_pct * (DIM-1);
 
-    x_pos_grid = x_pct * (DIM-1);//(px+1.0)/2.0 * DIM;//
-    y_pos_grid = y_pct * (DIM-1);//(py+1.0)/2.0 * DIM;//
-    //qDebug() << "on grid " << x_pos_grid << y_pos_grid;
     x_under = floorf(x_pos_grid);
     y_under = floorf(y_pos_grid);
-    //qDebug() << "under " << x_under << y_under;
+
     x_over = ceilf(x_pos_grid);
     y_over = ceilf(y_pos_grid);
-    //qDebug() << "over " << x_over << y_over;
+
     tx = (x_pos_grid - x_under);
     ty = (y_pos_grid - y_under);
 
-    q11 = mat[((int)y_under - 0) * DIM + ((int)x_under - 0)];
-    q12 = mat[((int)y_under - 0) * DIM + ((int)x_over - 0)];
-    q21 = mat[((int)y_over - 0) * DIM + ((int)x_under - 0)];
-    q22 = mat[((int)y_over - 0) * DIM + ((int)x_over - 0)];
+    q11 = static_cast<float>(mat[(static_cast<int>(y_under) - 0) * DIM + (static_cast<int>(x_under) - 0)]);
+    q12 = static_cast<float>(mat[(static_cast<int>(y_under) - 0) * DIM + (static_cast<int>(x_over) - 0)]);
+    q21 = static_cast<float>(mat[(static_cast<int>(y_over) - 0) * DIM + (static_cast<int>(x_under) - 0)]);
+    q22 = static_cast<float>(mat[(static_cast<int>(y_over) - 0) * DIM + (static_cast<int>(x_over) - 0)]);
     inter = (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q12 +
             (1 - tx) * ty * q21 + tx * ty * q22;
     return inter;
 }
-
-// ---
 
 void MainView::onMessageLogged( QOpenGLDebugMessage Message ) {
   qDebug() << " → Log:" << Message;

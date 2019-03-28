@@ -13,12 +13,12 @@ QVector3D rainbow(double value) {
 
 QVector3D set_colormap(float vy, int scalar_col, int nlevels)
 {
-   vy *= nlevels; vy = (int)(vy); vy/= nlevels;
+   vy *= nlevels; vy = static_cast<int>(vy); vy/= nlevels;
 
    if (scalar_col==COLOR_BLACKWHITE)
        return QVector3D(vy, vy, vy);
    else if (scalar_col==COLOR_RAINBOW)
-       return rainbow(vy);
+       return rainbow(static_cast<double>(vy));
    else if (scalar_col==COLOR_HEATMAP)
        return getHeatMapColor(vy);
    else if (scalar_col==COLOR_BLUE_RED)
@@ -63,7 +63,7 @@ QVector3D getHeatMapColor(float value)
   else
   {
     value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-    idx1  = floor(value);                  // Our desired color will be after this index.
+    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
     idx2  = idx1+1;                        // ... and before this index (inclusive).
     fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
   }
@@ -90,7 +90,7 @@ QVector3D getBlueRedColor(float value)
   else
   {
     value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-    idx1  = floor(value);                  // Our desired color will be after this index.
+    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
     idx2  = idx1+1;                        // ... and before this index (inclusive).
     fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
   }
