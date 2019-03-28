@@ -219,7 +219,7 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
 
     int idx_glyphs;
     float x_pct, y_pct, x_inter, y_inter, col_inter;
-    float scale_factor;
+    float scale_factor = 1.0f;
     float x_shift, y_shift;
 
     QMatrix4x4 modelview;
@@ -235,14 +235,25 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
         {
             for (int k = 0; k < nr_glyphs_p; k++)
             {
-//                x_pct = (fftw_real)i / nr_glyphs_x;
-//                y_pct = (fftw_real)j / nr_glyphs_y;
+
                 px = w_glyphs + (fftw_real)i * w_glyphs - 1.0;
                 py = h_glyphs + (fftw_real)j * h_glyphs - 1.0;
-//                x_pct = (px+1.0)/2.0;
-//                y_pct = (py+1.0)/2.0;
-                x_pct = (px - (w_glyphs - 1.0))/(w_glyphs*(nr_glyphs_x-1));
-                y_pct = (py - (h_glyphs - 1.0))/(h_glyphs*(nr_glyphs_y-1));
+                if (nr_glyphs_x == 1)
+                {
+                    x_pct = 0.5;
+                }
+                else
+                {
+                    x_pct = (px - (w_glyphs - 1.0))/(w_glyphs*(nr_glyphs_x-1));
+                }
+                if (nr_glyphs_y == 1)
+                {
+                    y_pct = 0.5;
+                }
+                else
+                {
+                    y_pct = (py - (h_glyphs - 1.0))/(h_glyphs*(nr_glyphs_y-1));
+                }
 
                 idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
 
@@ -259,17 +270,12 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
 
                 x_pct += x_shift;
                 y_pct += y_shift;
-                //x_pct = std::min(std::max(0.0f, x_pct),1.0f);
                 if (x_pct > 1.0f)
                 {
                     x_pct -= 2*x_shift;
                 }
                 y_pct = std::min(std::max(0.0f, y_pct),1.0f);
 
-//                px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
-//                py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
-                //px = x_pct*2.0-1.0;
-                //py = y_pct*2.0-1.0;
                 px = -1.0 + w_glyphs + (w_glyphs*(nr_glyphs_x-1))*x_pct;
                 py = -1.0 + h_glyphs + (h_glyphs*(nr_glyphs_y-1))*y_pct;
                 if(glyph_vector_var == V) {
@@ -280,6 +286,7 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                 } else if(glyph_vector_var == F) {
                     x_inter = glyph_interpolation(x_pct, y_pct, fx);
                     y_inter = glyph_interpolation(x_pct, y_pct, fy);
+                    scale_factor = std::min((float)sqrt(x_inter*x_inter + y_inter*y_inter), 0.1f)*10.0f;
                 }
 
                 if (glyphs3D)
@@ -287,7 +294,7 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                     dir = QVector2D(x_inter, y_inter);
                     angle = acos(dir.dotProduct(dir, QVector2D(0.0, 1.0)) / sqrt(x_inter*x_inter + y_inter*y_inter))*360/(2*M_PI);
                     d = glyphs3D_size*scale_factor;
-                    if (x_inter > 0.0)
+                    if (x_inter > 0.0f)
                     {
                         angle = -angle;
                     }

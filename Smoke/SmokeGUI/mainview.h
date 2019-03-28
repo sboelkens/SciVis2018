@@ -63,7 +63,7 @@ public:
   int nr_glyphs_p = 1;//4;//
   bool nr_glyphs_changed = true;
   bool glyphs3D = true;
-  float glyphs3D_size = 0.1;
+  float glyphs3D_size = 0.1f;
   OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
 
 protected:
