@@ -1,11 +1,22 @@
 #include "marchingsquare.h"
 
+MarchingSquare::MarchingSquare()
+{
+}
+
+
+MarchingSquare::MarchingSquare(int n)
+{
+}
+
+void MarchingSquare::init(int n)
+{
+}
 
 QVector4D* MarchingSquare::calcIsoline(double *rho, int n, double rhoVal)
 {
-    size_t dim     = (n * 2*(n/2+1)*sizeof(QVector4D));
-    QVector4D* isoline = static_cast<QVector4D*>(malloc(dim));
-
+    int dim     = n * n * sizeof(QVector4D);
+    isoline      = (QVector4D*) malloc(dim);
     for (int i = 0; i < n * n; i++)                      //Initialize data structures to 0
     { isoline[i] = QVector4D(0,0,0,0); }
 
@@ -24,8 +35,7 @@ QVector4D* MarchingSquare::calcIsoline(double *rho, int n, double rhoVal)
             code += (rho[idxD] > rhoVal) ? "1" : "0";
             code += (rho[idxDR] > rhoVal) ? "1" : "0";
 
-            isoline[idx] = this->lineFromBinary(rho[idx], rho[idxR], rho[idxD], rho[idxDR], rhoVal, code);
-
+            isoline[idx] = lineFromBinary(rho[idx], rho[idxR], rho[idxD], rho[idxDR], rhoVal, code);
         }
     }
 
@@ -108,13 +118,13 @@ point MarchingSquare::interpolateSide(double l, double r, double dl, double dr, 
         point.y = static_cast<float>(abs(l-rhoVal) / abs(l-dl));
     } else if (side == SIDE_UP) {
         point.x = static_cast<float>(abs(l-rhoVal) / abs(l-r));
-        point.y = 0;
+        point.y = 1;
     } else if (side == SIDE_RIGHT) {
         point.x = 1;
         point.y = static_cast<float>(abs(r-rhoVal) / abs(r-dr));
     } else if (side == SIDE_DOWN) {
         point.x = static_cast<float>(abs(dl-rhoVal) / abs(dl-dr));
-        point.y = 1;
+        point.y = 0;
     }
     return point;
 }
