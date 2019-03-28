@@ -51,6 +51,8 @@ private slots:
   void on_radioGlyphVectorV_clicked();
   void on_radioGlyphVectorF_clicked();
 
+  void on_selectGlyphShape_currentIndexChanged(int index);
+
   void on_nrGlyphsX_valueChanged(int value);
   void on_nrGlyphsY_valueChanged(int value);
   void on_nrGlyphsP_valueChanged(int value);

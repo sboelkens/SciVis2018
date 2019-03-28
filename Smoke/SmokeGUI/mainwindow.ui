@@ -63,7 +63,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>100</y>
+         <y>80</y>
          <width>42</width>
          <height>22</height>
         </rect>
@@ -82,7 +82,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>160</x>
-         <y>100</y>
+         <y>80</y>
          <width>71</width>
          <height>21</height>
         </rect>
@@ -95,7 +95,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>160</x>
-         <y>70</y>
+         <y>50</y>
          <width>121</width>
          <height>22</height>
         </rect>
@@ -120,7 +120,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>40</y>
+         <y>20</y>
          <width>51</width>
          <height>20</height>
         </rect>
@@ -136,7 +136,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>19</x>
-         <y>130</y>
+         <y>120</y>
          <width>260</width>
          <height>30</height>
         </rect>
@@ -149,7 +149,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>40</y>
+         <y>20</y>
          <width>91</width>
          <height>16</height>
         </rect>
@@ -169,7 +169,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>220</y>
+         <y>210</y>
          <width>281</width>
          <height>20</height>
         </rect>
@@ -624,7 +624,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>160</x>
-         <y>300</y>
+         <y>290</y>
          <width>71</width>
          <height>21</height>
         </rect>
@@ -637,7 +637,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>240</y>
+         <y>230</y>
          <width>51</width>
          <height>20</height>
         </rect>
@@ -653,7 +653,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>160</x>
-         <y>270</y>
+         <y>260</y>
          <width>121</width>
          <height>22</height>
         </rect>
@@ -684,7 +684,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>240</x>
-         <y>300</y>
+         <y>290</y>
          <width>42</width>
          <height>22</height>
         </rect>
@@ -703,7 +703,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>240</y>
+         <y>230</y>
          <width>91</width>
          <height>16</height>
         </rect>
@@ -1178,7 +1178,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>630</y>
+         <y>580</y>
          <width>71</width>
          <height>16</height>
         </rect>
@@ -1198,7 +1198,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>650</y>
+         <y>610</y>
          <width>271</width>
          <height>22</height>
         </rect>
@@ -1229,7 +1229,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>700</y>
+         <y>680</y>
          <width>71</width>
          <height>16</height>
         </rect>
@@ -1249,7 +1249,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>720</y>
+         <y>700</y>
          <width>271</width>
          <height>22</height>
         </rect>
@@ -1274,7 +1274,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>670</y>
+         <y>630</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1287,7 +1287,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>160</y>
+         <y>150</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1300,7 +1300,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>270</x>
-         <y>160</y>
+         <y>150</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1313,7 +1313,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>160</y>
+         <y>150</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1326,7 +1326,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>180</y>
+         <y>170</y>
          <width>61</width>
          <height>17</height>
         </rect>
@@ -1345,7 +1345,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>200</y>
+         <y>190</y>
          <width>61</width>
          <height>17</height>
         </rect>
@@ -1364,7 +1364,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>120</x>
-         <y>190</y>
+         <y>180</y>
          <width>51</width>
          <height>22</height>
         </rect>
@@ -1372,21 +1372,15 @@ QGroupBox::title {
        <property name="decimals">
         <number>3</number>
        </property>
-       <property name="minimum">
-        <double>-2.000000000000000</double>
-       </property>
        <property name="singleStep">
         <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.000000000000000</double>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="clampSmokeMaxValue">
        <property name="geometry">
         <rect>
          <x>230</x>
-         <y>190</y>
+         <y>180</y>
          <width>51</width>
          <height>22</height>
         </rect>
@@ -1405,7 +1399,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>90</x>
-         <y>190</y>
+         <y>180</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1418,7 +1412,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>200</x>
-         <y>190</y>
+         <y>180</y>
          <width>31</width>
          <height>16</height>
         </rect>
@@ -1432,7 +1426,7 @@ QGroupBox::title {
         <rect>
          <x>20</x>
          <y>360</y>
-         <width>21</width>
+         <width>16</width>
          <height>16</height>
         </rect>
        </property>
@@ -1445,7 +1439,7 @@ QGroupBox::title {
         <rect>
          <x>140</x>
          <y>360</y>
-         <width>21</width>
+         <width>16</width>
          <height>16</height>
         </rect>
        </property>
@@ -1471,7 +1465,7 @@ QGroupBox::title {
         <rect>
          <x>270</x>
          <y>360</y>
-         <width>21</width>
+         <width>16</width>
          <height>16</height>
         </rect>
        </property>
@@ -1483,7 +1477,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>270</x>
-         <y>670</y>
+         <y>630</y>
          <width>16</width>
          <height>16</height>
         </rect>
@@ -1496,7 +1490,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>740</y>
+         <y>720</y>
          <width>31</width>
          <height>16</height>
         </rect>
@@ -1509,7 +1503,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>270</x>
-         <y>740</y>
+         <y>720</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1522,7 +1516,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>670</y>
+         <y>630</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1535,7 +1529,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>740</y>
+         <y>720</y>
          <width>21</width>
          <height>16</height>
         </rect>
@@ -1548,7 +1542,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>440</y>
+         <y>450</y>
          <width>91</width>
          <height>16</height>
         </rect>
@@ -1568,7 +1562,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>490</y>
+         <y>500</y>
          <width>101</width>
          <height>17</height>
         </rect>
@@ -1584,7 +1578,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>470</y>
+         <y>480</y>
          <width>111</width>
          <height>17</height>
         </rect>
@@ -2058,7 +2052,7 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>470</y>
+         <y>480</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -2071,82 +2065,32 @@ QGroupBox::title {
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>490</y>
+         <y>500</y>
          <width>31</width>
          <height>22</height>
         </rect>
        </property>
        <property name="value">
-        <number>4</number>
+        <number>1</number>
        </property>
       </widget>
-      <widget class="QComboBox" name="selectSmoke">
+      <widget class="QComboBox" name="selectGlyphShape">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>121</width>
+         <x>180</x>
+         <y>500</y>
+         <width>81</width>
          <height>22</height>
         </rect>
        </property>
        <item>
         <property name="text">
-         <string>Fluid Density Rho</string>
+         <string>3D cones</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Fluid Velocity ||v||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Force Field ||f||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Divergence of ||v||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Divergence of ||f||</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QComboBox" name="selectGlyph">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>270</y>
-         <width>121</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <item>
-        <property name="text">
-         <string>Fluid Density Rho</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Fluid Velocity ||v||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Force Field ||f||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Divergence of ||v||</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Divergence of ||f||</string>
+         <string>2D lines</string>
         </property>
        </item>
       </widget>
@@ -2164,6 +2108,57 @@ QGroupBox::title {
        </property>
        <property name="checked">
         <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioGlyphClamp">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>400</y>
+         <width>61</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Clamp</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="clampGlyphMinValue">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>390</y>
+         <width>51</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+      </widget>
+      <widget class="QDoubleSpinBox" name="clampGlyphMaxValue">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>390</y>
+         <width>51</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="singleStep">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
        </property>
       </widget>
       <widget class="QLabel" name="labelMax_2">
@@ -2192,117 +2187,75 @@ QGroupBox::title {
         <string>min:</string>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="clampGlyphMinValue">
-       <property name="geometry">
-        <rect>
-         <x>120</x>
-         <y>390</y>
-         <width>51</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>-2.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioGlyphClamp">
+      <widget class="QComboBox" name="selectSmoke">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>400</y>
-         <width>61</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Clamp</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="clampGlyphMaxValue">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>390</y>
-         <width>51</width>
+         <y>50</y>
+         <width>121</width>
          <height>22</height>
         </rect>
        </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
+       <item>
+        <property name="text">
+         <string>Fluid Density Rho</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fluid Velocity ||v||</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Force Field ||f||</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Divergence of v</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Divergence of f</string>
+        </property>
+       </item>
       </widget>
-      <widget class="QLabel" name="labelGlyphColor_4">
+      <widget class="QComboBox" name="selectGlyph">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>540</y>
-         <width>91</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Isolines</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelMin_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>560</y>
-         <width>91</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Rho isoline value:</string>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="rhoIsolineValue">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>560</y>
-         <width>51</width>
+         <y>260</y>
+         <width>121</width>
          <height>22</height>
         </rect>
        </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>-2.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.500000000000000</double>
-       </property>
+       <item>
+        <property name="text">
+         <string>Fluid Density Rho</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fluid Velocity ||v||</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Force Field ||f||</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Divergence of v</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Divergence of f</string>
+        </property>
+       </item>
       </widget>
      </widget>
     </item>
@@ -2330,7 +2283,7 @@ QGroupBox::title {
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupGlyphVector"/>
   <buttongroup name="buttonGroupSmokeValues"/>
+  <buttongroup name="buttonGroupGlyphVector"/>
  </buttongroups>
 </ui>

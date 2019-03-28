@@ -17,16 +17,18 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     mainview.cpp \
     fluids.c \
+    marchingsquare.cpp \
     simulation.cpp \
     utils.cpp \
-    marchingsquare.cpp
+    objfile.cpp
 
 HEADERS  += mainwindow.h \
     mainview.h \
     fluids.h \
+    marchingsquare.h \
     simulation.h \
     utils.h \
-    marchingsquare.h
+    objfile.h
 
 FORMS    += mainwindow.ui
 

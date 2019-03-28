@@ -17,6 +17,7 @@
 
 #include "simulation.h"
 #include "utils.h"
+#include "objfile.h"
 
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_1_Core {
 
@@ -65,10 +66,13 @@ public:
   float rho_isoline_value = 0.500;
 
   bool is_initialized = false;
-  int nr_glyphs_x = 50;
-  int nr_glyphs_y = 50;
-  int nr_glyphs_p = 4;
+  int nr_glyphs_x = 20;//50;//
+  int nr_glyphs_y = 20;//50;//
+  int nr_glyphs_p = 1;//4;//
   bool nr_glyphs_changed = true;
+  bool glyphs3D = true;
+  float glyphs3D_size = 0.1;
+  OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
 
 protected:
   void initializeGL();
@@ -85,7 +89,7 @@ private:
   QOpenGLShaderProgram* mainShaderProg;
   QOpenGLShaderProgram* cMapShaderProg;
   GLuint gridVAO, gridCoordsBO, gridValBO, gridIndexBO;
-  GLuint glyphsVAO, glyphCoordsBO, glyphColourBO, glyphIndexBO;
+  GLuint glyphsVAO, glyphCoordsBO, glyphNormalsBO, glyphColourBO, glyphIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
 
   void createShaderPrograms();
@@ -99,15 +103,19 @@ private:
   QVector<float> triaVals;
   QVector<unsigned short> triaIndices;
   QVector<float> glyphShifts;
-  QVector<QVector2D> glyphCoords;
+  QVector<QVector3D> glyphCoords;
   QVector<QVector3D> glyphColours;
+  QVector<QVector3D> glyphNormals;
   QVector<unsigned short> glyphIndices;
 
-  GLint uniModelViewMatrix, uniProjectionMatrix;
+  GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
   GLint uniSmokeClamping, uniSmokeClampMin, uniSmokeClampMax;
   GLint uniGlyphClamping, uniGlyphClampMin, uniGlyphClampMax;// scaling/clamping uniforms
+  GLint uniPhong;
   QMatrix4x4 modelViewMatrix, projectionMatrix;
+  QMatrix3x3 normalMatrix;
+
 
   //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
   const int DIM = 50;               //size of simulation grid

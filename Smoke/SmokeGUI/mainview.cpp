@@ -9,12 +9,12 @@ MainView::~MainView() {
   clearArrays();
 
   glDeleteBuffers(1, &gridCoordsBO);
-//  glDeleteBuffers(1, &gridColourBO);
   glDeleteBuffers(1, &gridValBO);
   glDeleteBuffers(1, &gridIndexBO);
   glDeleteVertexArrays(1, &gridVAO);
   glDeleteBuffers(1, &glyphCoordsBO);
   glDeleteBuffers(1, &glyphColourBO);
+  glDeleteBuffers(1, &glyphNormalsBO);
   glDeleteBuffers(1, &glyphIndexBO);
   glDeleteVertexArrays(1, &glyphsVAO);
 
@@ -47,6 +47,8 @@ void MainView::createShaderPrograms() {
   // Pure OpenGL
   uniModelViewMatrix = glGetUniformLocation(mainShaderProg->programId(), "modelviewmatrix");
   uniProjectionMatrix = glGetUniformLocation(mainShaderProg->programId(), "projectionmatrix");
+  uniNormalMatrix = glGetUniformLocation(mainShaderProg->programId(), "normalmatrix");
+  uniPhong = glGetUniformLocation(mainShaderProg->programId(), "phong");
 
   uniMVMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "modelviewmatrix");
   uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
@@ -94,6 +96,11 @@ void MainView::createBuffers() {
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+  glGenBuffers(1, &glyphNormalsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, glyphNormalsBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
   glGenBuffers(1, &glyphIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
 
@@ -136,6 +143,7 @@ void MainView::updateBuffers() {
       {
           px = wn + static_cast<double>(i) * wn - 1.0;
           py = hn + static_cast<double>(j) * hn - 1.0;
+
 
           idx0 = (j * DIM) + i;
           idx1 = ((j + 1) * DIM) + i;
@@ -197,10 +205,24 @@ void MainView::updateBuffers() {
 
 void MainView::updateGlyphs()
 {
+    //glyphs3D = 0;
+
+    int glyphV, glyphT;
+    if (glyphs3D)
+    {
+        glyphV = cone.vertexCoords.length();
+        glyphT = cone.faceCoordInd.length();
+    }
+    else
+    {
+        glyphT = glyphV = 2;
+    }
+
     clearLineArrays();
-    glyphCoords.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-    glyphColours.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
-    glyphIndices.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
+    glyphCoords.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * glyphV);
+    glyphColours.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * glyphV);
+    glyphNormals.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * glyphV);
+    glyphIndices.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * glyphT);
     if (nr_glyphs_changed)
     {
         glyphShifts.clear();
@@ -220,7 +242,15 @@ void MainView::updateGlyphs()
 
     int idx_glyphs;
     float x_pct, y_pct, x_inter, y_inter, col_inter;
+    float scale_factor;
     float x_shift, y_shift;
+
+    QMatrix4x4 modelview;
+    QMatrix4x4 normalmat;
+    float d, angle;
+    QVector2D dir;
+    QVector3D vec3;
+    QVector4D vec4;
 
     for (int j = 0; j < nr_glyphs_y; j++)            //draw smoke
     {
@@ -228,8 +258,14 @@ void MainView::updateGlyphs()
         {
             for (int k = 0; k < nr_glyphs_p; k++)
             {
-                x_pct = (fftw_real)i / nr_glyphs_x;
-                y_pct = (fftw_real)j / nr_glyphs_y;
+//                x_pct = (fftw_real)i / nr_glyphs_x;
+//                y_pct = (fftw_real)j / nr_glyphs_y;
+                px = w_glyphs + (fftw_real)i * w_glyphs - 1.0;
+                py = h_glyphs + (fftw_real)j * h_glyphs - 1.0;
+//                x_pct = (px+1.0)/2.0;
+//                y_pct = (py+1.0)/2.0;
+                x_pct = (px - (w_glyphs - 1.0))/(w_glyphs*(nr_glyphs_x-1));
+                y_pct = (py - (h_glyphs - 1.0))/(h_glyphs*(nr_glyphs_y-1));
 
                 idx_glyphs = (j * nr_glyphs_x * nr_glyphs_p) + (i * nr_glyphs_p) + k;
 
@@ -246,23 +282,65 @@ void MainView::updateGlyphs()
 
                 x_pct += x_shift;
                 y_pct += y_shift;
-                x_pct = std::min(std::max(0.0f, x_pct),0.98f);
+                //x_pct = std::min(std::max(0.0f, x_pct),1.0f);
+                if (x_pct > 1.0f)
+                {
+                    x_pct -= 2*x_shift;
+                }
                 y_pct = std::min(std::max(0.0f, y_pct),1.0f);
 
-                px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
-                py = h_glyphs + y_pct * (float)nr_glyphs_x * h_glyphs - 1.0;
-
-                glyphCoords.append(QVector2D(px, py));
+//                px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
+//                py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
+                //px = x_pct*2.0-1.0;
+                //py = y_pct*2.0-1.0;
+                px = -1.0 + w_glyphs + (w_glyphs*(nr_glyphs_x-1))*x_pct;
+                py = -1.0 + h_glyphs + (h_glyphs*(nr_glyphs_y-1))*y_pct;
                 if(glyph_vector_var == V) {
                     x_inter = glyph_interpolation(x_pct, y_pct, vx);
                     y_inter = glyph_interpolation(x_pct, y_pct, vy);
+                    scale_factor = std::min((float)sqrt(x_inter*x_inter + y_inter*y_inter), 0.1f)*10.0f;
 
                 } else if(glyph_vector_var == F) {
                     x_inter = glyph_interpolation(x_pct, y_pct, fx);
                     y_inter = glyph_interpolation(x_pct, y_pct, fy);
                 }
-                glyphCoords.append(QVector2D(px + vec_scale * x_inter, py + vec_scale * y_inter));
 
+                if (glyphs3D)
+                {
+                    dir = QVector2D(x_inter, y_inter);
+                    angle = acos(dir.dotProduct(dir, QVector2D(0.0, 1.0)) / sqrt(x_inter*x_inter + y_inter*y_inter))*360/(2*M_PI);
+                    d = glyphs3D_size*scale_factor;
+                    if (x_inter > 0.0)
+                    {
+                        angle = -angle;
+                    }
+                    for (int n = 0; n < glyphV; n++)
+                    {
+                        modelview.setToIdentity();
+                        modelview.translate(QVector3D(px, py, 0.0));
+                        modelview.scale(QVector3D(d, d, d));
+                        modelview.rotate(angle, QVector3D(0.0, 0.0, 1.0));
+
+                        vec3 = cone.vertexCoords[n];
+                        //vec3.setX(vec3.x() * height()/width());
+                        vec4 = modelview * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+
+                        glyphCoords.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                        //glyphCoords.append(cone.vertexCoords[n]);
+                        normalmat = QMatrix4x4(modelview.normalMatrix());
+                        vec3 = cone.vertexNormals[n];
+                        vec4 = normalmat * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+
+                        glyphNormals.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                    }
+                }
+                else
+                {
+                    glyphCoords.append(QVector3D(px, py, -1.0));
+                    glyphCoords.append(QVector3D(px + vec_scale * x_inter, py + vec_scale * y_inter, -1.0));
+                    glyphNormals.append(QVector3D(0.0, 0.0, 1.0));
+                    glyphNormals.append(QVector3D(0.0, 0.0, 1.0));
+                }
                 if(glyph_var == RHO) {
                     col_inter = glyph_interpolation(x_pct, y_pct, rho);
                 } else if(glyph_var == V) {
@@ -278,10 +356,31 @@ void MainView::updateGlyphs()
                 } else if(glyph_var == DIVF) {
                     col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivF());
                 }
-                glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-                glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
-                glyphIndices.append(2*idx_glyphs);
-                glyphIndices.append(2*idx_glyphs+1);
+                for (int n = 0; n < glyphV; n++)
+                {
+                    if (glyphs3D)
+                    {
+                        //glyphColours.append(QVector3D((float)idx_glyphs,1.0,(float)n/(float)glyphV));
+                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                    }
+                    else
+                    {
+                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                    }
+                    //glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                }
+                if (glyphs3D)
+                {
+                    for (int n = 0; n < glyphT; n++)
+                    {
+                        glyphIndices.append(cone.faceCoordInd[n] + glyphV*idx_glyphs);
+                    }
+                }
+                else
+                {
+                    glyphIndices.append(2*idx_glyphs);
+                    glyphIndices.append(2*idx_glyphs+1);
+                }
                 if (nr_glyphs_changed)
                 {
                     glyphShifts.append(x_shift);
@@ -294,10 +393,13 @@ void MainView::updateGlyphs()
     nr_glyphs_changed = false;
 
     glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*glyphCoords.size(), glyphCoords.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*glyphCoords.size(), glyphCoords.data(), GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*glyphColours.size(), glyphColours.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, glyphNormalsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*glyphNormals.size(), glyphNormals.data(), GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*glyphIndices.size(), glyphIndices.data(), GL_DYNAMIC_DRAW);
@@ -355,7 +457,10 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
 void MainView::updateMatrices() {
   modelViewMatrix.setToIdentity();
   projectionMatrix.setToIdentity();
-
+  float dispRatio = 1.0;//width()/height();
+  projectionMatrix.ortho(-1.0*dispRatio, 1.0*dispRatio, -1.0, 1.0, 0.0, 100.0);
+  //projectionMatrix.perspective(60.0, dispRatio, 0.2, 4.0);//
+  normalMatrix.setToIdentity();
   updateUniformsRequired = true;
 }
 
@@ -364,6 +469,8 @@ void MainView::updateUniforms() {
   mainShaderProg->bind();
   glUniformMatrix4fv(uniModelViewMatrix, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjectionMatrix, 1, false, projectionMatrix.data());
+  glUniformMatrix3fv(uniNormalMatrix, 1, false, normalMatrix.data());
+  glUniform1i(uniPhong, glyphs3D);
   mainShaderProg->release();
   cMapShaderProg->bind();
   glUniformMatrix4fv(uniMVMat_cMap, 1, false, modelViewMatrix.data());
@@ -405,6 +512,8 @@ void MainView::clearLineArrays()
     glyphCoords.squeeze();
     glyphColours.clear();
     glyphColours.squeeze();
+    glyphNormals.clear();
+    glyphNormals.squeeze();
     glyphIndices.clear();
     glyphIndices.squeeze();
 }
@@ -554,7 +663,14 @@ void MainView::paintGL() {
       if (draw_vecs)
       {
           glBindVertexArray(glyphsVAO);
-          glDrawElements(GL_LINES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          if (glyphs3D)
+          {
+              glDrawElements(GL_TRIANGLES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          }
+          else
+          {
+              glDrawElements(GL_LINES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          }
           glBindVertexArray(0);
       }
       mainShaderProg->release();
@@ -594,8 +710,17 @@ void MainView::timerEvent(QTimerEvent *e)
 {
     if (!frozen)
     {
-        do_one_simulation_step();
-        this->update();
+        try
+        {
+            do_one_simulation_step();
+            this->update();
+        }
+        catch (std::exception e)
+        {
+            qDebug() << "tick failed";
+            qDebug() << e.what();
+        }
+
     }
 }
 
@@ -603,25 +728,34 @@ void MainView::timerEvent(QTimerEvent *e)
 
 float MainView::glyph_interpolation(float x_pct, float y_pct, fftw_real* mat)
 {
-    fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-    fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+    //qDebug() << "in glyph interpolation";
+    //qDebug() << "pctages" << x_pct << y_pct;
+    //fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
+    //fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
     float x_pos_grid, y_pos_grid, x_under, y_under, x_over, y_over;
     float tx, ty, q11, q12, q21, q22, inter;
 
-    x_pos_grid = x_pct * DIM;
-    y_pos_grid = y_pct * DIM;
+//    fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
+//    fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+//    float px = w_glyphs + x_pct * (float)nr_glyphs_x * w_glyphs - 1.0;
+//    float py = h_glyphs + y_pct * (float)nr_glyphs_y * h_glyphs - 1.0;
+
+    x_pos_grid = x_pct * (DIM-1);//(px+1.0)/2.0 * DIM;//
+    y_pos_grid = y_pct * (DIM-1);//(py+1.0)/2.0 * DIM;//
+    //qDebug() << "on grid " << x_pos_grid << y_pos_grid;
     x_under = floorf(x_pos_grid);
     y_under = floorf(y_pos_grid);
+    //qDebug() << "under " << x_under << y_under;
     x_over = ceilf(x_pos_grid);
     y_over = ceilf(y_pos_grid);
-
+    //qDebug() << "over " << x_over << y_over;
     tx = (x_pos_grid - x_under);
     ty = (y_pos_grid - y_under);
 
-    q11 = mat[(int)y_under * DIM + (int)x_under];
-    q12 = mat[(int)y_under * DIM + (int)x_over];
-    q21 = mat[(int)y_over * DIM + (int)x_under];
-    q22 = mat[(int)y_over * DIM + (int)x_over];
+    q11 = mat[((int)y_under - 0) * DIM + ((int)x_under - 0)];
+    q12 = mat[((int)y_under - 0) * DIM + ((int)x_over - 0)];
+    q21 = mat[((int)y_over - 0) * DIM + ((int)x_under - 0)];
+    q22 = mat[((int)y_over - 0) * DIM + ((int)x_over - 0)];
     inter = (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q12 +
             (1 - tx) * ty * q21 + tx * ty * q22;
     return inter;
