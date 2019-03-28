@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "marchingsquare.h"
 #include "simulation.h"
 #include "utils.h"
 #include "objfile.h"
@@ -29,10 +30,12 @@ public:
 
   void updateBuffers();
   void updateGlyphs();
+  void updateIsolines();
   void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
   void clearGridArrays();
   void clearLineArrays();
+  void clearIsolineArrays();
 
   double dt = 0.4;                        //simulation time step
   float visc = 0.001;                       //fluid viscosity
@@ -64,6 +67,7 @@ public:
   int scale_glyph_cnt = 0;
 
   float rho_isoline_value = 0.500;
+  int   draw_isolines = 1;
 
   bool is_initialized = false;
   int nr_glyphs_x = 20;//50;//
@@ -93,6 +97,7 @@ private:
   GLuint gridVAO, gridCoordsBO, gridNormalsBO , gridValBO, gridIndexBO;
   GLuint glyphsVAO, glyphCoordsBO, glyphNormalsBO, glyphColourBO, glyphIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
+  GLuint isolinesVAO, isolinesCoordsBO, isolinesColourBO, isolinesIndexBO;
 
   void createShaderPrograms();
   void createBuffers();
@@ -111,6 +116,9 @@ private:
   QVector<QVector3D> glyphColours;
   QVector<QVector3D> glyphNormals;
   QVector<unsigned short> glyphIndices;
+  QVector<QVector3D> isolineCoords;
+  QVector<QVector3D> isolineColours;
+  QVector<unsigned short> isolineIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNormMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
@@ -127,6 +135,7 @@ private:
 
   QPoint lastpos;
   Simulation simulation;
+  MarchingSquare marchingSquare;
   QTimer* timer;
 
   QVector<float> scale_maxvals_rho;

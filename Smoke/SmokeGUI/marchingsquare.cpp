@@ -1,13 +1,18 @@
 #include "marchingsquare.h"
 
-
-QVector4D* MarchingSquare::calcIsoline(double *rho, int n, double rhoVal)
+MarchingSquare::MarchingSquare()
 {
-    size_t dim     = (n * 2*(n/2+1)*sizeof(QVector4D));
-    QVector4D* isoline = static_cast<QVector4D*>(malloc(dim));
+}
 
-    for (int i = 0; i < n * n; i++)                      //Initialize data structures to 0
-    { isoline[i] = QVector4D(0,0,0,0); }
+QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double rhoIsoVal)
+{
+    isolines.clear();
+    isolines.squeeze();
+
+    wn = 2.0 / static_cast<double>(n + 1);   // Grid cell width
+    hn = 2.0 / static_cast<double>(n + 1);
+    rhoVal = rhoIsoVal;
+    double px, py;
 
     for (int j = 0; j < (n-1); j++)            //draw smoke
     {
@@ -15,106 +20,114 @@ QVector4D* MarchingSquare::calcIsoline(double *rho, int n, double rhoVal)
         {
             int idx = (j*n) + i;
             int idxR = (j * n) + (i+1);
-            int idxD = ((j+1) * n) + i;
-            int idxDR = ((j+1) * n) + (i+1);
+            int idxU = ((j+1) * n) + i;
+            int idxUR = ((j+1) * n) + (i+1);
 
             QString code = "";
-            code += (rho[idx] > rhoVal) ? "1" : "0";
+            code += (rho[idxU] > rhoVal) ? "1" : "0";
+            code += (rho[idxUR] > rhoVal) ? "1" : "0";
             code += (rho[idxR] > rhoVal) ? "1" : "0";
-            code += (rho[idxD] > rhoVal) ? "1" : "0";
-            code += (rho[idxDR] > rhoVal) ? "1" : "0";
+            code += (rho[idx] > rhoVal) ? "1" : "0";
 
-            isoline[idx] = this->lineFromBinary(rho[idx], rho[idxR], rho[idxD], rho[idxDR], rhoVal, code);
+            px = wn + static_cast<double>(i) * wn - 1.0;
+            py = hn + static_cast<double>(j) * hn - 1.0;
 
+            lineFromBinary(rho[idx], rho[idxR], rho[idxU], rho[idxUR], code, px, py);
         }
     }
 
-    return isoline;
+    return isolines;
 }
 
-QVector4D MarchingSquare::lineFromBinary(double l, double r, double dl, double dr, double rhoVal, QString code)
+void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, QString code, double px, double py)
 {
-    PStruct point1;
-    PStruct point2;
     if(code == "0000"){
-        return QVector4D(0, 0, 0, 0);
+        isolines.append(QVector2D(0, 0));
+        isolines.append(QVector2D(0, 0));
     }
     if(code == "0001"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "0010"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0011"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0100"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0101"){
-        return QVector4D(0, 0, 0, 0);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0110"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "0111"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
     }
     if(code == "1000"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
     }
     if(code == "1001"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1010"){
-        return QVector4D(0, 0, 0, 0);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1011"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_UP);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "1100"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "1101"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_RIGHT);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "1110"){
-        point1 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_LEFT);
-        point2 = interpolateSide(l, r, dl, dr, rhoVal, SIDE_DOWN);
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1111"){
-        return QVector4D(0, 0, 0, 0);
+        isolines.append(QVector2D(0, 0));
+        isolines.append(QVector2D(0, 0));
     }
-
-    return QVector4D(point1.x, point1.y, point2.x, point2.y);
 }
 
-point MarchingSquare::interpolateSide(double l, double r, double dl, double dr, double rhoVal, int side)
+QVector2D MarchingSquare::interpolateSide(double dl, double dr, double ul, double ur, int side, double px, double py)
 {
     PStruct point;
     if(side == SIDE_LEFT) {
         point.x = 0;
-        point.y = static_cast<float>(abs(l-rhoVal) / abs(l-dl));
+        point.y = static_cast<float>(abs(dl-rhoVal) / abs(dl-ul));
     } else if (side == SIDE_UP) {
-        point.x = static_cast<float>(abs(l-rhoVal) / abs(l-r));
-        point.y = 0;
+        point.x = static_cast<float>(abs(ul-rhoVal) / abs(ul-ur));
+        point.y = 1;
     } else if (side == SIDE_RIGHT) {
         point.x = 1;
-        point.y = static_cast<float>(abs(r-rhoVal) / abs(r-dr));
+        point.y = static_cast<float>(abs(dr-rhoVal) / abs(dr-ur));
     } else if (side == SIDE_DOWN) {
         point.x = static_cast<float>(abs(dl-rhoVal) / abs(dl-dr));
-        point.y = 1;
+        point.y = 0;
     }
-    return point;
+    float gridX = static_cast<float>(px) + (point.x * static_cast<float>(wn));
+    float gridY = static_cast<float>(py) + (point.y * static_cast<float>(hn));
+    return QVector2D(gridX, gridY);
 }

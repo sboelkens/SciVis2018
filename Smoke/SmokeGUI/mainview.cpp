@@ -18,6 +18,10 @@ MainView::~MainView() {
   glDeleteBuffers(1, &glyphNormalsBO);
   glDeleteBuffers(1, &glyphIndexBO);
   glDeleteVertexArrays(1, &glyphsVAO);
+  glDeleteBuffers(1, &isolinesCoordsBO);
+  glDeleteBuffers(1, &isolinesColourBO);
+  glDeleteBuffers(1, &isolinesIndexBO);
+  glDeleteVertexArrays(1, &isolinesVAO);
 
   delete mainShaderProg;
 
@@ -113,6 +117,24 @@ void MainView::createBuffers() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
 
   glBindVertexArray(0);
+
+  glGenVertexArrays(1, &isolinesVAO);
+  glBindVertexArray(isolinesVAO);
+
+  glGenBuffers(1, &isolinesCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, isolinesCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &isolinesColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, isolinesColourBO);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &isolinesIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, isolinesIndexBO);
+
+  glBindVertexArray(0);
 }
 
 void MainView::updateBuffers() {
@@ -125,7 +147,6 @@ void MainView::updateBuffers() {
   fftw_real* vy = simulation.getVy();
   fftw_real* fx = simulation.getFx();
   fftw_real* fy = simulation.getFy();
-  fftw_real* isoline = simulation.getIsoline();
 
   if (!is_initialized)
   {
@@ -479,6 +500,34 @@ void MainView::updateGlyphs()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*glyphIndices.size(), glyphIndices.data(), GL_DYNAMIC_DRAW);
 }
 
+void MainView::updateIsolines()
+{
+    int n_points = (DIM) * (DIM) * 2; //= DIM*DIM
+
+    clearIsolineArrays();
+    isolineCoords.reserve(n_points);
+    isolineColours.reserve(n_points);
+    isolineIndices.reserve(n_points);
+
+    QVector<QVector2D> isolines = marchingSquare.calcIsoline(simulation.getRho(), DIM, static_cast<double>(rho_isoline_value));
+
+    for (int i = 0; i < isolines.size(); i++)
+    {
+        isolineCoords.append(QVector3D(static_cast<float>(isolines[i].x()), static_cast<float>(isolines[i].y()), -1));
+        isolineColours.append(set_colormap(rho_isoline_value, COLOR_RAINBOW, 10));
+        isolineIndices.append(i);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, isolinesCoordsBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*isolineCoords.size(), isolineCoords.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, isolinesColourBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*isolineColours.size(), isolineColours.data(), GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, isolinesIndexBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*isolineIndices.size(), isolineIndices.data(), GL_DYNAMIC_DRAW);
+}
+
 void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw_real *fx, fftw_real *fy)
 {
     float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
@@ -578,6 +627,7 @@ void MainView::clearArrays()
 {
     clearGridArrays();
     clearLineArrays();
+    clearIsolineArrays();
 }
 
 void MainView::clearGridArrays()
@@ -603,6 +653,16 @@ void MainView::clearLineArrays()
     glyphNormals.squeeze();
     glyphIndices.clear();
     glyphIndices.squeeze();
+}
+
+void MainView::clearIsolineArrays()
+{
+    isolineCoords.clear();
+    isolineCoords.squeeze();
+    isolineColours.clear();
+    isolineColours.squeeze();
+    isolineIndices.clear();
+    isolineIndices.squeeze();
 }
 // ---
 void MainView::initializeGL() {
@@ -637,6 +697,8 @@ void MainView::initializeGL() {
 
   // Parameter initialization
   simulation = Simulation(DIM);
+  marchingSquare = MarchingSquare();
+
   srand(time(NULL)); // initialize seed for rng
 
   scale_maxvals_rho.reserve(scale_smoke_window);
@@ -665,11 +727,12 @@ void MainView::do_one_simulation_step(void)
     simulation.diffuse_matter(DIM, dt);
     simulation.divergenceV(DIM);
     simulation.divergenceF(DIM);
-    simulation.calcIsoline(DIM, static_cast<double>(rho_isoline_value));
+//    simulation.calcIsoline(DIM, static_cast<double>(rho_isoline_value));
     try
     {
         updateBuffers();
         updateGlyphs();
+        updateIsolines();
     }
     catch (std::exception e)
     {
@@ -758,6 +821,13 @@ void MainView::paintGL() {
           {
               glDrawElements(GL_LINES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           }
+          glBindVertexArray(0);
+      }
+      if (draw_isolines)
+      {
+          glUniform1i(uniPhong, false);
+          glBindVertexArray(isolinesVAO);
+          glDrawElements(GL_LINES, isolineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
       }
       mainShaderProg->release();
