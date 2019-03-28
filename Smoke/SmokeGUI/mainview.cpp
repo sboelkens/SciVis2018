@@ -295,7 +295,7 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                     {
                         modelview.setToIdentity();
                         modelview.translate(QVector3D(px, py, 0.0));
-                        modelview.scale(QVector3D(d, d, d));
+                        modelview.scale(QVector3D(d, d*width()/height(), d));
                         modelview.rotate(angle, QVector3D(0.0, 0.0, 1.0));
 
                         vec3 = cone.vertexCoords[n];
