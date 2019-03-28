@@ -74,6 +74,8 @@ public:
   float glyphs3D_size = 0.1f;
   OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
 
+  bool heightplot = false;
+
 protected:
   void initializeGL();
   void resizeGL(int newWidth, int newHeight);
@@ -88,7 +90,7 @@ private:
 
   QOpenGLShaderProgram* mainShaderProg;
   QOpenGLShaderProgram* cMapShaderProg;
-  GLuint gridVAO, gridCoordsBO, gridValBO, gridIndexBO;
+  GLuint gridVAO, gridCoordsBO, gridNormalsBO , gridValBO, gridIndexBO;
   GLuint glyphsVAO, glyphCoordsBO, glyphNormalsBO, glyphColourBO, glyphIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
 
@@ -99,9 +101,11 @@ private:
 
   float glyph_interpolation(float, float, fftw_real*);
 
-  QVector<QVector2D> triaCoords;
+  QVector<QVector3D> triaCoords;
+  QVector<QVector3D> triaNormals;
   QVector<float> triaVals;
   QVector<unsigned short> triaIndices;
+  QVector<QVector<unsigned short>> triaVertFaces;
   QVector<float> glyphShifts;
   QVector<QVector3D> glyphCoords;
   QVector<QVector3D> glyphColours;
@@ -109,10 +113,10 @@ private:
   QVector<unsigned short> glyphIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
-  GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
+  GLint uniMVMat_cMap, uniProjMat_cMap, uniNormMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
   GLint uniSmokeClamping, uniSmokeClampMin, uniSmokeClampMax;
   GLint uniGlyphClamping, uniGlyphClampMin, uniGlyphClampMax;// scaling/clamping uniforms
-  GLint uniPhong;
+  GLint uniPhong, uniPhongHeightPlot;
   QMatrix4x4 modelViewMatrix, projectionMatrix;
   QMatrix3x3 normalMatrix;
 

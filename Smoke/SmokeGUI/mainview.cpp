@@ -9,6 +9,7 @@ MainView::~MainView() {
   clearArrays();
 
   glDeleteBuffers(1, &gridCoordsBO);
+  glDeleteBuffers(1, &gridNormalsBO);
   glDeleteBuffers(1, &gridValBO);
   glDeleteBuffers(1, &gridIndexBO);
   glDeleteVertexArrays(1, &gridVAO);
@@ -52,6 +53,7 @@ void MainView::createShaderPrograms() {
 
   uniMVMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "modelviewmatrix");
   uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
+  uniNormMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "normalmatrix");
   uniNLevels_cMap = glGetUniformLocation(cMapShaderProg->programId(), "levels");
   uniColorMap_cMap = glGetUniformLocation(cMapShaderProg->programId(), "mode");
   uniGlyphClamping = glGetUniformLocation(cMapShaderProg->programId(), "glyphclamp");
@@ -60,6 +62,7 @@ void MainView::createShaderPrograms() {
   uniSmokeClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
   uniSmokeClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
   uniSmokeClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
+  uniPhongHeightPlot = glGetUniformLocation(cMapShaderProg->programId(), "phong");
 }
 
 void MainView::createBuffers() {
@@ -71,12 +74,17 @@ void MainView::createBuffers() {
   glGenBuffers(1, &gridCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridValBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &gridNormalsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, gridNormalsBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
@@ -122,9 +130,21 @@ void MainView::updateBuffers() {
   if (!is_initialized)
   {
       clearArrays();
-      triaCoords.reserve(n_points);
       triaIndices.reserve(n_trias);
+      triaVertFaces.reserve(n_points);
+      for (int i = 0; i < n_points; i++)
+      {
+          QVector<unsigned short> vertFaces;
+          vertFaces.reserve(6);
+          triaVertFaces.append(vertFaces);
+      }
   }
+  triaCoords.clear();
+  triaCoords.squeeze();
+  triaCoords.reserve(n_points);
+  triaNormals.clear();
+  triaNormals.squeeze();
+  triaNormals.reserve(n_points);
   triaVals.clear();
   triaVals.squeeze();
   triaVals.reserve(n_points);
@@ -133,6 +153,7 @@ void MainView::updateBuffers() {
 
   int idx0, idx1, idx2, idx3;
   double px, py;
+  int idxT = 0;
 
   fftw_real  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / static_cast<double>(DIM + 1);  // Grid cell height
@@ -170,10 +191,18 @@ void MainView::updateBuffers() {
           {
               triaVals.append(static_cast<float>(simulation.getDivF()[idx0]));
           }
+          if (heightplot)
+          {
+              triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py), 0.0+rho[idx0]/10.0));
+          }
+          else
+          {
+              triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py), -1.0f));
+              triaNormals.append(QVector3D(0.0, 0.0, 1.0));
+          }
 
           if (!is_initialized)
           {
-              triaCoords.append(QVector2D(static_cast<float>(px), static_cast<float>(py)));
               if (j + 1 < DIM && i + 1 < DIM)
               {
                   //first tria
@@ -184,19 +213,58 @@ void MainView::updateBuffers() {
                   triaIndices.append(idx0);
                   triaIndices.append(idx2);
                   triaIndices.append(idx3);
+
+                  triaVertFaces[idx0].append(idxT);
+                  triaVertFaces[idx1].append(idxT);
+                  triaVertFaces[idx2].append(idxT);
+
+                  triaVertFaces[idx0].append(idxT+1);
+                  triaVertFaces[idx2].append(idxT+1);
+                  triaVertFaces[idx3].append(idxT+1);
+
+                  idxT += 2;
               }
           }
+      }
+  }
+  if (heightplot)
+  {
+      QVector<QVector3D> faceNormals;
+      QVector3D coord1, coord2, coord3, normal;
+      faceNormals.reserve(n_trias/3);
+      for (int i = 0; i < triaIndices.length(); i += 3)
+      {
+          coord1 = triaCoords[triaIndices[i]];
+          coord2 = triaCoords[triaIndices[i+1]];
+          coord3 = triaCoords[triaIndices[i+2]];
+          normal = QVector3D::crossProduct(coord1 - coord2, coord1 - coord3);
+          normal = normal / normal.length();
+          faceNormals.append(normal);
+      }
+      QVector3D vertNormal;
+      for (int i = 0; i < triaVertFaces.length(); i++)
+      {
+          vertNormal = QVector3D(0.0, 0.0, 0.0);
+          for (int j = 0; j < triaVertFaces[i].length(); j++)
+          {
+              vertNormal += faceNormals[triaVertFaces[i][j]];
+          }
+          vertNormal = vertNormal / vertNormal.length();
+          triaNormals.append(vertNormal);
       }
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*triaVals.size(), triaVals.data(), GL_DYNAMIC_DRAW);
 
+  glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*triaCoords.size(), triaCoords.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, gridNormalsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*triaNormals.size(), triaNormals.data(), GL_DYNAMIC_DRAW);
+
   if (!is_initialized)
   {
-      glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(QVector2D)*triaCoords.size(), triaCoords.data(), GL_DYNAMIC_DRAW);
-
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
   }
@@ -334,7 +402,7 @@ void MainView::updateGlyphs()
                         glyphCoords.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
                         //glyphCoords.append(cone.vertexCoords[n]);
                         normalmat = QMatrix4x4(modelview.normalMatrix());
-                        vec3 = cone.vertexNormals[n];
+                        vec3 = -cone.vertexNormals[n];
                         vec4 = normalmat * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
 
                         glyphNormals.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
@@ -462,11 +530,22 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
 
 void MainView::updateMatrices() {
   modelViewMatrix.setToIdentity();
+  if (heightplot)
+  {
+      //modelViewMatrix.translate(0.0, -0.5, 0.0);
+      modelViewMatrix.scale(0.5, 0.5, 0.5);
+      modelViewMatrix.rotate(-45.0, QVector3D(1.0,0.0,0.0));
+      modelViewMatrix.rotate(45.0, QVector3D(0.0,0.0,1.0));
+      //modelViewMatrix.translate(-0.75, -0.75, 0.0);
+
+      //modelViewMatrix.rotate(45.0, QVector3D(1.0,0.0,0.0));
+  }
   projectionMatrix.setToIdentity();
   float dispRatio = 1.0;//width()/height();
-  projectionMatrix.ortho(-1.0*dispRatio, 1.0*dispRatio, -1.0, 1.0, 0.0, 100.0);
+  projectionMatrix.ortho(-1.0*dispRatio, 1.0*dispRatio, -1.0, 1.0, -1.0, 1.0);
   //projectionMatrix.perspective(60.0, dispRatio, 0.2, 4.0);//
   normalMatrix.setToIdentity();
+  normalMatrix = modelViewMatrix.normalMatrix();
   updateUniformsRequired = true;
 }
 
@@ -481,6 +560,7 @@ void MainView::updateUniforms() {
   cMapShaderProg->bind();
   glUniformMatrix4fv(uniMVMat_cMap, 1, false, modelViewMatrix.data());
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
+  glUniformMatrix3fv(uniNormMat_cMap, 1, false, normalMatrix.data());
   glUniform1i(uniNLevels_cMap, levels_smoke);
   glUniform1i(uniColorMap_cMap, smoke_col);
   glUniform1i(uniGlyphClamping, clamp_glyph_cmap);
@@ -489,6 +569,7 @@ void MainView::updateUniforms() {
   glUniform1i(uniSmokeClamping, clamp_smoke_cmap);
   glUniform1f(uniSmokeClampMin, clamp_smoke_min);
   glUniform1f(uniSmokeClampMax, clamp_smoke_max);
+  glUniform1i(uniPhongHeightPlot, heightplot);
   cMapShaderProg->release();
   updateUniformsRequired = false;
 }
