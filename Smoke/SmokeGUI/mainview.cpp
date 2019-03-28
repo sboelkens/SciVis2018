@@ -54,9 +54,12 @@ void MainView::createShaderPrograms() {
   uniProjMat_cMap = glGetUniformLocation(cMapShaderProg->programId(), "projectionmatrix");
   uniNLevels_cMap = glGetUniformLocation(cMapShaderProg->programId(), "levels");
   uniColorMap_cMap = glGetUniformLocation(cMapShaderProg->programId(), "mode");
-  uniClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
-  uniClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
-  uniClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
+  uniGlyphClamping = glGetUniformLocation(cMapShaderProg->programId(), "glyphclamp");
+  uniGlyphClampMax = glGetUniformLocation(cMapShaderProg->programId(), "glyphmaxval");
+  uniGlyphClampMin = glGetUniformLocation(cMapShaderProg->programId(), "glyphminval");
+  uniSmokeClamping = glGetUniformLocation(cMapShaderProg->programId(), "clamp");
+  uniSmokeClampMax = glGetUniformLocation(cMapShaderProg->programId(), "maxval");
+  uniSmokeClampMin = glGetUniformLocation(cMapShaderProg->programId(), "minval");
 }
 
 void MainView::createBuffers() {
@@ -68,12 +71,12 @@ void MainView::createBuffers() {
   glGenBuffers(1, &gridCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridValBO);
   glBindBuffer(GL_ARRAY_BUFFER, gridValBO);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &gridIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
@@ -86,17 +89,17 @@ void MainView::createBuffers() {
   glGenBuffers(1, &glyphCoordsBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphCoordsBO);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphColourBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphColourBO);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphNormalsBO);
   glBindBuffer(GL_ARRAY_BUFFER, glyphNormalsBO);
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glGenBuffers(1, &glyphIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glyphIndexBO);
@@ -104,10 +107,17 @@ void MainView::createBuffers() {
   glBindVertexArray(0);
 }
 
-void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy) {
+void MainView::updateBuffers() {
 
   int n_points = (DIM) * (DIM); //= DIM*DIM
   int n_trias = (DIM-1) * (DIM-1) * 6;
+
+  fftw_real* rho = simulation.getRho();
+  fftw_real* vx = simulation.getVx();
+  fftw_real* vy = simulation.getVy();
+  fftw_real* fx = simulation.getFx();
+  fftw_real* fy = simulation.getFy();
+  fftw_real* isoline = simulation.getIsoline();
 
   if (!is_initialized)
   {
@@ -124,15 +134,15 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
   int idx0, idx1, idx2, idx3;
   double px, py;
 
-  fftw_real  wn = 2.0 / (fftw_real)(DIM + 1);   // Grid cell width
-  fftw_real  hn = 2.0 / (fftw_real)(DIM + 1);  // Grid cell height
+  fftw_real  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / static_cast<double>(DIM + 1);  // Grid cell height
 
   for (int j = 0; j < DIM; j++)            //draw smoke
   {
       for (int i = 0; i < DIM; i++)
       {
-          px = wn + (fftw_real)i * wn - 1.0;
-          py = hn + (fftw_real)j * hn - 1.0;
+          px = wn + static_cast<double>(i) * wn - 1.0;
+          py = hn + static_cast<double>(j) * hn - 1.0;
 
 
           idx0 = (j * DIM) + i;
@@ -142,20 +152,28 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
 
           if (smoke_var == RHO)
           {
-              triaVals.append(rho[idx0]);
+              triaVals.append(static_cast<float>(rho[idx0]));
           }
           else if (smoke_var == V)
           {
-              triaVals.append(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]));
+              triaVals.append(static_cast<float>(sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0])));
           }
           else if (smoke_var == F)
           {
-              triaVals.append(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]));
+              triaVals.append(static_cast<float>(sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0])));
+          }
+          else if (smoke_var == DIVV)
+          {
+              triaVals.append(static_cast<float>(simulation.getDivV()[idx0]));
+          }
+          else if (smoke_var == DIVF)
+          {
+              triaVals.append(static_cast<float>(simulation.getDivF()[idx0]));
           }
 
           if (!is_initialized)
           {
-              triaCoords.append(QVector2D(px, py));
+              triaCoords.append(QVector2D(static_cast<float>(px), static_cast<float>(py)));
               if (j + 1 < DIM && i + 1 < DIM)
               {
                   //first tria
@@ -182,11 +200,9 @@ void MainView::updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
   }
-
-  updateGlyphs(rho, vx, vy, fx, fy);
 }
 
-void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy)
+void MainView::updateGlyphs()
 {
     //glyphs3D = 0;
 
@@ -213,9 +229,15 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
         glyphShifts.reserve(nr_glyphs_x*nr_glyphs_y*nr_glyphs_p * 2);
     }
 
+    fftw_real* rho = simulation.getRho();
+    fftw_real* vx = simulation.getVx();
+    fftw_real* vy = simulation.getVy();
+    fftw_real* fx = simulation.getFx();
+    fftw_real* fy = simulation.getFy();
+
     float px, py;
-    fftw_real  w_glyphs = 2.0 / (fftw_real)(nr_glyphs_x + 1);   // Grid cell width
-    fftw_real  h_glyphs = 2.0 / (fftw_real)(nr_glyphs_y + 1);  // Grid cell height
+    fftw_real  w_glyphs = 2.0 / static_cast<double>(nr_glyphs_x + 1);   // Grid cell width
+    fftw_real  h_glyphs = 2.0 / static_cast<double>(nr_glyphs_y + 1);  // Grid cell height
 
     int idx_glyphs;
     float x_pct, y_pct, x_inter, y_inter, col_inter;
@@ -335,6 +357,10 @@ void MainView::updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_r
                     x_inter = glyph_interpolation(x_pct, y_pct, fx);
                     y_inter = glyph_interpolation(x_pct, y_pct, fy);
                     col_inter = sqrt(x_inter*x_inter + y_inter*y_inter);
+                } else if(glyph_var == DIVV) {
+                    col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivV());
+                } else if(glyph_var == DIVF) {
+                    col_inter = glyph_interpolation(x_pct, y_pct, simulation.getDivF());
                 }
                 for (int n = 0; n < glyphV; n++)
                 {
@@ -426,12 +452,12 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
         }
     }
 
-    scale_maxvals_rho[scale_cnt] = rho_max;
-    scale_minvals_rho[scale_cnt] = rho_min;
-    scale_maxvals_vnorm[scale_cnt] = vnorm_max;
-    scale_minvals_vnorm[scale_cnt] = vnorm_min;
-    scale_maxvals_fnorm[scale_cnt] = fnorm_max;
-    scale_minvals_fnorm[scale_cnt] = fnorm_min;
+    scale_maxvals_rho[scale_smoke_cnt] = rho_max;
+    scale_minvals_rho[scale_smoke_cnt] = rho_min;
+    scale_maxvals_vnorm[scale_smoke_cnt] = vnorm_max;
+    scale_minvals_vnorm[scale_smoke_cnt] = vnorm_min;
+    scale_maxvals_fnorm[scale_smoke_cnt] = fnorm_max;
+    scale_minvals_fnorm[scale_smoke_cnt] = fnorm_min;
 }
 
 void MainView::updateMatrices() {
@@ -457,9 +483,12 @@ void MainView::updateUniforms() {
   glUniformMatrix4fv(uniProjMat_cMap, 1, false, projectionMatrix.data());
   glUniform1i(uniNLevels_cMap, levels_smoke);
   glUniform1i(uniColorMap_cMap, smoke_col);
-  glUniform1i(uniClamping, clamp_cmap);
-  glUniform1f(uniClampMin, clamp_min);
-  glUniform1f(uniClampMax, clamp_max);
+  glUniform1i(uniGlyphClamping, clamp_glyph_cmap);
+  glUniform1f(uniGlyphClampMin, clamp_glyph_min);
+  glUniform1f(uniGlyphClampMax, clamp_glyph_max);
+  glUniform1i(uniSmokeClamping, clamp_smoke_cmap);
+  glUniform1f(uniSmokeClampMin, clamp_smoke_min);
+  glUniform1f(uniSmokeClampMax, clamp_smoke_max);
   cMapShaderProg->release();
   updateUniformsRequired = false;
 }
@@ -495,7 +524,6 @@ void MainView::clearLineArrays()
     glyphIndices.squeeze();
 }
 // ---
-
 void MainView::initializeGL() {
 
   qDebug() << ":: Initializing OpenGL";
@@ -530,18 +558,18 @@ void MainView::initializeGL() {
   simulation = Simulation(DIM);
   srand(time(NULL)); // initialize seed for rng
 
-  scale_maxvals_rho.reserve(scale_window);
-  scale_minvals_rho.reserve(scale_window);
-  scale_maxvals_vnorm.reserve(scale_window);
-  scale_minvals_vnorm.reserve(scale_window);
-  scale_maxvals_fnorm.reserve(scale_window);
-  scale_minvals_fnorm.reserve(scale_window);
-  scale_maxvals_rho.resize(scale_window);
-  scale_minvals_rho.resize(scale_window);
-  scale_maxvals_vnorm.resize(scale_window);
-  scale_minvals_vnorm.resize(scale_window);
-  scale_maxvals_fnorm.resize(scale_window);
-  scale_minvals_fnorm.resize(scale_window);
+  scale_maxvals_rho.reserve(scale_smoke_window);
+  scale_minvals_rho.reserve(scale_smoke_window);
+  scale_maxvals_vnorm.reserve(scale_smoke_window);
+  scale_minvals_vnorm.reserve(scale_smoke_window);
+  scale_maxvals_fnorm.reserve(scale_smoke_window);
+  scale_minvals_fnorm.reserve(scale_smoke_window);
+  scale_maxvals_rho.resize(scale_smoke_window);
+  scale_minvals_rho.resize(scale_smoke_window);
+  scale_maxvals_vnorm.resize(scale_smoke_window);
+  scale_minvals_vnorm.resize(scale_smoke_window);
+  scale_maxvals_fnorm.resize(scale_smoke_window);
+  scale_minvals_fnorm.resize(scale_smoke_window);
 
   do_one_simulation_step();
   this->startTimer(0);
@@ -552,12 +580,15 @@ void MainView::initializeGL() {
 void MainView::do_one_simulation_step(void)
 {
     simulation.set_forces(DIM);
-    Struct vdir = simulation.solve(DIM, visc, dt);
-    fftw_real* rho = simulation.diffuse_matter(DIM, dt);
-    Struct fdir = simulation.get_force();
+    simulation.solve(DIM, visc, dt);
+    simulation.diffuse_matter(DIM, dt);
+    simulation.divergenceV(DIM);
+    simulation.divergenceF(DIM);
+    simulation.calcIsoline(DIM, static_cast<double>(rho_isoline_value));
     try
     {
-        updateBuffers(rho, vdir.x, vdir.y, fdir.x, fdir.y);
+        updateBuffers();
+        updateGlyphs();
     }
     catch (std::exception e)
     {
@@ -566,32 +597,52 @@ void MainView::do_one_simulation_step(void)
     }
     if (is_initialized)
     {
-        if (!clamp_cmap)
+        if (!clamp_smoke_cmap)
         {
             if (smoke_var == RHO)
             {
-                clamp_max = findMean(scale_maxvals_rho);
-                clamp_min = findMean(scale_minvals_rho);
+                clamp_smoke_max = findMean(scale_maxvals_rho);
+                clamp_smoke_min = findMean(scale_minvals_rho);
             }
             else if (smoke_var == V)
             {
-                clamp_max = findMean(scale_maxvals_vnorm);
-                clamp_min = findMean(scale_minvals_vnorm);
+                clamp_smoke_max = findMean(scale_maxvals_vnorm);
+                clamp_smoke_min = findMean(scale_minvals_vnorm);
             }
             else if (smoke_var == F)
             {
-                clamp_max = findMean(scale_maxvals_fnorm);
-                clamp_min = findMean(scale_minvals_fnorm);
+                clamp_smoke_max = findMean(scale_maxvals_fnorm);
+                clamp_smoke_min = findMean(scale_minvals_fnorm);
             }
             updateUniformsRequired = true;
         }
-        if (scale_cnt < scale_window - 1)
+        if (scale_smoke_cnt < scale_smoke_window - 1)
         {
-            scale_cnt++;
+            scale_smoke_cnt++;
         }
         else
         {
-            scale_cnt = 0;
+            scale_smoke_cnt = 0;
+        }
+
+        if (!clamp_glyph_cmap)
+        {
+            if (glyph_var == RHO)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_rho);
+                clamp_glyph_min = findMean(scale_minvals_rho);
+            }
+            else if (glyph_var == V)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_vnorm);
+                clamp_glyph_min = findMean(scale_minvals_vnorm);
+            }
+            else if (glyph_var == F)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_fnorm);
+                clamp_glyph_min = findMean(scale_minvals_fnorm);
+            }
+            updateUniformsRequired = true;
         }
     }
 }

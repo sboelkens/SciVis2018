@@ -27,8 +27,8 @@ public:
   MainView(QWidget *parent = 0);
   ~MainView();
 
-  void updateBuffers(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
-  void updateGlyphs(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+  void updateBuffers();
+  void updateGlyphs();
   void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
   void clearArrays();
   void clearGridArrays();
@@ -51,11 +51,19 @@ public:
   int   levels_glyph = 10;
   bool updateUniformsRequired;
   // scaling/clamping
-  bool clamp_cmap = true;                  // if false, scaling
-  float clamp_min = 0.0;
-  float clamp_max = 1.0;
-  int scale_window = 1000;
-  int scale_cnt = 0;
+  bool clamp_smoke_cmap = true;                  // if false, scaling
+  float clamp_smoke_min = 0.000;
+  float clamp_smoke_max = 1.000;
+  int scale_smoke_window = 1000;
+  int scale_smoke_cnt = 0;
+
+  bool clamp_glyph_cmap = true;                  // if false, scaling
+  float clamp_glyph_min = 0.000;
+  float clamp_glyph_max = 1.000;
+  int scale_glyph_window = 1000;
+  int scale_glyph_cnt = 0;
+
+  float rho_isoline_value = 0.500;
 
   bool is_initialized = false;
   int nr_glyphs_x = 20;//50;//
@@ -102,7 +110,8 @@ private:
 
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
-  GLint uniClamping, uniClampMin, uniClampMax; // scaling/clamping uniforms
+  GLint uniSmokeClamping, uniSmokeClampMin, uniSmokeClampMax;
+  GLint uniGlyphClamping, uniGlyphClampMin, uniGlyphClampMax;// scaling/clamping uniforms
   GLint uniPhong;
   QMatrix4x4 modelViewMatrix, projectionMatrix;
   QMatrix3x3 normalMatrix;

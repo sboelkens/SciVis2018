@@ -11,12 +11,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   this->waitForInitialization();
 
 }
-
 MainWindow::~MainWindow() {
   delete ui;
   qDebug() <<    "✗✗ MainWindow destructor";
 }
-
 void MainWindow::waitForInitialization()
 {
     if(ui->mainView->is_initialized) {
@@ -31,126 +29,130 @@ void MainWindow::waitForInitialization()
 
 }
 
+
+void MainWindow::on_selectSmoke_currentIndexChanged(int index)
+{
+    ui->mainView->smoke_var = index;
+    this->setSmokeColorLegend();
+}
+void MainWindow::on_selectNColorsSmoke_valueChanged(int value)
+{
+    ui->mainView->levels_smoke = value;
+    this->setSmokeColorLegend();
+}
+void MainWindow::on_selectColormapSmoke_currentIndexChanged(int index)
+{
+    ui->mainView->smoke_col = index;
+    this->setSmokeColorLegend();
+}
 void MainWindow::on_showSmoke_stateChanged(int state)
 {
     ui->mainView->draw_smoke = state;
     this->setFocus();
 }
 
+
+void MainWindow::on_radioSmokeScale_clicked()
+{
+    ui->mainView->clamp_smoke_cmap = false;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_radioSmokeClamp_clicked()
+{
+    ui->mainView->clamp_smoke_cmap = true;
+    ui->mainView->clamp_smoke_max = static_cast<float>(ui->clampSmokeMaxValue->value());
+    ui->mainView->clamp_smoke_min = static_cast<float>(ui->clampSmokeMinValue->value());
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
+{
+    ui->mainView->clamp_smoke_min = static_cast<float>(value);
+    ui->labelSmokeLegendMin->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
+{
+    ui->mainView->clamp_smoke_max = static_cast<float>(value);
+    ui->labelSmokeLegendMax->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+
+
+void MainWindow::on_selectGlyph_currentIndexChanged(int index)
+{
+    ui->mainView->glyph_var = index;
+    this->setGlyphColorLegend();
+}
+void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
+{
+    ui->mainView->levels_glyph = value;
+    this->setGlyphColorLegend();
+}
+void MainWindow::on_selectColormapGlyph_currentIndexChanged(int index)
+{
+    ui->mainView->glyph_col = index;
+    this->setGlyphColorLegend();
+}
 void MainWindow::on_showGlyph_stateChanged(int state)
 {
     ui->mainView->draw_vecs = state;
     this->setFocus();
 }
 
-void MainWindow::on_selectColormapSmoke_currentIndexChanged(int index)
-{
-    ui->mainView->smoke_col = index;
-    this->setSmokeColorLegend();
-}
 
-void MainWindow::on_selectNColorsSmoke_valueChanged(int value)
+void MainWindow::on_radioGlyphScale_clicked()
 {
-    ui->mainView->levels_smoke = value;
-    this->setSmokeColorLegend();
-}
-
-void MainWindow::on_selectColormapGlyph_currentIndexChanged(int index)
-{
-    ui->mainView->glyph_col = index;
-    this->setGlyphColorLegend();
-}
-
-void MainWindow::on_selectNColorsGlyph_valueChanged(int value)
-{
-    ui->mainView->levels_glyph = value;
-    this->setGlyphColorLegend();
-}
-
-void MainWindow::on_timeStepSlider_valueChanged(int value)
-{
-    ui->mainView->dt = (static_cast<double>(value) / 10);
+    ui->mainView->clamp_glyph_cmap = false;
+    ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
-
-void MainWindow::on_viscositySlider_valueChanged(int value)
+void MainWindow::on_radioGlyphClamp_clicked()
 {
-    ui->mainView->visc = (static_cast<float>(value) / 1000);
+    ui->mainView->clamp_glyph_cmap = true;
+    ui->mainView->clamp_glyph_max = static_cast<float>(ui->clampGlyphMaxValue->value());
+    ui->mainView->clamp_glyph_min = static_cast<float>(ui->clampGlyphMinValue->value());
+    ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
-
-void MainWindow::on_radioSmokeRho_clicked()
+void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 {
-    ui->mainView->smoke_var = RHO;
+    ui->mainView->clamp_glyph_min = static_cast<float>(value);
+    ui->labelGlyphLegendMin->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+    ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
-
-void MainWindow::on_radioSmokeV_clicked()
+void MainWindow::on_clampGlyphMaxValue_valueChanged(double value)
 {
-    ui->mainView->smoke_var = V;
-    this->setFocus();
-}
-
-void MainWindow::on_radioSmokeF_clicked()
-{
-    ui->mainView->smoke_var = F;
-    this->setFocus();
-}
-
-void MainWindow::on_radioClamp_clicked()
-{
-    ui->mainView->clamp_cmap = true;
-    ui->mainView->clamp_max = ui->clampMaxValue->value();
-    ui->mainView->clamp_min = ui->clampMinValue->value();
+    ui->mainView->clamp_glyph_max = static_cast<float>(value);
+    ui->labelGlyphLegendMax->setText(QString::number(value));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 
-void MainWindow::on_radioScale_clicked()
-{
-    ui->mainView->clamp_cmap = false;
-    ui->mainView->updateUniformsRequired = true;
-    this->setFocus();
-}
-
-void MainWindow::on_radioGlyphRho_clicked()
-{
-    ui->mainView->glyph_var = RHO;
-}
-
-void MainWindow::on_radioGlyphV_clicked()
-{
-    ui->mainView->glyph_var = V;
-}
-
-void MainWindow::on_radioGlyphF_clicked()
-{
-    ui->mainView->glyph_var = F;
-}
 
 void MainWindow::on_radioGlyphVectorV_clicked()
 {
     ui->mainView->glyph_vector_var = V;
+    this->setFocus();
 }
-
 void MainWindow::on_radioGlyphVectorF_clicked()
 {
     ui->mainView->glyph_vector_var = F;
-}
-
-void MainWindow::on_clampMinValue_valueChanged(double value)
-{
-    ui->mainView->clamp_min = value;
-    ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 
-void MainWindow::on_clampMaxValue_valueChanged(double value)
-{
-    ui->mainView->clamp_max = value;
-    ui->mainView->updateUniformsRequired = true;
-    this->setFocus();
-}
 
 void MainWindow::on_nrGlyphsX_valueChanged(int value)
 {
@@ -158,18 +160,24 @@ void MainWindow::on_nrGlyphsX_valueChanged(int value)
     ui->mainView->nr_glyphs_changed = true;
     this->setFocus();
 }
-
 void MainWindow::on_nrGlyphsY_valueChanged(int value)
 {
     ui->mainView->nr_glyphs_y = value;
     ui->mainView->nr_glyphs_changed = true;
     this->setFocus();
 }
-
 void MainWindow::on_nrGlyphsP_valueChanged(int value)
 {
     ui->mainView->nr_glyphs_p = value;
     ui->mainView->nr_glyphs_changed = true;
+    this->setFocus();
+}
+
+
+void MainWindow::on_rhoIsolineValue_valueChanged(double value)
+{
+    ui->mainView->rho_isoline_value = static_cast<float>(value);
+    ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 
@@ -196,16 +204,35 @@ void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
     this->setFocus();
 }
 
+
+void MainWindow::on_timeStepSlider_valueChanged(int value)
+{
+    ui->mainView->dt = (static_cast<double>(value) / 10);
+    this->setFocus();
+}
+void MainWindow::on_viscositySlider_valueChanged(int value)
+{
+    ui->mainView->visc = (static_cast<float>(value) / 1000);
+    this->setFocus();
+}
+
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    qDebug() << event->key();
     switch(event->key()) {
     case 'A':
     case Qt::Key_Space:
         ui->mainView->frozen = !ui->mainView->frozen;
         break;
+    case Qt::Key_1:
+        this->setPresetOne();
+        break;
+    case Qt::Key_2:
+        this->setPresetTwo();
+        break;
     }
 }
+
 
 void MainWindow::setSmokeColorLegend()
 {
@@ -214,7 +241,6 @@ void MainWindow::setSmokeColorLegend()
     ui->legendSmoke->setIconSize(QSize(260, 30));
     this->setFocus();
 }
-
 void MainWindow::setGlyphColorLegend()
 {
     QIcon pm = setColorLegend(260, 30, ui->mainView->levels_glyph, ui->mainView->glyph_col);
@@ -222,10 +248,8 @@ void MainWindow::setGlyphColorLegend()
     ui->legendGlyph->setIconSize(QSize(260, 30));
     this->setFocus();
 }
-
 QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
 {
-    qDebug() << "setColorLegend";
     ui->mainView->updateUniformsRequired = true;
 
     QPixmap pm(width, height);
@@ -241,11 +265,79 @@ QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
         pmp.setBrush(QBrush(color));
         pmp.setPen(Qt::NoPen);
         if ( x % 2 == 0) {
-            pmp.drawRect(floor(x*color_width), 0, floor(color_width+10), height);
+            pmp.drawRect(static_cast<int>(floor(x*color_width)),
+                         0,
+                         static_cast<int>(floor(color_width+10)),
+                         height);
         } else {
-            pmp.drawRect(ceil(x*color_width), 0, ceil(color_width+10), height);
+            pmp.drawRect(static_cast<int>(ceil(x*color_width)),
+                         0,
+                         static_cast<int>(ceil(color_width+10)),
+                         height);
         }
     }
 
     return QIcon(pm);
+}
+
+
+void MainWindow::setPresetOne()
+{
+    // Set presets Default values
+
+    ui->selectSmoke->setCurrentIndex(RHO);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_BLACKWHITE);
+    ui->selectNColorsSmoke->setValue(10);
+    ui->showSmoke->setCheckState(Qt::Checked);
+
+//    ui->radioSmokeScale->click();
+    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(0.00);
+    ui->clampSmokeMaxValue->setValue(1.00);
+
+    ui->selectGlyph->setCurrentIndex(RHO);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsGlyph->setValue(10);
+    ui->showGlyph->setCheckState(Qt::Checked);
+
+//    ui->radioGlyphScale->click();
+//    ui->radioGlyphClamp->click();
+//    ui->clampGlyphMinValue->setValue(-0.001);
+//    ui->clampGlyphMaxValue->setValue(0.001);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+
+    ui->timeStepSlider->setValue(1);
+    ui->viscositySlider->setValue(4);
+}
+void MainWindow::setPresetTwo()
+{
+    // Set presets for divergence V
+
+    ui->selectSmoke->setCurrentIndex(DIVV);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsSmoke->setValue(10);
+    ui->showSmoke->setCheckState(Qt::Checked);
+
+//    ui->radioSmokeScale->click();
+    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(-0.001);
+    ui->clampSmokeMaxValue->setValue(0.001);
+
+    ui->selectGlyph->setCurrentIndex(V);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_BLACKWHITE);
+    ui->selectNColorsGlyph->setValue(10);
+    ui->showGlyph->setCheckState(Qt::Unchecked);
+
+//    ui->radioGlyphScale->click();
+//    ui->radioGlyphClamp->click();
+//    ui->clampGlyphMinValue->setValue(-0.001);
+//    ui->clampGlyphMaxValue->setValue(0.001);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+
+    ui->timeStepSlider->setValue(1);
+    ui->viscositySlider->setValue(4);
 }

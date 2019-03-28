@@ -17,6 +17,7 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     mainview.cpp \
     fluids.c \
+    marchingsquare.cpp \
     simulation.cpp \
     utils.cpp \
     objfile.cpp
@@ -24,6 +25,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     mainview.h \
     fluids.h \
+    marchingsquare.h \
     simulation.h \
     utils.h \
     objfile.h
