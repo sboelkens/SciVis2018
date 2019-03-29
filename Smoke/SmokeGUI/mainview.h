@@ -101,7 +101,6 @@ protected:
     void resizeGL(int newWidth, int newHeight);
     void paintGL();
 
-<<<<<<< HEAD
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
   void wheelEvent(QWheelEvent* event);
@@ -165,69 +164,7 @@ private:
 
   void do_one_simulation_step();
   QVector3D getArcBallVector(int x, int y);
-=======
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-    void timerEvent(QTimerEvent *event);
 
-private:
-    QOpenGLDebugLogger* debugLogger;
-
-    QOpenGLShaderProgram* mainShaderProg;
-    QOpenGLShaderProgram* cMapShaderProg;
-    GLuint gridVAO, gridCoordsBO, gridNormalsBO , gridValBO, gridIndexBO;
-    GLuint glyphsVAO, glyphCoordsBO, glyphNormalsBO, glyphColourBO, glyphIndexBO;
-    GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
-    GLuint isolinesVAO, isolinesCoordsBO, isolinesColourBO, isolinesIndexBO;
-
-    void createShaderPrograms();
-    void createBuffers();
-    void updateMatrices();
-    void updateUniforms();
-
-    float glyph_interpolation(float, float, fftw_real*);
-
-    QVector<QVector3D> triaCoords;
-    QVector<QVector3D> triaNormals;
-    QVector<float> triaVals;
-    QVector<unsigned short> triaIndices;
-    QVector<QVector<unsigned short>> triaVertFaces;
-    QVector<float> glyphShifts;
-    QVector<QVector3D> glyphCoords;
-    QVector<QVector3D> glyphColours;
-    QVector<QVector3D> glyphNormals;
-    QVector<unsigned short> glyphIndices;
-    QVector<QVector3D> isolineCoords;
-    QVector<QVector3D> isolineColours;
-    QVector<unsigned short> isolineIndices;
-
-    GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
-    GLint uniMVMat_cMap, uniProjMat_cMap, uniNormMat_cMap, uniNLevels_cMap, uniColorMap_cMap;
-    GLint uniSmokeClamping, uniSmokeClampMin, uniSmokeClampMax;
-    GLint uniGlyphClamping, uniGlyphClampMin, uniGlyphClampMax;// scaling/clamping uniforms
-    GLint uniPhong, uniPhongHeightPlot;
-    QMatrix4x4 modelViewMatrix, projectionMatrix;
-    QMatrix3x3 normalMatrix;
-
-
-    //--- VISUALIZATION PARAMETERS ---------------------------------------------------------------------
-    const int DIM = 50;               //size of simulation grid
-    const float MAX_SAMPLE_DIST = 0.02;
-
-    QPoint lastpos;
-    Simulation simulation;
-    MarchingSquare marchingSquare;
-    QTimer* timer;
-
-    QVector<float> scale_maxvals_rho;
-    QVector<float> scale_minvals_rho;
-    QVector<float> scale_maxvals_vnorm;
-    QVector<float> scale_minvals_vnorm;
-    QVector<float> scale_maxvals_fnorm;
-    QVector<float> scale_minvals_fnorm;
-
-    void do_one_simulation_step();
->>>>>>> development
 
 private slots:
     void onMessageLogged( QOpenGLDebugMessage Message );
