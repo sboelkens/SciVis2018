@@ -13,14 +13,16 @@ QVector3D rainbow(double value) {
 
 QVector3D set_colormap(float vy, int scalar_col, int nlevels)
 {
-   vy *= nlevels; vy = (int)(vy); vy/= nlevels;
+   vy *= nlevels; vy = static_cast<int>(vy); vy/= nlevels;
 
    if (scalar_col==COLOR_BLACKWHITE)
        return QVector3D(vy, vy, vy);
    else if (scalar_col==COLOR_RAINBOW)
-       return rainbow(vy);
+       return rainbow(static_cast<double>(vy));
    else if (scalar_col==COLOR_HEATMAP)
        return getHeatMapColor(vy);
+   else if (scalar_col==COLOR_BLUE_RED)
+       return getBlueRedColor(vy);
    return QVector3D(0.0, 0.0, 0.0);
 }
 
@@ -61,7 +63,34 @@ QVector3D getHeatMapColor(float value)
   else
   {
     value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-    idx1  = floor(value);                  // Our desired color will be after this index.
+    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
+    idx2  = idx1+1;                        // ... and before this index (inclusive).
+    fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
+  }
+
+  float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
+  float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
+  float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
+
+  return QVector3D(red, green, blue);
+}
+
+QVector3D getBlueRedColor(float value)
+{
+  const int NUM_COLORS = 3;
+  static float color[NUM_COLORS][3] = { {0,0,1}, {1,1,1}, {1,0,0} };
+    // A static array of 3 colors:  (black, red, white) using {r,g,b} for each.
+
+  int idx1;        // |-- Our desired color will be between these two indexes in "color".
+  int idx2;        // |
+  float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
+
+  if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
+  else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
+  else
+  {
+    value = value * (NUM_COLORS-1);        // Will multiply value by 3.
+    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
     idx2  = idx1+1;                        // ... and before this index (inclusive).
     fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
   }
