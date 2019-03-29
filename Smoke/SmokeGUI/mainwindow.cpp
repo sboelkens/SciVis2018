@@ -85,7 +85,6 @@ void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
     this->setFocus();
 }
 
-
 void MainWindow::on_showGlyph_stateChanged(int state)
 {
     ui->mainView->draw_vecs = state;
