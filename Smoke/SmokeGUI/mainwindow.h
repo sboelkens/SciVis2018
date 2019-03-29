@@ -57,7 +57,11 @@ private slots:
   void on_nrGlyphsY_valueChanged(int value);
   void on_nrGlyphsP_valueChanged(int value);
 
+  void on_isolineBox_stateChanged(int state);
   void on_rhoIsolineValue_valueChanged(double value);
+
+  void on_heightplotBox_stateChanged(int state);
+  void on_clampHeightMaxValue_valueChanged(double value);
 
   void on_timeStepSlider_valueChanged(int value);
   void on_viscositySlider_valueChanged(int value);

@@ -582,9 +582,9 @@ void MainView::updateMatrices() {
   if (heightplot)
   {
       //modelViewMatrix.translate(0.0, -0.5, 0.0);
-      modelViewMatrix.scale(0.5, 0.5, 0.5);
+      modelViewMatrix.scale(hPlot_zoom, hPlot_zoom, hPlot_zoom);
       modelViewMatrix.rotate(-45.0, QVector3D(1.0,0.0,0.0));
-      modelViewMatrix.rotate(45.0, QVector3D(0.0,0.0,1.0));
+      modelViewMatrix.rotate(hPlot_zAngle, QVector3D(0.0,0.0,1.0));
       //modelViewMatrix.translate(-0.75, -0.75, 0.0);
 
       //modelViewMatrix.rotate(45.0, QVector3D(1.0,0.0,0.0));
@@ -596,6 +596,7 @@ void MainView::updateMatrices() {
   normalMatrix.setToIdentity();
   normalMatrix = modelViewMatrix.normalMatrix();
   updateUniformsRequired = true;
+  updateMatricesRequired = false;
 }
 
 void MainView::updateUniforms() {
@@ -797,9 +798,12 @@ void MainView::paintGL() {
       glClearColor(0.0, 0.0, 0.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //glLoadIdentity();
-
+      if (updateMatricesRequired)
+      {
+          updateMatrices();
+      }
       if (updateUniformsRequired) {
-        updateUniforms();
+          updateUniforms();
       }
       cMapShaderProg->bind();
       if (draw_smoke)
@@ -815,6 +819,7 @@ void MainView::paintGL() {
           glBindVertexArray(glyphsVAO);
           if (glyphs3D)
           {
+              glUniform1i(uniPhong, true);
               glDrawElements(GL_TRIANGLES, glyphIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           }
           else
@@ -848,9 +853,64 @@ void MainView::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
-        simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        QMatrix4x4 tfMatrix;
+        if (heightplot)
+        {
+            float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
+            float y_n = (2.0 * event->pos().y()) / (float)height() - 1.0;
+            tfMatrix.setToIdentity();
+            tfMatrix.scale(1.0/hPlot_zoom,1.0/hPlot_zoom,1.0/hPlot_zoom);
+            //tfMatrix.rotate(-45.0, QVector3D(1.0,0.0,0.0));
+            tfMatrix.rotate(hPlot_zAngle, QVector3D(0.0,0.0,1.0));
+            QVector4D tf = tfMatrix * QVector4D(x_n, y_n, 0.0, 1.0);
+            float x_s = (tf.x() + 1.0)/2.0 * width();
+            float y_s = (tf.y() + 1.0)/2.0 * height();
+            simulation.drag(DIM, width(), height(), x_s, y_s);
+        }
+        else
+        {
+            simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        }
+    }
+    if (event->buttons() & Qt::RightButton)
+    {
+        if (heightplot)
+        {
+            QVector3D v = getArcBallVector(lastpos.x(), lastpos.y());
+            QVector3D u = getArcBallVector(event->x(), event->y());
+
+            float angle = std::acos(std::min(1.0f, QVector3D::dotProduct(u,v)));
+
+            QVector3D rotAxis = QVector3D::crossProduct(v,u);
+            if (QVector3D::dotProduct(rotAxis, QVector3D(0.0, 0.0, 1.0)) > 0)
+            {
+                angle = -angle;
+            }
+
+            hPlot_zAngle = hPlot_zAngle - 180*angle/M_PI;
+            updateMatricesRequired = true;
+        }
     }
     lastpos = event->pos();
+
+}
+
+QVector3D MainView::getArcBallVector(int x, int y)
+{
+   QVector3D pt = QVector3D(2.0 * x / width() - 1.0, 2.0 * y / height() - 1.0 , 0);
+   pt.setY(pt.y() * -1);
+
+   // compute z-coordinates
+
+   float xySquared = pt.x() * pt.x() + pt.y() * pt.y();
+
+   if(xySquared <= 1.0)
+
+       pt.setZ(std::sqrt(1.0 - xySquared));
+   else
+       pt.normalize();
+
+   return pt;
 
 }
 
@@ -858,9 +918,55 @@ void MainView::mousePressEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
-        simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        QMatrix4x4 tfMatrix;
+        if (heightplot)
+        {
+            float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
+            float y_n = (2.0 * event->pos().y()) / (float)height() - 1.0;
+            tfMatrix.setToIdentity();
+            tfMatrix.scale(1.0/hPlot_zoom,1.0/hPlot_zoom,1.0/hPlot_zoom);
+            //tfMatrix.rotate(-45.0, QVector3D(1.0,0.0,0.0));
+            tfMatrix.rotate(hPlot_zAngle, QVector3D(0.0,0.0,1.0));
+            QVector4D tf = tfMatrix * QVector4D(x_n, y_n, 0.0, 1.0);
+            float x_s = (tf.x() + 1.0)/2.0 * width();
+            float y_s = (tf.y() + 1.0)/2.0 * height();
+            simulation.drag(DIM, width(), height(), x_s, y_s);
+        }
+        else
+        {
+            simulation.drag(DIM, width(), height(), event->pos().x(), event->pos().y());
+        }
+    }
+    if (event->buttons() & Qt::RightButton)
+    {
+        if (heightplot)
+        {
+            QVector3D v = getArcBallVector(lastpos.x(), lastpos.y());
+            QVector3D u = getArcBallVector(event->x(), event->y());
+
+            float angle = std::acos(std::min(1.0f, QVector3D::dotProduct(u,v)));
+
+            QVector3D rotAxis = QVector3D::crossProduct(v,u);
+            if (QVector3D::dotProduct(rotAxis, QVector3D(0.0, 0.0, 1.0)) > 0)
+            {
+                angle = -angle;
+            }
+
+            hPlot_zAngle = hPlot_zAngle - 180*angle/M_PI;
+            updateMatricesRequired = true;
+        }
     }
     lastpos = event->pos();
+}
+
+void MainView::wheelEvent(QWheelEvent *e)
+{
+    if (heightplot)
+    {
+        float d = e->delta() / 1200.0;
+        hPlot_zoom = std::min(0.8, std::max(0.25, (double)(hPlot_zoom+d)));
+        updateMatrices();
+    }
 }
 
 void MainView::timerEvent(QTimerEvent *e)

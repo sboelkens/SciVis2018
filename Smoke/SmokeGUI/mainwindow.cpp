@@ -204,6 +204,26 @@ void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
     this->setFocus();
 }
 
+void MainWindow::on_isolineBox_stateChanged(int state)
+{
+    ui->mainView->draw_isolines = (bool)state;
+    ui->mainView->updateUniformsRequired = true;
+    this->setFocus();
+}
+
+void MainWindow::on_heightplotBox_stateChanged(int state)
+{
+    ui->mainView->heightplot = (bool)state;
+    ui->mainView->updateMatricesRequired = true;
+    this->setFocus();
+}
+
+void MainWindow::on_clampHeightMaxValue_valueChanged(double value)
+{
+    ui->mainView->height_scaler = value;
+    this->setFocus();
+}
+
 
 void MainWindow::on_timeStepSlider_valueChanged(int value)
 {

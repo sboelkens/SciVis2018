@@ -53,6 +53,7 @@ public:
   int   levels_smoke = 10;
   int   levels_glyph = 10;
   bool updateUniformsRequired;
+  bool updateMatricesRequired;
   // scaling/clamping
   bool clamp_smoke_cmap = true;                  // if false, scaling
   float clamp_smoke_min = 0.000;
@@ -67,7 +68,7 @@ public:
   int scale_glyph_cnt = 0;
 
   float rho_isoline_value = 0.500;
-  int   draw_isolines = 1;
+  int   draw_isolines = 0;
 
   bool is_initialized = false;
   int nr_glyphs_x = 20;//50;//
@@ -79,6 +80,9 @@ public:
   OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
 
   bool heightplot = false;
+  float height_scaler = 10.0;
+  float hPlot_zAngle = 45.0;
+  float hPlot_zoom = 0.5;
 
 protected:
   void initializeGL();
@@ -87,6 +91,7 @@ protected:
 
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
+  void wheelEvent(QWheelEvent* event);
   void timerEvent(QTimerEvent *event);
 
 private:
@@ -146,6 +151,7 @@ private:
   QVector<float> scale_minvals_fnorm;
 
   void do_one_simulation_step();
+  QVector3D getArcBallVector(int x, int y);
 
 private slots:
   void onMessageLogged( QOpenGLDebugMessage Message );
