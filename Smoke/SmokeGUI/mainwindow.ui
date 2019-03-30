@@ -56,7 +56,15 @@ QGroupBox::title {
         <height>0</height>
        </size>
       </property>
-      <widget class="QWidget" name="grid" native="true">
+      <widget class="QWidget" name="grid">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>300</width>
+         <height>614</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Smoke grid</string>
        </attribute>
@@ -801,6 +809,14 @@ QGroupBox::title {
        </widget>
       </widget>
       <widget class="QWidget" name="glyphs">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>300</width>
+         <height>614</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Glyphs</string>
        </attribute>
@@ -2098,6 +2114,14 @@ QGroupBox::title {
        </widget>
       </widget>
       <widget class="QWidget" name="isolines">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>300</width>
+         <height>614</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Isolines</string>
        </attribute>
@@ -2758,26 +2782,34 @@ QGroupBox::title {
        </widget>
       </widget>
       <widget class="QWidget" name="heightplot">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>300</width>
+         <height>614</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Heightplot</string>
        </attribute>
        <widget class="QCheckBox" name="heightplotBox">
         <property name="geometry">
          <rect>
-          <x>200</x>
-          <y>10</y>
-          <width>81</width>
+          <x>230</x>
+          <y>0</y>
+          <width>61</width>
           <height>20</height>
          </rect>
         </property>
         <property name="text">
-         <string>Heightplot</string>
+         <string>Show</string>
         </property>
        </widget>
        <widget class="QDoubleSpinBox" name="clampHeightMaxValue">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>230</x>
           <y>30</y>
           <width>51</width>
           <height>22</height>
@@ -2786,6 +2818,9 @@ QGroupBox::title {
         <property name="decimals">
          <number>3</number>
         </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
         </property>
@@ -2793,7 +2828,7 @@ QGroupBox::title {
          <enum>QAbstractSpinBox::DefaultStepType</enum>
         </property>
         <property name="value">
-         <double>1.000000000000000</double>
+         <double>10.000000000000000</double>
         </property>
        </widget>
        <widget class="QLabel" name="labelGlyphColor_5">
@@ -2820,7 +2855,7 @@ QGroupBox::title {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>60</y>
+          <y>180</y>
           <width>281</width>
           <height>20</height>
          </rect>
@@ -3271,8 +3306,115 @@ QGroupBox::title {
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+       <widget class="QSpinBox" name="hPlot_xAngle">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>60</y>
+          <width>42</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>85</number>
+        </property>
+        <property name="singleStep">
+         <number>5</number>
+        </property>
+        <property name="value">
+         <number>45</number>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="selectHeightVar">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>121</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>Fluid Density Rho</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fluid Velocity ||v||</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Force Field ||f||</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Divergence of v</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Divergence of f</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>60</y>
+          <width>101</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Camera tilt angle</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>30</y>
+          <width>61</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Peak value</string>
+        </property>
+       </widget>
+       <widget class="QTextBrowser" name="textBrowser">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>90</y>
+          <width>256</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Rotate the grid around its center by dragging the right mouse button.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zoom in and out using the scroll wheel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="simulationparams">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>300</width>
+         <height>614</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Simulation parameters</string>
        </attribute>
@@ -3478,6 +3620,5 @@ QGroupBox::title {
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupSmokeValues"/>
-  <buttongroup name="buttonGroupGlyphVector"/>
  </buttongroups>
 </ui>

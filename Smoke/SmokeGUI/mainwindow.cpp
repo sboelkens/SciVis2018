@@ -26,15 +26,14 @@ void MainWindow::waitForInitialization()
         connect(timer, SIGNAL(timeout()), this, SLOT(waitForInitialization()));
         timer->start(100);
     }
-
 }
-
 
 void MainWindow::on_showSmoke_stateChanged(int state)
 {
     ui->mainView->draw_smoke = state;
     this->setFocus();
 }
+
 void MainWindow::on_selectSmoke_currentIndexChanged(int index)
 {
     ui->mainView->smoke_var = index;
@@ -204,6 +203,27 @@ void MainWindow::on_heightplotBox_stateChanged(int state)
 void MainWindow::on_clampHeightMaxValue_valueChanged(double value)
 {
     ui->mainView->height_scaler = value;
+    this->setFocus();
+}
+
+void MainWindow::on_hPlot_xAngle_valueChanged(int value)
+{
+    ui->mainView->hPlot_xAngle = value;
+    ui->mainView->updateMatricesRequired = true;
+    this->setFocus();
+}
+
+void MainWindow::on_selectHeightVar_currentIndexChanged(int index)
+{
+    ui->mainView->height_var = index;
+    if (index == 0)
+    {
+        ui->mainView->height_scaler = 10.0;
+    }
+    else
+    {
+        ui->mainView->height_scaler = 0.1;
+    }
     this->setFocus();
 }
 

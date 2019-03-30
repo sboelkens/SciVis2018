@@ -176,6 +176,8 @@ void MainView::updateBuffers() {
   double px, py;
   int idxT = 0;
 
+  fftw_real var;
+
   fftw_real  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
   fftw_real  hn = 2.0 / static_cast<double>(DIM + 1);  // Grid cell height
 
@@ -214,7 +216,23 @@ void MainView::updateBuffers() {
           }
           if (heightplot)
           {
-              triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py), static_cast<float>(0.0+rho[idx0]/10.0)));
+              if (height_var == RHO)
+              {
+                  triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py),
+                                              static_cast<float>(std::min(0.0+rho[idx0]/height_scaler, 1.0))));
+              }
+              if (height_var == V)
+              {
+                  var = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
+                  triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py),
+                                              static_cast<float>(std::min(0.0+var/height_scaler, 1.0))));
+              }
+              if (height_var == F)
+              {
+                  var = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+                  triaCoords.append(QVector3D(static_cast<float>(px), static_cast<float>(py),
+                                              static_cast<float>(std::min(0.0+var/height_scaler, 1.0))));
+              }
           }
           else
           {
@@ -600,7 +618,7 @@ void MainView::updateMatrices() {
   {
       //modelViewMatrix.translate(0.0, -0.5, 0.0);
       modelViewMatrix.scale(hPlot_zoom, hPlot_zoom, hPlot_zoom);
-      modelViewMatrix.rotate(-45.0, QVector3D(1.0,0.0,0.0));
+      modelViewMatrix.rotate(-hPlot_xAngle, QVector3D(1.0,0.0,0.0));
       modelViewMatrix.rotate(hPlot_zAngle, QVector3D(0.0,0.0,1.0));
       //modelViewMatrix.translate(-0.75, -0.75, 0.0);
 

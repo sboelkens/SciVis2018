@@ -92,8 +92,10 @@ public:
 
     // height plot vars
     bool heightplot = false;
+    int height_var = RHO;
     float height_scaler = 10.0;
     float hPlot_zAngle = 45.0;
+    float hPlot_xAngle = 45.0;
     float hPlot_zoom = 0.5;
 
 protected:
