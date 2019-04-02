@@ -98,6 +98,8 @@ public:
     float hPlot_xAngle = 45.0;
     float hPlot_zoom = 0.5;
 
+    bool streamtubes = false;
+
 protected:
     void initializeGL();
     void resizeGL(int newWidth, int newHeight);

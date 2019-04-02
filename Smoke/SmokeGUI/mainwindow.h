@@ -67,6 +67,8 @@ private slots:
   void on_hPlot_xAngle_valueChanged(int value);
   void on_selectHeightVar_currentIndexChanged(int index);
 
+  void on_streamtubesBox_stateChanged(int state);
+
   void on_timeStepSlider_valueChanged(int value);
   void on_viscositySlider_valueChanged(int value);
 
