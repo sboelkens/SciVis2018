@@ -20,6 +20,7 @@ void MainWindow::waitForInitialization()
     if(ui->mainView->is_initialized) {
         this->setSmokeColorLegend();
         this->setGlyphColorLegend();
+        this->setIsolineColorLegend();
     } else {
         QTimer *timer = new QTimer;
         timer->setSingleShot(true);
@@ -62,25 +63,35 @@ void MainWindow::on_radioSmokeClamp_clicked()
     ui->mainView->clamp_smoke_cmap = true;
     ui->mainView->clamp_smoke_max = static_cast<float>(ui->clampSmokeMaxValue->value());
     ui->mainView->clamp_smoke_min = static_cast<float>(ui->clampSmokeMinValue->value());
+
+    ui->labelSmokeLegendMin->setText(QString::number(ui->clampSmokeMinValue->value()));
+    ui->labelSmokeLegendMax->setText(QString::number(ui->clampSmokeMaxValue->value()));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
 {
-    ui->mainView->clamp_smoke_min = static_cast<float>(value);
-    ui->labelSmokeLegendMin->setText(QString::number(value));
-    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
-    ui->mainView->updateUniformsRequired = true;
+    if(ui->mainView->clamp_smoke_cmap) {
+        ui->mainView->clamp_smoke_min = static_cast<float>(value);
+        ui->labelSmokeLegendMin->setText(QString::number(value));
+        float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+        ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+        ui->mainView->updateUniformsRequired = true;
+    }
     this->setFocus();
 }
 void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
 {
-    ui->mainView->clamp_smoke_max = static_cast<float>(value);
-    ui->labelSmokeLegendMax->setText(QString::number(value));
-    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
-    ui->mainView->updateUniformsRequired = true;
+    if(ui->mainView->clamp_smoke_cmap) {
+        ui->mainView->clamp_smoke_max = static_cast<float>(value);
+        ui->labelSmokeLegendMax->setText(QString::number(value));
+        float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+        ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+        ui->mainView->updateUniformsRequired = true;
+    }
     this->setFocus();
 }
 
@@ -117,25 +128,36 @@ void MainWindow::on_radioGlyphClamp_clicked()
     ui->mainView->clamp_glyph_cmap = true;
     ui->mainView->clamp_glyph_max = static_cast<float>(ui->clampGlyphMaxValue->value());
     ui->mainView->clamp_glyph_min = static_cast<float>(ui->clampGlyphMinValue->value());
+
+    ui->labelGlyphLegendMin->setText(QString::number(ui->clampGlyphMinValue->value()));
+    ui->labelGlyphLegendMax->setText(QString::number(ui->clampGlyphMaxValue->value()));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 {
-    ui->mainView->clamp_glyph_min = static_cast<float>(value);
-    ui->labelGlyphLegendMin->setText(QString::number(value));
-    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
-    ui->mainView->updateUniformsRequired = true;
+    if(ui->mainView->clamp_glyph_cmap) {
+        ui->mainView->clamp_glyph_min = static_cast<float>(value);
+        ui->labelGlyphLegendMin->setText(QString::number(value));
+        float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+        ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+        ui->mainView->updateUniformsRequired = true;
+    }
+
     this->setFocus();
 }
 void MainWindow::on_clampGlyphMaxValue_valueChanged(double value)
 {
-    ui->mainView->clamp_glyph_max = static_cast<float>(value);
-    ui->labelGlyphLegendMax->setText(QString::number(value));
-    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
-    ui->mainView->updateUniformsRequired = true;
+    if(ui->mainView->clamp_glyph_cmap) {
+        ui->mainView->clamp_glyph_max = static_cast<float>(value);
+        ui->labelGlyphLegendMax->setText(QString::number(value));
+        float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+        ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+        ui->mainView->updateUniformsRequired = true;
+    }
     this->setFocus();
 }
 
@@ -227,15 +249,26 @@ void MainWindow::on_selectHeightVar_currentIndexChanged(int index)
     this->setFocus();
 }
 
+void MainWindow::on_showIsoline_stateChanged(int state)
+{
+    ui->mainView->draw_isolines = state;
+    this->setFocus();
+}
 void MainWindow::on_isolineMinValue_valueChanged(double value)
 {
     ui->mainView->isoline_min_value = static_cast<float>(value);
+    ui->labelIsolineLegendMin->setText(QString::number(value));
+    float mid = (ui->mainView->isoline_min_value+ui->mainView->isoline_max_value)/2;
+    ui->labelIsolineLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_isolineMaxValue_valueChanged(double value)
 {
     ui->mainView->isoline_max_value = static_cast<float>(value);
+    ui->labelIsolineLegendMax->setText(QString::number(value));
+    float mid = (ui->mainView->isoline_min_value+ui->mainView->isoline_max_value)/2;
+    ui->labelIsolineLegendMid->setText(QString::number(static_cast<double>(mid)));
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
@@ -248,11 +281,13 @@ void MainWindow::on_nrIsolines_valueChanged(int value)
 void MainWindow::on_selectNColorsIsoline_valueChanged(int value)
 {
     ui->mainView->levels_isoline = value;
+    this->setIsolineColorLegend();
     this->setFocus();
 }
 void MainWindow::on_selectColormapIsoline_currentIndexChanged(int index)
 {
     ui->mainView->isoline_col = index;
+    this->setIsolineColorLegend();
     this->setFocus();
 }
 
@@ -302,6 +337,13 @@ void MainWindow::setGlyphColorLegend()
     QIcon pm = setColorLegend(260, 30, ui->mainView->levels_glyph, ui->mainView->glyph_col);
     ui->legendGlyph->setIcon(pm);
     ui->legendGlyph->setIconSize(QSize(260, 30));
+    this->setFocus();
+}
+void MainWindow::setIsolineColorLegend()
+{
+    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_isoline, ui->mainView->isoline_col);
+    ui->legendIsoline->setIcon(pm);
+    ui->legendIsoline->setIconSize(QSize(260, 30));
     this->setFocus();
 }
 QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)

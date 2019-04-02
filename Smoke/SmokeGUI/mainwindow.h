@@ -23,6 +23,7 @@ public:
 
   void setSmokeColorLegend();
   void setGlyphColorLegend();
+  void setIsolineColorLegend();
   QIcon setColorLegend(int width, int height, int levels, int color);
 
 private slots:
@@ -56,6 +57,7 @@ private slots:
   void on_nrGlyphsP_valueChanged(int value);
   void on_selectGlyphShape_currentIndexChanged(int index);
 
+  void on_showIsoline_stateChanged(int state);
   void on_isolineMinValue_valueChanged(double value);
   void on_isolineMaxValue_valueChanged(double value);
   void on_nrIsolines_valueChanged(int value);

@@ -11,9 +11,12 @@ QVector3D rainbow(double value) {
     return QVector3D(R, G, B);
 }
 
-QVector3D set_colormap(float vy, int scalar_col, int nlevels)
+QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float max)
 {
    vy *= nlevels; vy = static_cast<int>(vy); vy/= nlevels;
+
+   if(vy < min) { vy = 0; }
+   else if(vy > max) { vy = 1; }
 
    if (scalar_col==COLOR_BLACKWHITE)
        return QVector3D(vy, vy, vy);

@@ -16,7 +16,7 @@ const int DIVV = 3;
 const int DIVF = 4;
 
 QVector3D rainbow(double val);
-QVector3D set_colormap(float val, int scalar_col, int nlevels = 7);
+QVector3D set_colormap(float val, int scalar_col, int nlevels = 7, float min = 0.0, float max = 1.0);
 QVector3D direction_to_color(float x, float y, int method);
 QVector3D getBlueRedColor(float value);
 QVector3D getHeatMapColor(float value);

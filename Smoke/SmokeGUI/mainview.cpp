@@ -480,13 +480,13 @@ void MainView::updateGlyphs()
                     if (glyphs3D)
                     {
                         //glyphColours.append(QVector3D((float)idx_glyphs,1.0,(float)n/(float)glyphV));
-                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph, clamp_glyph_min, clamp_glyph_max));
                     }
                     else
                     {
-                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                        glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph, clamp_glyph_min, clamp_glyph_max));
                     }
-                    //glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph));
+                    //glyphColours.append(set_colormap(col_inter, glyph_col, levels_glyph, clamp_glyph_min, clamp_glyph_max));
                 }
                 if (glyphs3D)
                 {
@@ -753,9 +753,15 @@ void MainView::do_one_simulation_step(void)
     simulation.divergenceF(DIM);
     try
     {
-        updateBuffers();
-        updateGlyphs();
-        updateIsolines();
+        if(draw_smoke) {
+            updateBuffers();
+        }
+        if(draw_vecs) {
+            updateGlyphs();
+        }
+        if(draw_isolines) {
+            updateIsolines();
+        }
     }
     catch (std::exception e)
     {
@@ -1032,6 +1038,7 @@ float MainView::glyph_interpolation(float x_pct, float y_pct, fftw_real* mat)
     q22 = static_cast<float>(mat[(static_cast<int>(y_over) - 0) * DIM + (static_cast<int>(x_over) - 0)]);
     inter = (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q12 +
             (1 - tx) * ty * q21 + tx * ty * q22;
+
     return inter;
 }
 
