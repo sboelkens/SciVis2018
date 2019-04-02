@@ -261,7 +261,6 @@ void MainWindow::on_streamtubesBox_stateChanged(int value)
     ui->mainView->streamtubes = (bool)value;
 }
 
-
 void MainWindow::on_timeStepSlider_valueChanged(int value)
 {
     ui->mainView->dt = (static_cast<double>(value) / 10);
