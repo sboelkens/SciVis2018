@@ -243,8 +243,8 @@ void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
     else if (index == GLYPH_3D_ARROW)
     {
         ui->mainView->glyphs3D = true;
-        ui->mainView->nr_glyphs_x = 30;
-        ui->mainView->nr_glyphs_y = 30;
+        ui->mainView->nr_glyphs_x = 20;
+        ui->mainView->nr_glyphs_y = 20;
         //ui->mainView->nr_glyphs_p = 1;
         ui->nrGlyphsP->setValue(1);
     }
