@@ -802,7 +802,7 @@ void MainView::initializeGL() {
   scale_minvals_divfnorm.resize(scale_smoke_window);
 
   do_one_simulation_step();
-  this->startTimer(0);
+  this->startTimer(50);
   updateMatrices();
   is_initialized = true;
 }
