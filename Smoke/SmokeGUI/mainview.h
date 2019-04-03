@@ -64,7 +64,7 @@ public:
     int   draw_isolines = 1;
     float isoline_min_value = 0.000f;
     float isoline_max_value = 1.000f;
-    int   nr_isolines = 2;
+    int   nr_isolines = 1;
     int   isoline_col = COLOR_HEATMAP;
     int   levels_isoline = 10;
 

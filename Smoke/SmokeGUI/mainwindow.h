@@ -29,6 +29,11 @@ public:
 private slots:
   void waitForInitialization();
 
+  void updateLegendLabels();
+  void updateSmokeLegendLabels();
+  void updateGlyphLegendLabels();
+  void updateIsolineLegendLabels();
+
   void on_showSmoke_stateChanged(int state);
   void on_selectSmoke_currentIndexChanged(int index);
   void on_selectNColorsSmoke_valueChanged(int value);

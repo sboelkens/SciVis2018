@@ -10,6 +10,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   this->waitForInitialization();
 
+  QTimer *timer = new QTimer;
+  connect(timer, SIGNAL(timeout()), this, SLOT(updateLegendLabels()));
+  timer->start(500);
+
 }
 MainWindow::~MainWindow() {
   delete ui;
@@ -27,6 +31,34 @@ void MainWindow::waitForInitialization()
         connect(timer, SIGNAL(timeout()), this, SLOT(waitForInitialization()));
         timer->start(100);
     }
+}
+
+
+void MainWindow::updateLegendLabels()
+{
+    updateSmokeLegendLabels();
+    updateGlyphLegendLabels();
+}
+void MainWindow::updateSmokeLegendLabels()
+{
+    ui->labelSmokeLegendMin->setText(QString::number(static_cast<double>(ui->mainView->clamp_smoke_min)));
+    ui->labelSmokeLegendMax->setText(QString::number(static_cast<double>(ui->mainView->clamp_smoke_max)));
+    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
+    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+}
+void MainWindow::updateGlyphLegendLabels()
+{
+    ui->labelGlyphLegendMin->setText(QString::number(static_cast<double>(ui->mainView->clamp_glyph_min)));
+    ui->labelGlyphLegendMax->setText(QString::number(static_cast<double>(ui->mainView->clamp_glyph_max)));
+    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
+    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+}
+void MainWindow::updateIsolineLegendLabels()
+{
+    ui->labelIsolineLegendMin->setText(QString::number(static_cast<double>(ui->mainView->isoline_min_value)));
+    ui->labelIsolineLegendMax->setText(QString::number(static_cast<double>(ui->mainView->isoline_max_value)));
+    float mid = (ui->mainView->isoline_min_value+ui->mainView->isoline_max_value)/2;
+    ui->labelIsolineLegendMid->setText(QString::number(static_cast<double>(mid)));
 }
 
 void MainWindow::on_showSmoke_stateChanged(int state)
@@ -63,11 +95,7 @@ void MainWindow::on_radioSmokeClamp_clicked()
     ui->mainView->clamp_smoke_cmap = true;
     ui->mainView->clamp_smoke_max = static_cast<float>(ui->clampSmokeMaxValue->value());
     ui->mainView->clamp_smoke_min = static_cast<float>(ui->clampSmokeMinValue->value());
-
-    ui->labelSmokeLegendMin->setText(QString::number(ui->clampSmokeMinValue->value()));
-    ui->labelSmokeLegendMax->setText(QString::number(ui->clampSmokeMaxValue->value()));
-    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+    updateSmokeLegendLabels();
 
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
@@ -76,9 +104,7 @@ void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_smoke_cmap) {
         ui->mainView->clamp_smoke_min = static_cast<float>(value);
-        ui->labelSmokeLegendMin->setText(QString::number(value));
-        float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-        ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+        updateSmokeLegendLabels();
         ui->mainView->updateUniformsRequired = true;
     }
     this->setFocus();
@@ -87,9 +113,7 @@ void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_smoke_cmap) {
         ui->mainView->clamp_smoke_max = static_cast<float>(value);
-        ui->labelSmokeLegendMax->setText(QString::number(value));
-        float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-        ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+        updateSmokeLegendLabels();
         ui->mainView->updateUniformsRequired = true;
     }
     this->setFocus();
@@ -128,12 +152,7 @@ void MainWindow::on_radioGlyphClamp_clicked()
     ui->mainView->clamp_glyph_cmap = true;
     ui->mainView->clamp_glyph_max = static_cast<float>(ui->clampGlyphMaxValue->value());
     ui->mainView->clamp_glyph_min = static_cast<float>(ui->clampGlyphMinValue->value());
-
-    ui->labelGlyphLegendMin->setText(QString::number(ui->clampGlyphMinValue->value()));
-    ui->labelGlyphLegendMax->setText(QString::number(ui->clampGlyphMaxValue->value()));
-    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
-
+    updateGlyphLegendLabels();
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
@@ -141,9 +160,7 @@ void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_glyph_cmap) {
         ui->mainView->clamp_glyph_min = static_cast<float>(value);
-        ui->labelGlyphLegendMin->setText(QString::number(value));
-        float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-        ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+        updateGlyphLegendLabels();
         ui->mainView->updateUniformsRequired = true;
     }
 
@@ -153,9 +170,7 @@ void MainWindow::on_clampGlyphMaxValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_glyph_cmap) {
         ui->mainView->clamp_glyph_max = static_cast<float>(value);
-        ui->labelGlyphLegendMax->setText(QString::number(value));
-        float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-        ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+        updateGlyphLegendLabels();
         ui->mainView->updateUniformsRequired = true;
     }
     this->setFocus();
@@ -257,18 +272,14 @@ void MainWindow::on_showIsoline_stateChanged(int state)
 void MainWindow::on_isolineMinValue_valueChanged(double value)
 {
     ui->mainView->isoline_min_value = static_cast<float>(value);
-    ui->labelIsolineLegendMin->setText(QString::number(value));
-    float mid = (ui->mainView->isoline_min_value+ui->mainView->isoline_max_value)/2;
-    ui->labelIsolineLegendMid->setText(QString::number(static_cast<double>(mid)));
+    updateIsolineLegendLabels();
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_isolineMaxValue_valueChanged(double value)
 {
     ui->mainView->isoline_max_value = static_cast<float>(value);
-    ui->labelIsolineLegendMax->setText(QString::number(value));
-    float mid = (ui->mainView->isoline_min_value+ui->mainView->isoline_max_value)/2;
-    ui->labelIsolineLegendMid->setText(QString::number(static_cast<double>(mid)));
+    updateIsolineLegendLabels();
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
