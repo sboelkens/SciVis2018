@@ -20,6 +20,10 @@
 #include "utils.h"
 #include "objfile.h"
 
+const int GLYPH_3D_CONE  = 0;
+const int GLYPH_3D_ARROW = 1;
+const int GLYPH_2D_LINE  = 2;
+
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_1_Core {
 
     Q_OBJECT
@@ -87,8 +91,10 @@ public:
     int   nr_glyphs_p = 4;
     bool  nr_glyphs_changed = true;
     bool  glyphs3D = false;
+    int   glyph_type = GLYPH_2D_LINE;
     float glyphs3D_size = 0.1f;
     OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
+    OBJFile arrow = OBJFile("../SmokeGUI/arrow.obj");
 
     // height plot vars
     bool heightplot = false;

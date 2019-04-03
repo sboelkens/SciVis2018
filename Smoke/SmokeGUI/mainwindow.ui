@@ -1446,11 +1446,16 @@ QGroupBox::title {
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <item>
          <property name="text">
           <string>3D cones</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3D arrows</string>
          </property>
         </item>
         <item>

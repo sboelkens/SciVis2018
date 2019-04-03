@@ -316,8 +316,21 @@ void MainView::updateGlyphs()
     int glyphV, glyphT;
     if (glyphs3D)
     {
-        glyphV = cone.vertexCoords.length();
-        glyphT = cone.faceCoordInd.length();
+        if(glyph_type == GLYPH_3D_CONE)
+        {
+            glyphV = cone.vertexCoords.length();
+            glyphT = cone.faceCoordInd.length();
+        }
+        else if(glyph_type == GLYPH_3D_ARROW)
+        {
+            glyphV = arrow.vertexCoords.length();
+            glyphT = arrow.faceCoordInd.length();
+        }
+        else
+        {
+            glyphT = glyphV = 2;
+        }
+
     }
     else
     {
@@ -438,17 +451,32 @@ void MainView::updateGlyphs()
                         modelview.scale(QVector3D(d, d*width()/height(), d));
                         modelview.rotate(angle, QVector3D(0.0, 0.0, 1.0));
 
-                        vec3 = cone.vertexCoords[n];
-                        //vec3.setX(vec3.x() * height()/width());
-                        vec4 = modelview * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+                        if(glyph_type == GLYPH_3D_CONE)
+                        {
+                            vec3 = cone.vertexCoords[n];
+                            vec4 = modelview * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
 
-                        glyphCoords.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
-                        //glyphCoords.append(cone.vertexCoords[n]);
-                        normalmat = QMatrix4x4(modelview.normalMatrix());
-                        vec3 = -cone.vertexNormals[n];
-                        vec4 = normalmat * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+                            glyphCoords.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                            normalmat = QMatrix4x4(modelview.normalMatrix());
+                            vec3 = -cone.vertexNormals[n];
+                            vec4 = normalmat * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
 
-                        glyphNormals.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                            glyphNormals.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                        }
+                        else if(glyph_type == GLYPH_3D_ARROW)
+                        {
+                            vec3 = arrow.vertexCoords[n];
+                            vec4 = modelview * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+
+                            glyphCoords.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                            normalmat = QMatrix4x4(modelview.normalMatrix());
+                            vec3 = -arrow.vertexNormals[n];
+                            vec4 = normalmat * QVector4D(vec3.x(), vec3.y(), vec3.z(), 1.0);
+
+                            glyphNormals.append(QVector3D(vec4.x(), vec4.y(), vec4.z()));
+                        }
+
+
                     }
                 }
                 else
@@ -492,7 +520,14 @@ void MainView::updateGlyphs()
                 {
                     for (int n = 0; n < glyphT; n++)
                     {
-                        glyphIndices.append(static_cast<unsigned short>(cone.faceCoordInd[n] + static_cast<unsigned int>(glyphV*idx_glyphs)));
+                        if(glyph_type == GLYPH_3D_CONE)
+                        {
+                            glyphIndices.append(static_cast<unsigned short>(cone.faceCoordInd[n] + static_cast<unsigned int>(glyphV*idx_glyphs)));
+                        }
+                        else if(glyph_type == GLYPH_3D_ARROW)
+                        {
+                            glyphIndices.append(static_cast<unsigned short>(arrow.faceCoordInd[n] + static_cast<unsigned int>(glyphV*idx_glyphs)));
+                        }
                     }
                 }
                 else

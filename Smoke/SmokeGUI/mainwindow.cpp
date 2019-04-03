@@ -215,7 +215,8 @@ void MainWindow::on_nrGlyphsP_valueChanged(int value)
 }
 void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
 {
-    if (index == 0)
+    ui->mainView->glyph_type = index;
+    if (index == GLYPH_3D_CONE)
     {
         ui->mainView->glyphs3D = true;
         ui->mainView->nr_glyphs_x = 20;
@@ -223,7 +224,15 @@ void MainWindow::on_selectGlyphShape_currentIndexChanged(int index)
         //ui->mainView->nr_glyphs_p = 4;
         ui->nrGlyphsP->setValue(1);
     }
-    else if (index == 1)
+    else if (index == GLYPH_3D_ARROW)
+    {
+        ui->mainView->glyphs3D = true;
+        ui->mainView->nr_glyphs_x = 30;
+        ui->mainView->nr_glyphs_y = 30;
+        //ui->mainView->nr_glyphs_p = 1;
+        ui->nrGlyphsP->setValue(1);
+    }
+    else if (index == GLYPH_2D_LINE)
     {
         ui->mainView->glyphs3D = false;
         ui->mainView->nr_glyphs_x = 50;
