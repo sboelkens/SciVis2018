@@ -31,7 +31,7 @@ public:
     void updateBuffers();
     void updateGlyphs();
     void updateIsolines();
-    void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+    void updateAverages();
     void clearArrays();
     void clearGridArrays();
     void clearLineArrays();
@@ -165,6 +165,10 @@ private:
   QVector<float> scale_minvals_vnorm;
   QVector<float> scale_maxvals_fnorm;
   QVector<float> scale_minvals_fnorm;
+  QVector<float> scale_maxvals_divvnorm;
+  QVector<float> scale_minvals_divvnorm;
+  QVector<float> scale_maxvals_divfnorm;
+  QVector<float> scale_minvals_divfnorm;
 
   void do_one_simulation_step();
   QVector3D getArcBallVector(int x, int y);

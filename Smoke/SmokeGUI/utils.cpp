@@ -13,10 +13,15 @@ QVector3D rainbow(double value) {
 
 QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float max)
 {
-   vy *= nlevels; vy = static_cast<int>(vy); vy/= nlevels;
+   if (vy<min) vy=min; if (vy>max) vy=max;
+   vy = vy - min;
+   vy = vy/(max-min);
 
-   if(vy < min) { vy = 0; }
-   else if(vy > max) { vy = 1; }
+   //subdivide values into levels
+   vy *= nlevels;
+   vy = int(vy);
+   vy/= nlevels;
+
 
    if (scalar_col==COLOR_BLACKWHITE)
        return QVector3D(vy, vy, vy);

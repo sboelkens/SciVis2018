@@ -44,8 +44,7 @@ QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double isolin
 void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, QString code, double px, double py)
 {
     if(code == "0000"){
-        isolines.append(QVector2D(0, 0));
-        isolines.append(QVector2D(0, 0));
+        return;
     }
     if(code == "0001"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
@@ -108,8 +107,7 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1111"){
-        isolines.append(QVector2D(0, 0));
-        isolines.append(QVector2D(0, 0));
+        return;
     }
 }
 

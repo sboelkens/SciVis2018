@@ -41,17 +41,23 @@ void MainWindow::updateLegendLabels()
 }
 void MainWindow::updateSmokeLegendLabels()
 {
-    ui->labelSmokeLegendMin->setText(QString::number(static_cast<double>(ui->mainView->clamp_smoke_min)));
-    ui->labelSmokeLegendMax->setText(QString::number(static_cast<double>(ui->mainView->clamp_smoke_max)));
-    float mid = (ui->mainView->clamp_smoke_min+ui->mainView->clamp_smoke_max)/2;
-    ui->labelSmokeLegendMid->setText(QString::number(static_cast<double>(mid)));
+    double min = static_cast<double>(ui->mainView->clamp_smoke_min);
+    if(min > -0.001 && min < 0.001) { min = 0.000; }
+    double max = static_cast<double>(ui->mainView->clamp_smoke_max);
+    if(max > -0.001 && max < 0.001) { max = 0.000; }
+    ui->labelSmokeLegendMin->setText(QString::number(min, 'f', 3));
+    ui->labelSmokeLegendMax->setText(QString::number(max, 'f', 3));
+    ui->labelSmokeLegendMid->setText(QString::number(((min+max)/2), 'f', 3));
 }
 void MainWindow::updateGlyphLegendLabels()
 {
-    ui->labelGlyphLegendMin->setText(QString::number(static_cast<double>(ui->mainView->clamp_glyph_min)));
-    ui->labelGlyphLegendMax->setText(QString::number(static_cast<double>(ui->mainView->clamp_glyph_max)));
-    float mid = (ui->mainView->clamp_glyph_min+ui->mainView->clamp_glyph_max)/2;
-    ui->labelGlyphLegendMid->setText(QString::number(static_cast<double>(mid)));
+    double min = static_cast<double>(ui->mainView->clamp_glyph_min);
+    if(min > -0.001 && min < 0.001) { min = 0.000; }
+    double max = static_cast<double>(ui->mainView->clamp_glyph_max);
+    if(max > -0.001 && max < 0.001) { max = 0.000; }
+    ui->labelGlyphLegendMin->setText(QString::number(min, 'f', 3));
+    ui->labelGlyphLegendMax->setText(QString::number(max, 'f', 3));
+    ui->labelGlyphLegendMid->setText(QString::number(((min+max)/2), 'f', 3));
 }
 void MainWindow::updateIsolineLegendLabels()
 {

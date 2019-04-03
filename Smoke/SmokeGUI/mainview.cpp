@@ -170,7 +170,7 @@ void MainView::updateBuffers() {
   triaVals.squeeze();
   triaVals.reserve(n_points);
 
-  updateAverages(rho, vx, vy, fx, fy);
+  updateAverages();
 
   int idx0, idx1, idx2, idx3;
   double px, py;
@@ -563,10 +563,10 @@ void MainView::updateIsolines()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*isolineIndices.size(), isolineIndices.data(), GL_DYNAMIC_DRAW);
 }
 
-void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw_real *fx, fftw_real *fy)
+void MainView::updateAverages()
 {
-    float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0;
-    float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0;
+    float rho_max = 0.0; float vnorm_max = 0.0; float fnorm_max = 0.0; float divvnorm_max = 0.0; float divfnorm_max = 0.0;
+    float rho_min  = 9999.0; float vnorm_min = 9999.0; float fnorm_min = 9999.0; float divvnorm_min = 9999.0; float divfnorm_min = 9999.0;
     float vnorm, fnorm;
 
     int idx0;
@@ -575,16 +575,32 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
         for (int i = 0; i < DIM; i++)
         {
             idx0 = (j * DIM) + i;
-            if (rho[idx0] > static_cast<double>(rho_max))
+            if (simulation.getRho()[idx0] > static_cast<double>(rho_max))
             {
-                rho_max = static_cast<float>(rho[idx0]);
+                rho_max = static_cast<float>(simulation.getRho()[idx0]);
             }
-            if (rho[idx0] < static_cast<double>(rho_min))
+            if (simulation.getRho()[idx0] < static_cast<double>(rho_min))
             {
-                rho_min = static_cast<float>(rho[idx0]);
+                rho_min = static_cast<float>(simulation.getRho()[idx0]);
             }
-            vnorm = sqrt(vx[idx0]*vx[idx0] + vy[idx0]*vy[idx0]);
-            fnorm = sqrt(fx[idx0]*fx[idx0] + fy[idx0]*fy[idx0]);
+            vnorm = sqrt(simulation.getVx()[idx0]*simulation.getVx()[idx0] + simulation.getVy()[idx0]*simulation.getVy()[idx0]);
+            fnorm = sqrt(simulation.getFx()[idx0]*simulation.getFx()[idx0] + simulation.getFy()[idx0]*simulation.getFy()[idx0]);
+            if (simulation.getDivV()[idx0] > static_cast<double>(divvnorm_max))
+            {
+                divvnorm_max = static_cast<float>(simulation.getDivV()[idx0]);
+            }
+            if (simulation.getDivV()[idx0] < static_cast<double>(divvnorm_min))
+            {
+                divvnorm_min = static_cast<float>(simulation.getDivV()[idx0]);
+            }
+            if (simulation.getDivF()[idx0] > static_cast<double>(divfnorm_max))
+            {
+                divfnorm_max = static_cast<float>(simulation.getDivF()[idx0]);
+            }
+            if (simulation.getDivF()[idx0] < static_cast<double>(divfnorm_min))
+            {
+                divfnorm_min = static_cast<float>(simulation.getDivF()[idx0]);
+            }
             if (vnorm > vnorm_max)
             {
                 vnorm_max = vnorm;
@@ -610,6 +626,10 @@ void MainView::updateAverages(fftw_real *rho, fftw_real *vx, fftw_real *vy, fftw
     scale_minvals_vnorm[scale_smoke_cnt] = vnorm_min;
     scale_maxvals_fnorm[scale_smoke_cnt] = fnorm_max;
     scale_minvals_fnorm[scale_smoke_cnt] = fnorm_min;
+    scale_maxvals_divvnorm[scale_smoke_cnt] = divvnorm_max;
+    scale_minvals_divvnorm[scale_smoke_cnt] = divvnorm_min;
+    scale_maxvals_divfnorm[scale_smoke_cnt] = divfnorm_max;
+    scale_minvals_divfnorm[scale_smoke_cnt] = divfnorm_min;
 }
 
 void MainView::updateMatrices() {
@@ -731,12 +751,20 @@ void MainView::initializeGL() {
   scale_minvals_vnorm.reserve(scale_smoke_window);
   scale_maxvals_fnorm.reserve(scale_smoke_window);
   scale_minvals_fnorm.reserve(scale_smoke_window);
+  scale_maxvals_divvnorm.reserve(scale_smoke_window);
+  scale_minvals_divvnorm.reserve(scale_smoke_window);
+  scale_maxvals_divfnorm.reserve(scale_smoke_window);
+  scale_minvals_divfnorm.reserve(scale_smoke_window);
   scale_maxvals_rho.resize(scale_smoke_window);
   scale_minvals_rho.resize(scale_smoke_window);
   scale_maxvals_vnorm.resize(scale_smoke_window);
   scale_minvals_vnorm.resize(scale_smoke_window);
   scale_maxvals_fnorm.resize(scale_smoke_window);
   scale_minvals_fnorm.resize(scale_smoke_window);
+  scale_maxvals_divvnorm.resize(scale_smoke_window);
+  scale_minvals_divvnorm.resize(scale_smoke_window);
+  scale_maxvals_divfnorm.resize(scale_smoke_window);
+  scale_minvals_divfnorm.resize(scale_smoke_window);
 
   do_one_simulation_step();
   this->startTimer(0);
@@ -753,6 +781,8 @@ void MainView::do_one_simulation_step(void)
     simulation.divergenceF(DIM);
     try
     {
+
+        updateAverages();
         if(draw_smoke) {
             updateBuffers();
         }
@@ -787,6 +817,16 @@ void MainView::do_one_simulation_step(void)
                 clamp_smoke_max = findMean(scale_maxvals_fnorm);
                 clamp_smoke_min = findMean(scale_minvals_fnorm);
             }
+            else if (smoke_var == DIVV)
+            {
+                clamp_smoke_max = findMean(scale_maxvals_divvnorm);
+                clamp_smoke_min = findMean(scale_minvals_divvnorm);
+            }
+            else if (smoke_var == DIVF)
+            {
+                clamp_smoke_max = findMean(scale_maxvals_divfnorm);
+                clamp_smoke_min = findMean(scale_minvals_divfnorm);
+            }
             updateUniformsRequired = true;
         }
         if (scale_smoke_cnt < scale_smoke_window - 1)
@@ -814,6 +854,16 @@ void MainView::do_one_simulation_step(void)
             {
                 clamp_glyph_max = findMean(scale_maxvals_fnorm);
                 clamp_glyph_min = findMean(scale_minvals_fnorm);
+            }
+            else if (glyph_var == DIVV)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_divvnorm);
+                clamp_glyph_min = findMean(scale_minvals_divvnorm);
+            }
+            else if (glyph_var == DIVF)
+            {
+                clamp_glyph_max = findMean(scale_maxvals_divfnorm);
+                clamp_glyph_min = findMean(scale_minvals_divfnorm);
             }
             updateUniformsRequired = true;
         }
