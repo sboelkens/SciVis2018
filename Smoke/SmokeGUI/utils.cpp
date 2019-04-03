@@ -31,6 +31,8 @@ QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float m
        return getHeatMapColor(vy);
    else if (scalar_col==COLOR_BLUE_RED)
        return getBlueRedColor(vy);
+   else if (scalar_col==COLOR_ZEBRA)
+       return getZebraColor(vy, nlevels);
    return QVector3D(0.0, 0.0, 0.0);
 }
 
@@ -108,6 +110,16 @@ QVector3D getBlueRedColor(float value)
   float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
 
   return QVector3D(red, green, blue);
+}
+
+QVector3D getZebraColor(float value, int nlevels)
+{
+    value *= nlevels;
+    if (static_cast<int>(value) % 2 == 0) {
+        return QVector3D(0,0,0);
+    } else {
+        return QVector3D(1,1,1);
+    }
 }
 
 float findMean(QVector<float> list)

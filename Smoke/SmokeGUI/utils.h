@@ -8,6 +8,7 @@ const int COLOR_BLACKWHITE = 0;   //different types of color mapping: black-and-
 const int COLOR_RAINBOW    = 1;
 const int COLOR_HEATMAP    = 2;
 const int COLOR_BLUE_RED   = 3;
+const int COLOR_ZEBRA      = 4;
 
 const int RHO  = 0;
 const int V    = 1;
@@ -20,6 +21,7 @@ QVector3D set_colormap(float val, int scalar_col, int nlevels = 7, float min = 0
 QVector3D direction_to_color(float x, float y, int method);
 QVector3D getBlueRedColor(float value);
 QVector3D getHeatMapColor(float value);
+QVector3D getZebraColor(float value, int nlevels);
 
 
 float findMean(QVector<float>);

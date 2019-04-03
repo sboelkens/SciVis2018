@@ -129,6 +129,11 @@ QGroupBox::title {
           <string>blue-red</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>zebra</string>
+         </property>
+        </item>
        </widget>
        <widget class="QCheckBox" name="showSmoke">
         <property name="geometry">
@@ -968,6 +973,11 @@ QGroupBox::title {
         <item>
          <property name="text">
           <string>blue-red</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>zebra</string>
          </property>
         </item>
        </widget>
@@ -2216,6 +2226,11 @@ QGroupBox::title {
         <item>
          <property name="text">
           <string>blue-red</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>zebra</string>
          </property>
         </item>
        </widget>

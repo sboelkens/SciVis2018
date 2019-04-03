@@ -71,7 +71,7 @@ void main() {
 
       fColor = vec4(red, green, blue, 1.0);
   }
-  else if (mode == 3) //heat map
+  else if (mode == 3) // red-white-blue
   {
       int NUM_COLORS = 3;
       mat3 color;
@@ -99,6 +99,14 @@ void main() {
       float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
 
       fColor = vec4(red, green, blue, 1.0);
+  }
+  else if(mode == 4) // zebra
+  {
+      if (int(value*levels) % 2 == 0) {
+          fColor = vec4(0.0, 0.0, 0.0, 1.0);
+      } else {
+          fColor = vec4(1.0, 1.0, 1.0, 1.0);
+      }
   }
   else //unknown colormap
   {
