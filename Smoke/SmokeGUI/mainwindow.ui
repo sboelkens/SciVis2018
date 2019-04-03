@@ -3460,16 +3460,6 @@ QGroupBox::title {
           <string>Force Field ||f||</string>
          </property>
         </item>
-        <item>
-         <property name="text">
-          <string>Divergence of v</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Divergence of f</string>
-         </property>
-        </item>
        </widget>
        <widget class="QLabel" name="label_5">
         <property name="geometry">
@@ -3776,8 +3766,8 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupSmokeValues"/>
   <buttongroup name="buttonGroupGlyphVectorValues"/>
   <buttongroup name="buttonGroupGlyphValues"/>
+  <buttongroup name="buttonGroupSmokeValues"/>
  </buttongroups>
 </ui>

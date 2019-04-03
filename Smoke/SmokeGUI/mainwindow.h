@@ -85,8 +85,12 @@ private slots:
 private:
   Ui::MainWindow *ui;
 
-  void setPresetOne();
-  void setPresetTwo();
+  void setPresetDefault();
+  void setPresetDivergence();
+  void setPresetHeightplot();
+  void setPresetIsolines();
+  void setPreset3D();
+  void setPresetScalingClamping();
 };
 
 #endif // MAINWINDOW_H

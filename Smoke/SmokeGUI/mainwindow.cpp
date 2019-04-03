@@ -109,6 +109,10 @@ void MainWindow::on_radioSmokeClamp_clicked()
 void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_smoke_cmap) {
+        if(value > static_cast<double>(ui->mainView->clamp_smoke_max)){
+            value = static_cast<double>(ui->mainView->clamp_smoke_max);
+            ui->clampSmokeMinValue->setValue(value);
+        }
         ui->mainView->clamp_smoke_min = static_cast<float>(value);
         updateSmokeLegendLabels();
         ui->mainView->updateUniformsRequired = true;
@@ -118,6 +122,10 @@ void MainWindow::on_clampSmokeMinValue_valueChanged(double value)
 void MainWindow::on_clampSmokeMaxValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_smoke_cmap) {
+        if(value < static_cast<double>(ui->mainView->clamp_smoke_min)){
+            value = static_cast<double>(ui->mainView->clamp_smoke_min);
+            ui->clampSmokeMaxValue->setValue(value);
+        }
         ui->mainView->clamp_smoke_max = static_cast<float>(value);
         updateSmokeLegendLabels();
         ui->mainView->updateUniformsRequired = true;
@@ -165,6 +173,10 @@ void MainWindow::on_radioGlyphClamp_clicked()
 void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_glyph_cmap) {
+        if(value > static_cast<double>(ui->mainView->clamp_glyph_max)){
+            value = static_cast<double>(ui->mainView->clamp_glyph_max);
+            ui->clampGlyphMinValue->setValue(value);
+        }
         ui->mainView->clamp_glyph_min = static_cast<float>(value);
         updateGlyphLegendLabels();
         ui->mainView->updateUniformsRequired = true;
@@ -175,6 +187,10 @@ void MainWindow::on_clampGlyphMinValue_valueChanged(double value)
 void MainWindow::on_clampGlyphMaxValue_valueChanged(double value)
 {
     if(ui->mainView->clamp_glyph_cmap) {
+        if(value < static_cast<double>(ui->mainView->clamp_glyph_min)){
+            value = static_cast<double>(ui->mainView->clamp_glyph_min);
+            ui->clampGlyphMaxValue->setValue(value);
+        }
         ui->mainView->clamp_glyph_max = static_cast<float>(value);
         updateGlyphLegendLabels();
         ui->mainView->updateUniformsRequired = true;
@@ -287,14 +303,20 @@ void MainWindow::on_showIsoline_stateChanged(int state)
 void MainWindow::on_isolineMinValue_valueChanged(double value)
 {
     ui->mainView->isoline_min_value = static_cast<float>(value);
-    updateIsolineLegendLabels();
+    if(value > static_cast<double>(ui->mainView->isoline_max_value)){
+        value = static_cast<double>(ui->mainView->isoline_max_value);
+        ui->isolineMinValue->setValue(value);
+    }
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
 void MainWindow::on_isolineMaxValue_valueChanged(double value)
 {
     ui->mainView->isoline_max_value = static_cast<float>(value);
-    updateIsolineLegendLabels();
+    if(value < static_cast<double>(ui->mainView->isoline_min_value)){
+        value = static_cast<double>(ui->mainView->isoline_min_value);
+        ui->isolineMaxValue->setValue(value);
+    }
     ui->mainView->updateUniformsRequired = true;
     this->setFocus();
 }
@@ -342,10 +364,22 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         ui->mainView->frozen = !ui->mainView->frozen;
         break;
     case Qt::Key_Q:
-        this->setPresetOne();
+        this->setPresetDefault();
         break;
     case Qt::Key_W:
-        this->setPresetTwo();
+        this->setPresetScalingClamping();
+        break;
+    case Qt::Key_E:
+        this->setPreset3D();
+        break;
+    case Qt::Key_R:
+        this->setPresetDivergence();
+        break;
+    case Qt::Key_T:
+        this->setPresetIsolines();
+        break;
+    case Qt::Key_Y:
+        this->setPresetHeightplot();
         break;
     }
 }
@@ -405,9 +439,10 @@ QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
 }
 
 
-void MainWindow::setPresetOne()
+void MainWindow::setPresetDefault()
 {
     // Set presets Default values
+    ui->settingsGB->setCurrentIndex(0);
 
     ui->showSmoke->setCheckState(Qt::Checked);
     ui->selectSmoke->setCurrentIndex(RHO);
@@ -431,7 +466,7 @@ void MainWindow::setPresetOne()
 
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
-    ui->selectGlyphShape->setCurrentIndex(1);
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_2D_LINE);
 
     ui->showIsoline->setCheckState(Qt::Checked);
     ui->isolineMinValue->setValue(0.000);
@@ -440,12 +475,16 @@ void MainWindow::setPresetOne()
     ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
     ui->selectNColorsIsoline->setValue(10);
 
+    ui->heightplotBox->setCheckState(Qt::Unchecked);
+    ui->hPlot_xAngle->setValue(45);
+
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
 }
-void MainWindow::setPresetTwo()
+void MainWindow::setPresetDivergence()
 {
     // Set presets for divergence V
+    ui->settingsGB->setCurrentIndex(0);
 
     ui->selectSmoke->setCurrentIndex(DIVV);
     ui->selectColormapSmoke->setCurrentIndex(COLOR_RAINBOW);
@@ -469,7 +508,7 @@ void MainWindow::setPresetTwo()
 
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
-    ui->selectGlyphShape->setCurrentIndex(1);
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_2D_LINE);
 
     ui->showIsoline->setCheckState(Qt::Unchecked);
     ui->isolineMinValue->setValue(0.000);
@@ -477,6 +516,177 @@ void MainWindow::setPresetTwo()
     ui->nrIsolines->setValue(1);
     ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
     ui->selectNColorsIsoline->setValue(10);
+
+    ui->heightplotBox->setCheckState(Qt::Unchecked);
+    ui->hPlot_xAngle->setValue(45);
+
+    ui->timeStepSlider->setValue(1);
+    ui->viscositySlider->setValue(1);
+}
+void MainWindow::setPresetHeightplot()
+{
+    // Set presets for Heightplot
+    ui->settingsGB->setCurrentIndex(3);
+
+    ui->showSmoke->setCheckState(Qt::Unchecked);
+    ui->selectSmoke->setCurrentIndex(RHO);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_BLUE_RED);
+    ui->selectNColorsSmoke->setValue(10);
+
+    ui->radioSmokeScale->click();
+//    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(0.000);
+    ui->clampSmokeMaxValue->setValue(1.000);
+
+    ui->showGlyph->setCheckState(Qt::Unchecked);
+    ui->selectGlyph->setCurrentIndex(RHO);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsGlyph->setValue(10);
+
+//    ui->radioGlyphScale->click();
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_2D_LINE);
+
+    ui->showIsoline->setCheckState(Qt::Unchecked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(1);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
+    ui->selectNColorsIsoline->setValue(10);
+
+    ui->heightplotBox->setCheckState(Qt::Checked);
+    ui->hPlot_xAngle->setValue(60);
+
+    ui->timeStepSlider->setValue(4);
+    ui->viscositySlider->setValue(1);
+}
+void MainWindow::setPresetIsolines()
+{
+    // Set presets for Isolines
+    ui->settingsGB->setCurrentIndex(2);
+
+    ui->showSmoke->setCheckState(Qt::Checked);
+    ui->selectSmoke->setCurrentIndex(RHO);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_BLACKWHITE);
+    ui->selectNColorsSmoke->setValue(10);
+
+//    ui->radioSmokeScale->click();
+    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(0.000);
+    ui->clampSmokeMaxValue->setValue(1.000);
+
+    ui->showGlyph->setCheckState(Qt::Unchecked);
+    ui->selectGlyph->setCurrentIndex(RHO);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsGlyph->setValue(10);
+
+//    ui->radioGlyphScale->click();
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_2D_LINE);
+
+    ui->showIsoline->setCheckState(Qt::Checked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(6);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_BLUE_RED);
+    ui->selectNColorsIsoline->setValue(6);
+
+    ui->heightplotBox->setCheckState(Qt::Unchecked);
+    ui->hPlot_xAngle->setValue(45);
+
+    ui->timeStepSlider->setValue(4);
+    ui->viscositySlider->setValue(1);
+}
+void MainWindow::setPreset3D()
+{
+    // Set presets for 3D cones
+    ui->settingsGB->setCurrentIndex(1);
+
+    ui->showSmoke->setCheckState(Qt::Checked);
+    ui->selectSmoke->setCurrentIndex(RHO);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_BLACKWHITE);
+    ui->selectNColorsSmoke->setValue(10);
+
+//    ui->radioSmokeScale->click();
+    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(0.000);
+    ui->clampSmokeMaxValue->setValue(1.000);
+
+    ui->showGlyph->setCheckState(Qt::Checked);
+    ui->selectGlyph->setCurrentIndex(RHO);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsGlyph->setValue(10);
+
+//    ui->radioGlyphScale->click();
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_3D_CONE);
+
+    ui->showIsoline->setCheckState(Qt::Unchecked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(1);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
+    ui->selectNColorsIsoline->setValue(10);
+
+    ui->heightplotBox->setCheckState(Qt::Unchecked);
+    ui->hPlot_xAngle->setValue(45);
+
+    ui->timeStepSlider->setValue(4);
+    ui->viscositySlider->setValue(1);
+}
+void MainWindow::setPresetScalingClamping()
+{
+    // Set presets for Scaling and clamping
+    ui->settingsGB->setCurrentIndex(0);
+
+    ui->showSmoke->setCheckState(Qt::Checked);
+    ui->selectSmoke->setCurrentIndex(RHO);
+    ui->selectColormapSmoke->setCurrentIndex(COLOR_BLACKWHITE);
+    ui->selectNColorsSmoke->setValue(10);
+
+    ui->radioSmokeScale->click();
+//    ui->radioSmokeClamp->click();
+    ui->clampSmokeMinValue->setValue(0.000);
+    ui->clampSmokeMaxValue->setValue(1.000);
+
+    ui->showGlyph->setCheckState(Qt::Checked);
+    ui->selectGlyph->setCurrentIndex(RHO);
+    ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
+    ui->selectNColorsGlyph->setValue(10);
+
+//    ui->radioGlyphScale->click();
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
+
+    ui->radioGlyphVectorV->click();
+//    ui->radioGlyphVectorF->click();
+    ui->selectGlyphShape->setCurrentIndex(GLYPH_2D_LINE);
+
+    ui->showIsoline->setCheckState(Qt::Checked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(1);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
+    ui->selectNColorsIsoline->setValue(10);
+
+    ui->heightplotBox->setCheckState(Qt::Unchecked);
+    ui->hPlot_xAngle->setValue(45);
 
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
