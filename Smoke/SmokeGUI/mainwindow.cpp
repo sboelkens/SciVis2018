@@ -259,6 +259,7 @@ void MainWindow::on_selectColormapIsoline_currentIndexChanged(int index)
 void MainWindow::on_streamtubesBox_stateChanged(int value)
 {
     ui->mainView->streamtubes = (bool)value;
+    this->setFocus();
 }
 
 void MainWindow::on_timeStepSlider_valueChanged(int value)

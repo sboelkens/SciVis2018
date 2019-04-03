@@ -28,14 +28,16 @@ public:
     MainView(QWidget *parent = nullptr);
     ~MainView();
 
-    void updateBuffers();
+    void updateBuffers(); 
     void updateGlyphs();
     void updateIsolines();
+    void updateStreamtubes();
     void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
     void clearArrays();
     void clearGridArrays();
     void clearLineArrays();
     void clearIsolineArrays();
+    void clearStreamArrays();
 
     // Simulation variables
     double dt = 0.4;                   // simulation time step
@@ -49,11 +51,11 @@ public:
     // Smoke variables
     int   draw_smoke = 1;              // draw the smoke or not
     int   smoke_var = 0;               // variable encoded by the smoke (rho, ||v|| or ||f||)
-    int   smoke_col = COLOR_BLACKWHITE;
+    int   smoke_col = COLOR_RAINBOW;
     int   levels_smoke = 10;
 
     // Glyph variables
-    int   draw_vecs = 1;               // draw the velocity field or not
+    int   draw_vecs = 0;               // draw the velocity field or not
     int   glyph_var = 0;
     int   glyph_vector_var = 1;
     int   glyph_col = COLOR_RAINBOW;   // method for scalar coloring
@@ -61,10 +63,10 @@ public:
     float vec_scale = 1;               // scaling of hedgehogs
 
     // Isoline variables
-    int   draw_isolines = 1;
+    int   draw_isolines = 0;
     float isoline_min_value = 0.000f;
     float isoline_max_value = 1.000f;
-    int   nr_isolines = 2;
+    int   nr_isolines = 0;
     int   isoline_col = COLOR_HEATMAP;
     int   levels_isoline = 10;
 
@@ -99,6 +101,13 @@ public:
     float hPlot_zoom = 0.5;
 
     bool streamtubes = false;
+    fftw_real *rho_frames, *vx_frames, *vy_frames, *fx_frames, *fy_frames;
+    int n_stream_frames = 20;
+    int stream_frames_cnt = 0;
+    bool stream_arr_initialized = false;
+    bool stream_buffer_full = false;
+
+    void start_streamtube(QVector3D pos);
 
 protected:
     void initializeGL();
@@ -119,6 +128,7 @@ private:
   GLuint glyphsVAO, glyphCoordsBO, glyphNormalsBO, glyphColourBO, glyphIndexBO;
   GLuint fLinesVAO, fLinesCoordsBO, fLinesColourBO, fLinesIndexBO;
   GLuint isolinesVAO, isolinesCoordsBO, isolinesColourBO, isolinesIndexBO;
+  GLuint streamtubesVAO, streamtubeCoordsBO, streamtubeNormalsBO, streamtubeColourBO, streamtubeIndexBO;
 
   void createShaderPrograms();
   void createBuffers();
@@ -126,6 +136,9 @@ private:
   void updateUniforms();
 
   float glyph_interpolation(float, float, fftw_real*);
+
+  QVector<QVector<QVector3D>> streamtubeCenters;
+  QVector<QVector3D> streamtubeSeeds;
 
   QVector<QVector3D> triaCoords;
   QVector<QVector3D> triaNormals;
@@ -140,6 +153,10 @@ private:
   QVector<QVector3D> isolineCoords;
   QVector<QVector3D> isolineColours;
   QVector<unsigned short> isolineIndices;
+  QVector<QVector3D> streamtubeCoords;
+  QVector<QVector3D> streamtubeColours;
+  QVector<QVector3D> streamtubeNormals;
+  QVector<unsigned short> streamtubeIndices;
 
   GLint uniModelViewMatrix, uniProjectionMatrix, uniNormalMatrix;
   GLint uniMVMat_cMap, uniProjMat_cMap, uniNormMat_cMap, uniNLevels_cMap, uniColorMap_cMap;

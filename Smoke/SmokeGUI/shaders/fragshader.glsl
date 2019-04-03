@@ -11,6 +11,8 @@ out vec4 fColor;
 
 void main() {
 
+    float alpha = 1.0;
+
     if (phong == 1)
     {
         vec3 lightpos = vec3(0.0, 0.0, -1.0);
@@ -43,11 +45,12 @@ void main() {
              //compcolour += matspecularcoeff * specularcoeff * lightcolour * matspeccolour;
 
 
-      fColor = vec4(compcolour, 1.0);
+      fColor = vec4(compcolour, alpha);
     }
     else
     {
-        fColor = vec4(vertcolour_in, 1.0);
+        fColor = vec4(vertcolour_in, alpha);
     }
+
 
 }

@@ -28,9 +28,10 @@ void main() {
   value = int(value);
   value/= levels;
 
+  float alpha = 1.0;
   if (mode == 0) //grayscale
   {
-      fColor = vec4(value, value, value, 1.0);
+      fColor = vec4(value, value, value, alpha);
   }
   else if (mode == 1) //rainbow
   {
@@ -40,7 +41,7 @@ void main() {
       float G = max(0.0,(4-abs(value-2)-abs(value-4))/2);
       float B = max(0.0,(3-abs(value-1)-abs(value-2))/2);
 
-      fColor = vec4(R, G, B, 1.0);
+      fColor = vec4(R, G, B, alpha);
   }
   else if (mode == 2) //heat map
   {

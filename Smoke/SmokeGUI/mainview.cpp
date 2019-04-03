@@ -22,6 +22,11 @@ MainView::~MainView() {
   glDeleteBuffers(1, &isolinesColourBO);
   glDeleteBuffers(1, &isolinesIndexBO);
   glDeleteVertexArrays(1, &isolinesVAO);
+  glDeleteBuffers(1, &streamtubeCoordsBO);
+  glDeleteBuffers(1, &streamtubeColourBO);
+  glDeleteBuffers(1, &streamtubeNormalsBO);
+  glDeleteBuffers(1, &streamtubeIndexBO);
+  glDeleteVertexArrays(1, &streamtubesVAO);
 
   delete mainShaderProg;
 
@@ -133,6 +138,29 @@ void MainView::createBuffers() {
 
   glGenBuffers(1, &isolinesIndexBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, isolinesIndexBO);
+
+  glBindVertexArray(0);
+
+  glGenVertexArrays(1, &streamtubesVAO);
+  glBindVertexArray(streamtubesVAO);
+
+  glGenBuffers(1, &streamtubeCoordsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeCoordsBO);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &streamtubeColourBO);
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeColourBO);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &streamtubeNormalsBO);
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeNormalsBO);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glGenBuffers(1, &streamtubeIndexBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, streamtubeIndexBO);
 
   glBindVertexArray(0);
 }
@@ -306,6 +334,301 @@ void MainView::updateBuffers() {
   {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridIndexBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*triaIndices.size(), triaIndices.data(), GL_DYNAMIC_DRAW);
+  }
+}
+
+void MainView::updateStreamtubes() {
+    size_t frame_dim = DIM * DIM;
+    if (!stream_arr_initialized)
+    {
+        size_t dim = n_stream_frames * frame_dim * sizeof(fftw_real);        //Allocate data structures
+        rho_frames = static_cast<fftw_real*>(malloc(dim));
+        vx_frames = static_cast<fftw_real*>(malloc(dim));
+        vy_frames = static_cast<fftw_real*>(malloc(dim));
+        fx_frames = static_cast<fftw_real*>(malloc(dim));
+        fy_frames = static_cast<fftw_real*>(malloc(dim));
+
+        start_streamtube(QVector3D(-0.5,0.0,0.5));
+        start_streamtube(QVector3D(0.5,0.0,0.5));
+        start_streamtube(QVector3D(0.0,0.5,0.5));
+        start_streamtube(QVector3D(0.0,-0.5,0.5));
+    }
+
+    fftw_real* rho = simulation.getRho();
+    fftw_real* vx = simulation.getVx();
+    fftw_real* vy = simulation.getVy();
+    fftw_real* fx = simulation.getFx();
+    fftw_real* fy = simulation.getFy();
+
+    for (size_t i = 0; i < frame_dim; i++)
+    {
+        rho_frames[stream_frames_cnt*frame_dim + i] = rho[i];
+        vx_frames[stream_frames_cnt*frame_dim + i] = vx[i];
+        vy_frames[stream_frames_cnt*frame_dim + i] = vy[i];
+        fx_frames[stream_frames_cnt*frame_dim + i] = fx[i];
+        fy_frames[stream_frames_cnt*frame_dim + i] = fy[i];
+    }
+
+  int frame_sz;
+  if (!stream_buffer_full)
+  {
+      frame_sz = stream_frames_cnt + 1;
+  }
+  else
+  {
+      frame_sz = n_stream_frames;
+  }
+
+  fftw_real  wn = 2.0 / static_cast<double>(DIM + 1);   // Grid cell width
+  fftw_real  hn = 2.0 / static_cast<double>(DIM + 1);  // Grid cell height
+
+  QVector<QVector3D> tube;
+  QVector3D new_pos, prev_pos;
+  float new_x, new_y;
+
+  size_t nr_centers = 0;
+
+  int pos_v, pos_h, idx;
+
+  if (stream_arr_initialized)
+  {
+      for (int i = 0; i < streamtubeCenters.length(); i++)
+      {
+          tube = streamtubeCenters[i];
+          for  (int j = 0; j < tube.length(); j++)
+          {
+              prev_pos = tube[j];
+              pos_v = (prev_pos.y() + 1.0 - hn)/hn;
+              idx = j * DIM*DIM + (pos_v * DIM) + pos_h;
+                new_x = prev_pos.x() + vx_frames[idx];
+                new_y = prev_pos.y() + vy_frames[idx];
+                if (new_x < -1.0 + wn)
+                {
+                    new_x = 1.0 - wn;
+                }
+                else if (new_x > 1.0 - wn)
+                {
+                    new_x = -1.0 + wn;
+                }
+                if (new_y < -1.0 + hn)
+                {
+                    new_y = 1.0 - hn;
+                }
+                else if (new_y > 1.0 - hn)
+                {
+                    new_y = -1.0 + hn;
+                }
+                tube[j] = QVector3D(new_x, new_y, tube[j].z() - 1.0f/n_stream_frames);
+          }
+          new_pos = streamtubeSeeds[i];
+          if (tube.length() < n_stream_frames)
+          {
+              tube.append(new_pos);
+          }
+          else
+          {
+              tube[stream_frames_cnt] = new_pos;
+          }
+          streamtubeCenters[i] = tube;
+          nr_centers += tube.length();
+      }
+  }
+
+    int nr_coords = 6*nr_centers;
+    int nr_trias = 3*8*nr_centers;
+    clearStreamArrays();
+    streamtubeCoords.reserve(6*20*20);
+    streamtubeNormals.reserve(6*20*20);
+    streamtubeColours.reserve(6*20*20);
+    streamtubeIndices.reserve(3*8*20*20);
+
+
+  QVector3D center;
+  float offset = 0.05;
+  float x, y;
+
+  for (int i = 0; i < streamtubeCenters.length(); i++)
+  {
+      tube = streamtubeCenters[i];
+      for  (int j = 0; j < tube.length(); j++)
+      {
+          center = tube[j];
+          streamtubeCoords.append(QVector3D(center.x()+offset, center.y(), center.z()));
+          streamtubeNormals.append(QVector3D(-1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(center.x()-offset, center.y(), center.z()));
+          streamtubeNormals.append(QVector3D(1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(center.x(), center.y()+offset, center.z()));
+          streamtubeNormals.append(QVector3D(0.0, -1.0, 0.0));
+          streamtubeCoords.append(QVector3D(center.x(), center.y()-offset, center.z()));
+          streamtubeNormals.append(QVector3D(0.0, 1.0, 0.0));
+          streamtubeCoords.append(QVector3D(center.x(), center.y(), center.z()+offset));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, -1.0));
+          streamtubeCoords.append(QVector3D(center.x(), center.y(), center.z()-offset));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, 1.0));
+          pos_h = (center.x() + 1.0 - wn)/wn;
+          pos_v = (center.y() + 1.0 - hn)/hn;
+          idx = ((j+n_stream_frames-1)%n_stream_frames) * DIM*DIM + (pos_v * DIM) + pos_h;
+          x = vx_frames[idx];
+          y = vy_frames[idx];
+
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 0);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 2);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 4);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 0);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 2);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 5);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 0);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 3);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 4);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 0);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 3);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 5);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 1);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 2);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 4);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 1);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 2);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 5);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 1);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 3);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 4);
+
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 1);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 3);
+          streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 5);
+      }
+      for (size_t j = 0; j < n_stream_frames-tube.length(); j++)
+      {
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(-1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, -1.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 1.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, -1.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, 1.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+      }
+  }
+  for (int i = 0; i < 20-streamtubeCenters.length(); i++)
+  {
+      for (int j = 0; j < n_stream_frames; j++)
+      {
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(-1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(1.0, 0.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, -1.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 1.0, 0.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, -1.0));
+          streamtubeCoords.append(QVector3D(0.0,0.0,0.0));
+          streamtubeNormals.append(QVector3D(0.0, 0.0, 1.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeColours.append(QVector3D(0.0,0.0,0.0));
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+          streamtubeIndices.append(0);
+      }
+  }
+
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeColourBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*streamtubeColours.size(), streamtubeColours.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeCoordsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*streamtubeCoords.size(), streamtubeCoords.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, streamtubeNormalsBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(QVector3D)*streamtubeNormals.size(), streamtubeNormals.data(), GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, streamtubeIndexBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short)*streamtubeIndices.size(), streamtubeIndices.data(), GL_DYNAMIC_DRAW);
+
+  if (stream_frames_cnt < n_stream_frames - 1)
+  {
+      stream_frames_cnt++;
+  }
+  else
+  {
+      stream_frames_cnt = 0;
+      stream_buffer_full = true;
+  }
+  if (!stream_arr_initialized)
+  {
+      stream_arr_initialized = true;
   }
 }
 
@@ -664,6 +987,7 @@ void MainView::clearArrays()
     clearGridArrays();
     clearLineArrays();
     clearIsolineArrays();
+    clearStreamArrays();
 }
 
 void MainView::clearGridArrays()
@@ -699,6 +1023,18 @@ void MainView::clearIsolineArrays()
     isolineColours.squeeze();
     isolineIndices.clear();
     isolineIndices.squeeze();
+}
+
+void MainView::clearStreamArrays()
+{
+    streamtubeCoords.clear();
+    streamtubeCoords.squeeze();
+    streamtubeColours.clear();
+    streamtubeColours.squeeze();
+    streamtubeNormals.clear();
+    streamtubeNormals.squeeze();
+    streamtubeIndices.clear();
+    streamtubeIndices.squeeze();
 }
 
 void MainView::initializeGL() {
@@ -738,6 +1074,7 @@ void MainView::initializeGL() {
   scale_maxvals_fnorm.resize(scale_smoke_window);
   scale_minvals_fnorm.resize(scale_smoke_window);
 
+
   do_one_simulation_step();
   this->startTimer(0);
   updateMatrices();
@@ -751,6 +1088,36 @@ void MainView::do_one_simulation_step(void)
     simulation.diffuse_matter(DIM, dt);
     simulation.divergenceV(DIM);
     simulation.divergenceF(DIM);
+    if (streamtubes)
+    {
+        try
+        {
+            updateStreamtubes();
+        }
+        catch (std::exception e)
+        {
+            qDebug() << "updating buffers failed";
+            qDebug() << e.what();
+        }
+    }
+    else
+    {
+        if (stream_arr_initialized)
+        {
+            free(rho_frames);
+            free(vx_frames);
+            free(vy_frames);
+            free(fx_frames);
+            free(fy_frames);
+            streamtubeCenters.clear();
+            streamtubeCenters.squeeze();
+            streamtubeSeeds.clear();
+            streamtubeSeeds.squeeze();
+            stream_arr_initialized = false;
+            stream_buffer_full = false;
+            stream_frames_cnt = 0;
+        }
+    }
     try
     {
         updateBuffers();
@@ -762,6 +1129,7 @@ void MainView::do_one_simulation_step(void)
         qDebug() << "updating buffers failed";
         qDebug() << e.what();
     }
+
     if (is_initialized)
     {
         if (!clamp_smoke_cmap)
@@ -831,9 +1199,17 @@ void MainView::paintGL() {
       cMapShaderProg->bind();
       if (draw_smoke)
       {
-          glBindVertexArray(gridVAO);
-          glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
-          glBindVertexArray(0);
+          try
+          {
+              glBindVertexArray(gridVAO);
+              glDrawElements(GL_TRIANGLES, triaIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+              glBindVertexArray(0);
+          }
+          catch (std::exception e)
+          {
+              qDebug() << "drawing failed";
+              qDebug() << e.what();
+          }
       }
       cMapShaderProg->release();
       mainShaderProg->bind();
@@ -856,6 +1232,15 @@ void MainView::paintGL() {
           glUniform1i(uniPhong, false);
           glBindVertexArray(isolinesVAO);
           glDrawElements(GL_LINES, isolineIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+          glBindVertexArray(0);
+      }
+      if (streamtubes)
+      {
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glUniform1i(uniPhong, true);
+          glBindVertexArray(streamtubesVAO);
+          glDrawElements(GL_TRIANGLES, streamtubeIndices.size(), GL_UNSIGNED_SHORT, nullptr);
           glBindVertexArray(0);
       }
       mainShaderProg->release();
@@ -977,6 +1362,13 @@ void MainView::mousePressEvent(QMouseEvent *event)
             hPlot_zAngle = hPlot_zAngle - 180*angle/M_PI;
             updateMatricesRequired = true;
         }
+        if (streamtubes)
+        {
+            float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
+            float y_n = 1.0 - (2.0 * event->pos().y()) / (float)height();
+
+            start_streamtube(QVector3D(x_n, y_n, 0.5));
+        }
     }
     lastpos = event->pos();
 }
@@ -1033,6 +1425,17 @@ float MainView::glyph_interpolation(float x_pct, float y_pct, fftw_real* mat)
     inter = (1 - tx) * (1 - ty) * q11 + tx * (1 - ty) * q12 +
             (1 - tx) * ty * q21 + tx * ty * q22;
     return inter;
+}
+
+void MainView::start_streamtube(QVector3D pos)
+{
+    if (streamtubeCenters.length() < 20)
+    {
+        QVector<QVector3D> new_tube;
+        streamtubeSeeds.append(pos);
+        new_tube.append(pos);
+        streamtubeCenters.append(new_tube);
+    }
 }
 
 void MainView::onMessageLogged( QOpenGLDebugMessage Message ) {
