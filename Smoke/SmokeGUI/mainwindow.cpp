@@ -332,10 +332,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Space:
         ui->mainView->frozen = !ui->mainView->frozen;
         break;
-    case Qt::Key_1:
+    case Qt::Key_Q:
         this->setPresetOne();
         break;
-    case Qt::Key_2:
+    case Qt::Key_W:
         this->setPresetTwo();
         break;
     }
@@ -400,33 +400,39 @@ void MainWindow::setPresetOne()
 {
     // Set presets Default values
 
+    ui->showSmoke->setCheckState(Qt::Checked);
     ui->selectSmoke->setCurrentIndex(RHO);
     ui->selectColormapSmoke->setCurrentIndex(COLOR_BLACKWHITE);
     ui->selectNColorsSmoke->setValue(10);
-    ui->showSmoke->setCheckState(Qt::Checked);
 
 //    ui->radioSmokeScale->click();
     ui->radioSmokeClamp->click();
-    ui->clampSmokeMinValue->setValue(0.00);
-    ui->clampSmokeMaxValue->setValue(1.00);
+    ui->clampSmokeMinValue->setValue(0.000);
+    ui->clampSmokeMaxValue->setValue(1.000);
 
+    ui->showGlyph->setCheckState(Qt::Checked);
     ui->selectGlyph->setCurrentIndex(RHO);
     ui->selectColormapGlyph->setCurrentIndex(COLOR_RAINBOW);
     ui->selectNColorsGlyph->setValue(10);
-    ui->showGlyph->setCheckState(Qt::Checked);
 
 //    ui->radioGlyphScale->click();
-//    ui->radioGlyphClamp->click();
-//    ui->clampGlyphMinValue->setValue(-0.001);
-//    ui->clampGlyphMaxValue->setValue(0.001);
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
 
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
-
     ui->selectGlyphShape->setCurrentIndex(1);
 
-    ui->timeStepSlider->setValue(1);
-    ui->viscositySlider->setValue(4);
+    ui->showIsoline->setCheckState(Qt::Checked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(1);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
+    ui->selectNColorsIsoline->setValue(10);
+
+    ui->timeStepSlider->setValue(4);
+    ui->viscositySlider->setValue(1);
 }
 void MainWindow::setPresetTwo()
 {
@@ -448,15 +454,21 @@ void MainWindow::setPresetTwo()
     ui->showGlyph->setCheckState(Qt::Unchecked);
 
 //    ui->radioGlyphScale->click();
-//    ui->radioGlyphClamp->click();
-//    ui->clampGlyphMinValue->setValue(-0.001);
-//    ui->clampGlyphMaxValue->setValue(0.001);
+    ui->radioGlyphClamp->click();
+    ui->clampGlyphMinValue->setValue(0.000);
+    ui->clampGlyphMaxValue->setValue(1.000);
 
     ui->radioGlyphVectorV->click();
 //    ui->radioGlyphVectorF->click();
-
     ui->selectGlyphShape->setCurrentIndex(1);
 
-    ui->timeStepSlider->setValue(1);
-    ui->viscositySlider->setValue(4);
+    ui->showIsoline->setCheckState(Qt::Unchecked);
+    ui->isolineMinValue->setValue(0.000);
+    ui->isolineMaxValue->setValue(1.000);
+    ui->nrIsolines->setValue(1);
+    ui->selectColormapIsoline->setCurrentIndex(COLOR_HEATMAP);
+    ui->selectNColorsIsoline->setValue(10);
+
+    ui->timeStepSlider->setValue(4);
+    ui->viscositySlider->setValue(1);
 }

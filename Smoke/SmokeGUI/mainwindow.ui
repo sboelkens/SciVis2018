@@ -863,6 +863,9 @@ QGroupBox::title {
         <property name="text">
          <string>Force Field ||f||</string>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupGlyphVectorValues</string>
+        </attribute>
        </widget>
        <widget class="QSpinBox" name="selectNColorsGlyph">
         <property name="geometry">
@@ -2006,6 +2009,9 @@ QGroupBox::title {
         <property name="checked">
          <bool>false</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupGlyphValues</string>
+        </attribute>
        </widget>
        <widget class="QLabel" name="labelGlyphLegendMax">
         <property name="geometry">
@@ -2073,6 +2079,9 @@ QGroupBox::title {
         <property name="checked">
          <bool>true</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupGlyphValues</string>
+        </attribute>
        </widget>
        <widget class="QLabel" name="labelMin_2">
         <property name="geometry">
@@ -2136,8 +2145,11 @@ QGroupBox::title {
          <string>Fluid Velocity ||v||</string>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroupGlyphVectorValues</string>
+        </attribute>
        </widget>
       </widget>
       <widget class="QWidget" name="isolines">
@@ -3745,5 +3757,7 @@ p, li { white-space: pre-wrap; }
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupSmokeValues"/>
+  <buttongroup name="buttonGroupGlyphVectorValues"/>
+  <buttongroup name="buttonGroupGlyphValues"/>
  </buttongroups>
 </ui>
