@@ -528,7 +528,7 @@ void MainWindow::setPresetHeightplot()
     // Set presets for Heightplot
     ui->settingsGB->setCurrentIndex(3);
 
-    ui->showSmoke->setCheckState(Qt::Unchecked);
+    ui->showSmoke->setCheckState(Qt::Checked);
     ui->selectSmoke->setCurrentIndex(RHO);
     ui->selectColormapSmoke->setCurrentIndex(COLOR_BLUE_RED);
     ui->selectNColorsSmoke->setValue(10);
@@ -597,9 +597,9 @@ void MainWindow::setPresetIsolines()
     ui->showIsoline->setCheckState(Qt::Checked);
     ui->isolineMinValue->setValue(0.000);
     ui->isolineMaxValue->setValue(1.000);
-    ui->nrIsolines->setValue(6);
+    ui->nrIsolines->setValue(4);
     ui->selectColormapIsoline->setCurrentIndex(COLOR_BLUE_RED);
-    ui->selectNColorsIsoline->setValue(6);
+    ui->selectNColorsIsoline->setValue(4);
 
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
