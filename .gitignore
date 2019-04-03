@@ -377,3 +377,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Do not ignore shape objects 
+!arrow.obj
+!cone.obj
+!better_cone.obj
