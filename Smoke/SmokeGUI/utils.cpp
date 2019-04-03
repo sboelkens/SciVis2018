@@ -11,95 +11,109 @@ QVector3D rainbow(double value) {
     return QVector3D(R, G, B);
 }
 
-QVector3D set_colormap(float vy, int scalar_col, int nlevels)
+QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float max)
 {
-   vy *= nlevels; vy = static_cast<int>(vy); vy/= nlevels;
+    if (vy<min) vy=min; if (vy>max) vy=max;
+    vy = vy - min;
+    vy = vy/(max-min);
 
-   if (scalar_col==COLOR_BLACKWHITE)
-       return QVector3D(vy, vy, vy);
-   else if (scalar_col==COLOR_RAINBOW)
-       return rainbow(static_cast<double>(vy));
-   else if (scalar_col==COLOR_HEATMAP)
-       return getHeatMapColor(vy);
-   else if (scalar_col==COLOR_BLUE_RED)
-       return getBlueRedColor(vy);
-   return QVector3D(0.0, 0.0, 0.0);
+    //subdivide values into levels
+    vy *= nlevels;
+    vy = int(vy);
+    vy/= nlevels;
+
+
+    if (scalar_col==COLOR_BLACKWHITE)
+        return QVector3D(vy, vy, vy);
+    else if (scalar_col==COLOR_RAINBOW)
+        return rainbow(static_cast<double>(vy));
+    else if (scalar_col==COLOR_HEATMAP)
+        return getHeatMapColor(vy);
+    else if (scalar_col==COLOR_BLUE_RED)
+        return getBlueRedColor(vy);
+    else if (scalar_col==COLOR_ZEBRA)
+        return getZebraColor(vy, nlevels);
+    return QVector3D(0.0, 0.0, 0.0);
 }
 
-QVector3D direction_to_color(float x, float y, int method)
+QVector3D direction_to_color(float x, float y)
 {
     float r, g, b, f;
-    if (method)
-    {
-      f = atan2(y,x) / 3.1415927 + 1;
-      r = f;
-      if(r > 1) r = 2 - r;
-      g = f + .66667;
-      if(g > 2) g -= 2;
-      if(g > 1) g = 2 - g;
-      b = f + 2 * .66667;
-      if(b > 2) b -= 2;
-      if(b > 1) b = 2 - b;
-    }
-    else
-    {
-        r = g = b = 1;
-    }
+
+    f = atan2(y,x) / 3.1415927 + 1;
+    r = f;
+    if(r > 1) r = 2 - r;
+    g = f + .66667;
+    if(g > 2) g -= 2;
+    if(g > 1) g = 2 - g;
+    b = f + 2 * .66667;
+    if(b > 2) b -= 2;
+    if(b > 1) b = 2 - b;
     return QVector3D(r, g, b);
 }
 
 QVector3D getHeatMapColor(float value)
 {
-  const int NUM_COLORS = 3;
-  static float color[NUM_COLORS][3] = { {0,0,0}, {1,0,0}, {1,1,1} };
+    const int NUM_COLORS = 3;
+    static float color[NUM_COLORS][3] = { {0,0,0}, {1,0,0}, {1,1,1} };
     // A static array of 3 colors:  (black, red, white) using {r,g,b} for each.
 
-  int idx1;        // |-- Our desired color will be between these two indexes in "color".
-  int idx2;        // |
-  float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
+    int idx1;        // |-- Our desired color will be between these two indexes in "color".
+    int idx2;        // |
+    float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
 
-  if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
-  else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
-  else
-  {
-    value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
-    idx2  = idx1+1;                        // ... and before this index (inclusive).
-    fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
-  }
+    if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
+    else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
+    else
+    {
+        value = value * (NUM_COLORS-1);        // Will multiply value by 3.
+        idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
+        idx2  = idx1+1;                        // ... and before this index (inclusive).
+        fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
+    }
 
-  float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
-  float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
-  float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
+    float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
+    float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
+    float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
 
-  return QVector3D(red, green, blue);
+    return QVector3D(red, green, blue);
 }
 
 QVector3D getBlueRedColor(float value)
 {
-  const int NUM_COLORS = 3;
-  static float color[NUM_COLORS][3] = { {0,0,1}, {1,1,1}, {1,0,0} };
+    const int NUM_COLORS = 3;
+    static float color[NUM_COLORS][3] = { {0,0,1}, {1,1,1}, {1,0,0} };
     // A static array of 3 colors:  (black, red, white) using {r,g,b} for each.
 
-  int idx1;        // |-- Our desired color will be between these two indexes in "color".
-  int idx2;        // |
-  float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
+    int idx1;        // |-- Our desired color will be between these two indexes in "color".
+    int idx2;        // |
+    float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
 
-  if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
-  else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
-  else
-  {
-    value = value * (NUM_COLORS-1);        // Will multiply value by 3.
-    idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
-    idx2  = idx1+1;                        // ... and before this index (inclusive).
-    fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
-  }
+    if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
+    else if(value >= 1)  {  idx1 = idx2 = NUM_COLORS-1; }    // accounts for an input >=0
+    else
+    {
+        value = value * (NUM_COLORS-1);        // Will multiply value by 3.
+        idx1  = static_cast<int>(floor(value));// Our desired color will be after this index.
+        idx2  = idx1+1;                        // ... and before this index (inclusive).
+        fractBetween = value - float(idx1);    // Distance between the two indexes (0-1).
+    }
 
-  float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
-  float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
-  float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
+    float red   = (color[idx2][0] - color[idx1][0])*fractBetween + color[idx1][0];
+    float green = (color[idx2][1] - color[idx1][1])*fractBetween + color[idx1][1];
+    float blue  = (color[idx2][2] - color[idx1][2])*fractBetween + color[idx1][2];
 
-  return QVector3D(red, green, blue);
+    return QVector3D(red, green, blue);
+}
+
+QVector3D getZebraColor(float value, int nlevels)
+{
+    value *= nlevels;
+    if (static_cast<int>(value) % 2 == 0) {
+        return QVector3D(0,0,0);
+    } else {
+        return QVector3D(1,1,1);
+    }
 }
 
 float findMean(QVector<float> list)

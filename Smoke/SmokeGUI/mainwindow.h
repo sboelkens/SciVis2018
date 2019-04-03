@@ -23,10 +23,16 @@ public:
 
   void setSmokeColorLegend();
   void setGlyphColorLegend();
+  void setIsolineColorLegend();
   QIcon setColorLegend(int width, int height, int levels, int color);
 
 private slots:
   void waitForInitialization();
+
+  void updateLegendLabels();
+  void updateSmokeLegendLabels();
+  void updateGlyphLegendLabels();
+  void updateIsolineLegendLabels();
 
   void on_showSmoke_stateChanged(int state);
   void on_selectSmoke_currentIndexChanged(int index);
@@ -56,6 +62,7 @@ private slots:
   void on_nrGlyphsP_valueChanged(int value);
   void on_selectGlyphShape_currentIndexChanged(int index);
 
+  void on_showIsoline_stateChanged(int state);
   void on_isolineMinValue_valueChanged(double value);
   void on_isolineMaxValue_valueChanged(double value);
   void on_nrIsolines_valueChanged(int value);
@@ -78,8 +85,12 @@ private slots:
 private:
   Ui::MainWindow *ui;
 
-  void setPresetOne();
-  void setPresetTwo();
+  void setPresetDefault();
+  void setPresetDivergence();
+  void setPresetHeightplot();
+  void setPresetIsolines();
+  void setPreset3D();
+  void setPresetScalingClamping();
 };
 
 #endif // MAINWINDOW_H

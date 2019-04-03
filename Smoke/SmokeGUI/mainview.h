@@ -20,6 +20,10 @@
 #include "utils.h"
 #include "objfile.h"
 
+const int GLYPH_3D_CONE  = 0;
+const int GLYPH_3D_ARROW = 1;
+const int GLYPH_2D_LINE  = 2;
+
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_1_Core {
 
     Q_OBJECT
@@ -32,7 +36,8 @@ public:
     void updateGlyphs();
     void updateIsolines();
     void updateStreamtubes();
-    void updateAverages(fftw_real* rho, fftw_real* vx, fftw_real* vy, fftw_real* fx, fftw_real* fy);
+    void updateAverages();
+
     void clearArrays();
     void clearGridArrays();
     void clearLineArrays();
@@ -51,11 +56,11 @@ public:
     // Smoke variables
     int   draw_smoke = 1;              // draw the smoke or not
     int   smoke_var = 0;               // variable encoded by the smoke (rho, ||v|| or ||f||)
-    int   smoke_col = COLOR_RAINBOW;
+    int   smoke_col = COLOR_BLACKWHITE;
     int   levels_smoke = 10;
 
     // Glyph variables
-    int   draw_vecs = 0;               // draw the velocity field or not
+    int   draw_vecs = 1;               // draw the velocity field or not
     int   glyph_var = 0;
     int   glyph_vector_var = 1;
     int   glyph_col = COLOR_RAINBOW;   // method for scalar coloring
@@ -66,7 +71,8 @@ public:
     int   draw_isolines = 0;
     float isoline_min_value = 0.000f;
     float isoline_max_value = 1.000f;
-    int   nr_isolines = 0;
+    int   nr_isolines = 1;
+
     int   isoline_col = COLOR_HEATMAP;
     int   levels_isoline = 10;
 
@@ -89,8 +95,10 @@ public:
     int   nr_glyphs_p = 4;
     bool  nr_glyphs_changed = true;
     bool  glyphs3D = false;
+    int   glyph_type = GLYPH_2D_LINE;
     float glyphs3D_size = 0.1f;
     OBJFile cone = OBJFile("../SmokeGUI/better_cone.obj");
+    OBJFile arrow = OBJFile("../SmokeGUI/arrow.obj");
 
     // height plot vars
     bool heightplot = false;
@@ -182,6 +190,10 @@ private:
   QVector<float> scale_minvals_vnorm;
   QVector<float> scale_maxvals_fnorm;
   QVector<float> scale_minvals_fnorm;
+  QVector<float> scale_maxvals_divvnorm;
+  QVector<float> scale_minvals_divvnorm;
+  QVector<float> scale_maxvals_divfnorm;
+  QVector<float> scale_minvals_divfnorm;
 
   void do_one_simulation_step();
   QVector3D getArcBallVector(int x, int y);

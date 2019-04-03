@@ -44,8 +44,7 @@ QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double isolin
 void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, QString code, double px, double py)
 {
     if(code == "0000"){
-        isolines.append(QVector2D(0, 0));
-        isolines.append(QVector2D(0, 0));
+        return;
     }
     if(code == "0001"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
@@ -64,10 +63,18 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0101"){
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        double avg = (dl + dr + ul + ur) / 4;
+        if(avg < rhoVal) {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        } else {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        }
     }
     if(code == "0110"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
@@ -86,10 +93,18 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1010"){
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+        double avg = (dl + dr + ul + ur) / 4;
+        if(avg < rhoVal) {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        } else {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        }
     }
     if(code == "1011"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
@@ -108,8 +123,7 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1111"){
-        isolines.append(QVector2D(0, 0));
-        isolines.append(QVector2D(0, 0));
+        return;
     }
 }
 
