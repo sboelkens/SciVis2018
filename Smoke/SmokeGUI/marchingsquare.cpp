@@ -63,10 +63,18 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
     }
     if(code == "0101"){
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        double avg = (dl + dr + ul + ur) / 4;
+        if(avg < rhoVal) {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        } else {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        }
     }
     if(code == "0110"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
@@ -85,10 +93,18 @@ void MarchingSquare::lineFromBinary(double dl, double dr, double ul, double ur, 
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
     }
     if(code == "1010"){
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
-        isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+        double avg = (dl + dr + ul + ur) / 4;
+        if(avg < rhoVal) {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        } else {
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_LEFT, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_DOWN, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
+            isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_RIGHT, px, py));
+        }
     }
     if(code == "1011"){
         isolines.append(interpolateSide(dl, dr, ul, ur, SIDE_UP, px, py));
