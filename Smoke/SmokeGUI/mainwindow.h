@@ -85,6 +85,7 @@ private slots:
 private:
   Ui::MainWindow *ui;
 
+  QVector3D getColorLegendDirectionValue(double i, double num_values);
   void setPresetDefault();
   void setPresetDivergence();
   void setPresetHeightplot();

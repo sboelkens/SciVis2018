@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   QTimer *timer = new QTimer;
   connect(timer, SIGNAL(timeout()), this, SLOT(updateLegendLabels()));
-  timer->start(500);
+  timer->start(200);
 
 }
 MainWindow::~MainWindow() {
@@ -51,13 +51,19 @@ void MainWindow::updateSmokeLegendLabels()
 }
 void MainWindow::updateGlyphLegendLabels()
 {
-    double min = static_cast<double>(ui->mainView->clamp_glyph_min);
-    if(min > -0.001 && min < 0.001) { min = 0.000; }
-    double max = static_cast<double>(ui->mainView->clamp_glyph_max);
-    if(max > -0.001 && max < 0.001) { max = 0.000; }
-    ui->labelGlyphLegendMin->setText(QString::number(min, 'f', 3));
-    ui->labelGlyphLegendMax->setText(QString::number(max, 'f', 3));
-    ui->labelGlyphLegendMid->setText(QString::number(((min+max)/2), 'f', 3));
+    if(ui->mainView->glyph_col == COLOR_DIRECTIONAL) {
+        ui->labelGlyphLegendMin->setText("0°");
+        ui->labelGlyphLegendMid->setText("180°");
+        ui->labelGlyphLegendMax->setText("360°");
+    } else {
+        double min = static_cast<double>(ui->mainView->clamp_glyph_min);
+        if(min > -0.001 && min < 0.001) { min = 0.000; }
+        double max = static_cast<double>(ui->mainView->clamp_glyph_max);
+        if(max > -0.001 && max < 0.001) { max = 0.000; }
+        ui->labelGlyphLegendMin->setText(QString::number(min, 'f', 3));
+        ui->labelGlyphLegendMax->setText(QString::number(max, 'f', 3));
+        ui->labelGlyphLegendMid->setText(QString::number(((min+max)/2), 'f', 3));
+    }
 }
 void MainWindow::updateIsolineLegendLabels()
 {
@@ -398,6 +404,19 @@ void MainWindow::setGlyphColorLegend()
     QIcon pm = setColorLegend(ui->mainView->levels_glyph, ui->mainView->glyph_col);
     ui->legendGlyph->setIcon(pm);
     ui->legendGlyph->setIconSize(QSize(legend_width, legend_height));
+    if(ui->mainView->glyph_col == COLOR_DIRECTIONAL) {
+        ui->selectNColorsGlyph->setEnabled(false);
+        ui->clampGlyphMinValue->setEnabled(false);
+        ui->clampGlyphMaxValue->setEnabled(false);
+        ui->radioGlyphClamp->setEnabled(false);
+        ui->radioGlyphScale->setEnabled(false);
+    } else {
+        ui->selectNColorsGlyph->setEnabled(true);
+        ui->clampGlyphMinValue->setEnabled(true);
+        ui->clampGlyphMaxValue->setEnabled(true);
+        ui->radioGlyphClamp->setEnabled(true);
+        ui->radioGlyphScale->setEnabled(true);
+    }
     this->setFocus();
 }
 void MainWindow::setIsolineColorLegend()
@@ -413,16 +432,53 @@ QIcon MainWindow::setColorLegend(int levels, int color_scheme)
 
     QPixmap pm(legend_width, legend_height);
     QPainter pmp(&pm);
+    QVector3D rgb;
 
-    for(int x = 0; x <= 256;x++) {
-        QVector3D rgb = set_colormap(static_cast<float>(x)/256, color_scheme, levels);
+    for(int x = 0; x <= 256; x++) {
+        if(color_scheme == COLOR_DIRECTIONAL) {
+            rgb = getColorLegendDirectionValue(x, 256);
+        } else {
+            rgb = set_colormap(static_cast<float>(x)/256, color_scheme, levels);
+        }
+
         QColor color = QColor(static_cast<int>(rgb.x()*255), static_cast<int>(rgb.y()*255), static_cast<int>(rgb.z()*255));
         pmp.setBrush(QBrush(color));
         pmp.setPen(Qt::NoPen);
         pmp.drawRect(x, 0, 1, legend_height);
     }
-
     return QIcon(pm);
+}
+
+QVector3D MainWindow::getColorLegendDirectionValue(double i, double num_values)
+{
+    double num_values_side = num_values / 8;
+    double x,y;
+    if(i < (num_values_side*1)) {
+        x = i/num_values_side;
+        y = 1.00;
+    } else if(i < (num_values_side*2)) {
+        x = 1.00;
+        y = 1.00-((i-(num_values_side*1))/num_values_side);
+    } else if(i < (num_values_side*3)) {
+        x = 1.00;
+        y = 0-((i-(num_values_side*2))/num_values_side);
+    } else if(i < (num_values_side*4)) {
+        x = 1.00-((i-(num_values_side*3))/num_values_side);
+        y = -1.00;
+    } else if(i < (num_values_side*5)) {
+        x = 0.00-((i-(num_values_side*4))/num_values_side);
+        y = -1.00;
+    } else if(i < (num_values_side*6)) {
+        x = -1.00;
+        y = -1.00+((i-(num_values_side*5))/num_values_side);
+    } else if(i < (num_values_side*7)) {
+        x = -1.00;
+        y = (i-(num_values_side*6))/num_values_side;
+    } else {
+        x = -1.00+((i-(num_values_side*7))/num_values_side);
+        y = 1.00;
+    }
+    return direction_to_color(static_cast<float>(x), static_cast<float>(y));
 }
 
 

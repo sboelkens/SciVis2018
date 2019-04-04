@@ -72,12 +72,11 @@ QVector3D getBlueRedColor(float value)
 
 QVector3D getColorScheme(float value, int num_colors, float color_scheme[][3])
 {
-    int idx1;        // |-- Our desired color will be between these two indexes in "color".
-    int idx2;        // |
-    float fractBetween = 0;  // Fraction between "idx1" and "idx2" where our value is.
+    int idx1, idx2;
+    float fractBetween = 0;
 
-    if(value <= 0)      {  idx1 = idx2 = 0;            }    // accounts for an input <=0
-    else if(value >= 1)  {  idx1 = idx2 = num_colors-1; }    // accounts for an input >=0
+    if(value <= 0)      {  idx1 = idx2 = 0;            }
+    else if(value >= 1)  {  idx1 = idx2 = num_colors-1; }
     else
     {
         value = value * (num_colors-1);        // Will multiply value by 3.
