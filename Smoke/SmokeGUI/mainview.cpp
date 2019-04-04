@@ -348,10 +348,10 @@ void MainView::updateStreamtubes() {
         fx_frames = static_cast<fftw_real*>(malloc(dim));
         fy_frames = static_cast<fftw_real*>(malloc(dim));
 
-        start_streamtube(QVector3D(-0.5,0.0,0.5));
-        start_streamtube(QVector3D(0.5,0.0,0.5));
-        start_streamtube(QVector3D(0.0,0.5,0.5));
-        start_streamtube(QVector3D(0.0,-0.5,0.5));
+//        start_streamtube(QVector3D(-0.5,0.0,0.0));
+//        start_streamtube(QVector3D(0.5,0.0,0.0));
+//        start_streamtube(QVector3D(0.0,0.5,0.0));
+//        start_streamtube(QVector3D(0.0,-0.5,0.0));
     }
 
     fftw_real* rho = simulation.getRho();
@@ -418,7 +418,7 @@ void MainView::updateStreamtubes() {
                 {
                     new_y = -1.0 + hn;
                 }
-                tube[j] = QVector3D(new_x, new_y, tube[j].z() - 1.0f/n_stream_frames);
+                tube[j] = QVector3D(new_x, new_y, tube[j].z() + 1.0f/n_stream_frames);
           }
           new_pos = streamtubeSeeds[i];
           if (tube.length() < n_stream_frames)
@@ -471,12 +471,12 @@ void MainView::updateStreamtubes() {
           x = vx_frames[idx];
           y = vy_frames[idx];
 
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
-          streamtubeColours.append(set_colormap(rho_frames[idx], smoke_col, levels_smoke));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
+          streamtubeColours.append(set_colormap((float)i/20, COLOR_RAINBOW, 20));
 
           streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 0);
           streamtubeIndices.append(i*n_stream_frames*6 + j*6 + 2);
@@ -1447,12 +1447,36 @@ void MainView::mousePressEvent(QMouseEvent *event)
             hPlot_zAngle = hPlot_zAngle - 180*angle/M_PI;
             updateMatricesRequired = true;
         }
+    }
+    if (event->buttons() & Qt::MidButton)
+    {
         if (streamtubes)
         {
-            float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
-            float y_n = 1.0 - (2.0 * event->pos().y()) / (float)height();
+            if (heightplot)
+            {
+                QMatrix4x4 tfMatrix;
+                float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
+                float y_n = 1.0 - (2.0 * event->pos().y()) / (float)height();
+                tfMatrix.setToIdentity();
+//                tfMatrix.scale(1.0/hPlot_zoom,1.0/hPlot_zoom,1.0/hPlot_zoom);
+//                tfMatrix.rotate(45.0, QVector3D(1.0,0.0,0.0));
+//                tfMatrix.rotate(hPlot_zAngle, QVector3D(0.0,0.0,1.0));
+                tfMatrix.scale(1.0/hPlot_zoom, 1.0/hPlot_zoom, 1.0/hPlot_zoom);
+                //tfMatrix.rotate(-hPlot_xAngle, QVector3D(1.0,0.0,0.0));
+                tfMatrix.rotate(-hPlot_zAngle, QVector3D(0.0,0.0,1.0));
+                QVector4D tf = tfMatrix * QVector4D(x_n, y_n, 0.0, 1.0);
+                float x_s = tf.x();
+                float y_s = tf.y();
+                start_streamtube(QVector3D(x_s, y_s, 0.0));
+            }
+            else
+            {
+                float x_n = (2.0 * event->pos().x()) / (float)width() - 1.0;
+                float y_n = 1.0 - (2.0 * event->pos().y()) / (float)height();
 
-            start_streamtube(QVector3D(x_n, y_n, 0.5));
+                start_streamtube(QVector3D(x_n, y_n, 0.5));
+            }
+
         }
     }
     lastpos = event->pos();
