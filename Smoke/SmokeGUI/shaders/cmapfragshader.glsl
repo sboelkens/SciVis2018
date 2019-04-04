@@ -103,7 +103,7 @@ void main() {
   }
   else if(mode == 4) // zebra
   {
-      if (int(floor((value*levels)+0.5)) % 2 == 0) {
+      if (int(floor((value*(levels-1))+0.5)) % 2 == 0) {
           fColor = vec4(0.0, 0.0, 0.0, 1.0);
       } else {
           fColor = vec4(1.0, 1.0, 1.0, 1.0);
