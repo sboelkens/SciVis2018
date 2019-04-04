@@ -62,7 +62,7 @@ QGroupBox::title {
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -81,7 +81,7 @@ QGroupBox::title {
          <number>2</number>
         </property>
         <property name="maximum">
-         <number>255</number>
+         <number>256</number>
         </property>
         <property name="value">
          <number>10</number>
@@ -156,7 +156,7 @@ QGroupBox::title {
          <rect>
           <x>19</x>
           <y>110</y>
-          <width>260</width>
+          <width>255</width>
           <height>30</height>
          </rect>
         </property>
@@ -831,7 +831,7 @@ QGroupBox::title {
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -1977,7 +1977,7 @@ QGroupBox::title {
          <rect>
           <x>19</x>
           <y>90</y>
-          <width>260</width>
+          <width>255</width>
           <height>30</height>
          </rect>
         </property>
@@ -2178,7 +2178,7 @@ QGroupBox::title {
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -2862,7 +2862,7 @@ QGroupBox::title {
          <rect>
           <x>20</x>
           <y>130</y>
-          <width>260</width>
+          <width>255</width>
           <height>30</height>
          </rect>
         </property>
@@ -2903,7 +2903,7 @@ QGroupBox::title {
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3505,10 +3505,10 @@ QGroupBox::title {
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Rotate the grid around its center by dragging the right mouse button.&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zoom in and out using the scroll wheel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;Rotate the grid around its center by dragging the right mouse button.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:7.8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7.8pt;&quot;&gt;Zoom in and out using the scroll wheel.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </widget>
@@ -3518,7 +3518,7 @@ p, li { white-space: pre-wrap; }
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3564,7 +3564,7 @@ p, li { white-space: pre-wrap; }
          <x>0</x>
          <y>0</y>
          <width>300</width>
-         <height>583</height>
+         <height>607</height>
         </rect>
        </property>
        <attribute name="label">
@@ -3771,8 +3771,8 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="buttonGroupGlyphValues"/>
   <buttongroup name="buttonGroupGlyphVectorValues"/>
   <buttongroup name="buttonGroupSmokeValues"/>
-  <buttongroup name="buttonGroupGlyphValues"/>
  </buttongroups>
 </ui>

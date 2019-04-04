@@ -19,7 +19,7 @@ QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float m
 
     //subdivide values into levels
     vy *= nlevels;
-    vy = int(vy);
+    vy = int(round(vy));
     vy/= nlevels;
 
 
@@ -93,8 +93,7 @@ QVector3D getColorScheme(float value, int num_colors, float color_scheme[][3])
 
 QVector3D getZebraColor(float value, int nlevels)
 {
-    value *= nlevels;
-    if (static_cast<int>(value) % 2 == 0) {
+    if (static_cast<int>(round(value * nlevels)) % 2 == 0) {
         return QVector3D(0,0,0);
     } else {
         return QVector3D(1,1,1);

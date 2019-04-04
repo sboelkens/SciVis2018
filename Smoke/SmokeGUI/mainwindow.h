@@ -24,7 +24,7 @@ public:
   void setSmokeColorLegend();
   void setGlyphColorLegend();
   void setIsolineColorLegend();
-  QIcon setColorLegend(int width, int height, int levels, int color);
+  QIcon setColorLegend(int levels, int color);
 
 private slots:
   void waitForInitialization();
@@ -91,6 +91,9 @@ private:
   void setPresetIsolines();
   void setPreset3D();
   void setPresetScalingClamping();
+
+  int legend_width = 255;
+  int legend_height = 30;
 };
 
 #endif // MAINWINDOW_H

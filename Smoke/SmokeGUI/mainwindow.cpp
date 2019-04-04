@@ -388,52 +388,38 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::setSmokeColorLegend()
 {
-    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_smoke, ui->mainView->smoke_col);
+    QIcon pm = setColorLegend(ui->mainView->levels_smoke, ui->mainView->smoke_col);
     ui->legendSmoke->setIcon(pm);
-    ui->legendSmoke->setIconSize(QSize(260, 30));
+    ui->legendSmoke->setIconSize(QSize(legend_width, legend_height));
     this->setFocus();
 }
 void MainWindow::setGlyphColorLegend()
 {
-    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_glyph, ui->mainView->glyph_col);
+    QIcon pm = setColorLegend(ui->mainView->levels_glyph, ui->mainView->glyph_col);
     ui->legendGlyph->setIcon(pm);
-    ui->legendGlyph->setIconSize(QSize(260, 30));
+    ui->legendGlyph->setIconSize(QSize(legend_width, legend_height));
     this->setFocus();
 }
 void MainWindow::setIsolineColorLegend()
 {
-    QIcon pm = setColorLegend(260, 30, ui->mainView->levels_isoline, ui->mainView->isoline_col);
+    QIcon pm = setColorLegend(ui->mainView->levels_isoline, ui->mainView->isoline_col);
     ui->legendIsoline->setIcon(pm);
-    ui->legendIsoline->setIconSize(QSize(260, 30));
+    ui->legendIsoline->setIconSize(QSize(legend_width, legend_height));
     this->setFocus();
 }
-QIcon MainWindow::setColorLegend(int width, int height, int levels, int color)
+QIcon MainWindow::setColorLegend(int levels, int color)
 {
     ui->mainView->updateUniformsRequired = true;
 
-    QPixmap pm(width, height);
+    QPixmap pm(legend_width, legend_height);
     QPainter pmp(&pm);
-    double color_width = static_cast<double>(width)/(static_cast<double>(levels)+1);
 
-    for(int x = 0; x <= levels;x++) {
-        float fx = static_cast<float>(x);\
-        float flevels = static_cast<float>(levels);
-
-        QVector3D rgb = set_colormap(fx/flevels,color, levels);
+    for(int x = 0; x <= 256;x++) {
+        QVector3D rgb = set_colormap(static_cast<float>(x)/256,color, levels);
         QColor color = QColor(static_cast<int>(rgb.x()*255), static_cast<int>(rgb.y()*255), static_cast<int>(rgb.z()*255));
         pmp.setBrush(QBrush(color));
         pmp.setPen(Qt::NoPen);
-        if ( x % 2 == 0) {
-            pmp.drawRect(static_cast<int>(floor(x*color_width)),
-                         0,
-                         static_cast<int>(floor(color_width+10)),
-                         height);
-        } else {
-            pmp.drawRect(static_cast<int>(ceil(x*color_width)),
-                         0,
-                         static_cast<int>(ceil(color_width+10)),
-                         height);
-        }
+        pmp.drawRect(x, 0, 1, legend_height);
     }
 
     return QIcon(pm);

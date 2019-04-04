@@ -25,7 +25,7 @@ void main() {
 
   //subdivide values into levels
   value *= levels;
-  value = int(value);
+  value = int(floor(value + 0.5));
   value/= levels;
 
   float alpha = 1.0;
@@ -103,7 +103,7 @@ void main() {
   }
   else if(mode == 4) // zebra
   {
-      if (int(value*levels) % 2 == 0) {
+      if (int(floor((value*levels)+0.5)) % 2 == 0) {
           fColor = vec4(0.0, 0.0, 0.0, 1.0);
       } else {
           fColor = vec4(1.0, 1.0, 1.0, 1.0);
