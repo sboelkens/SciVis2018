@@ -22,6 +22,7 @@ QVector3D set_colormap(float val, int scalar_col, int nlevels = 7, float min = 0
 QVector3D direction_to_color(float x, float y);
 QVector3D getBlueRedColor(float value);
 QVector3D getHeatMapColor(float value);
+QVector3D getColorScheme(float value, int num_colors, float color_scheme[][3]);
 QVector3D getZebraColor(float value, int nlevels);
 
 
