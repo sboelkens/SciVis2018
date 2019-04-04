@@ -407,7 +407,7 @@ void MainWindow::setIsolineColorLegend()
     ui->legendIsoline->setIconSize(QSize(legend_width, legend_height));
     this->setFocus();
 }
-QIcon MainWindow::setColorLegend(int levels, int color)
+QIcon MainWindow::setColorLegend(int levels, int color_scheme)
 {
     ui->mainView->updateUniformsRequired = true;
 
@@ -415,7 +415,7 @@ QIcon MainWindow::setColorLegend(int levels, int color)
     QPainter pmp(&pm);
 
     for(int x = 0; x <= 256;x++) {
-        QVector3D rgb = set_colormap(static_cast<float>(x)/256,color, levels);
+        QVector3D rgb = set_colormap(static_cast<float>(x)/256, color_scheme, levels);
         QColor color = QColor(static_cast<int>(rgb.x()*255), static_cast<int>(rgb.y()*255), static_cast<int>(rgb.z()*255));
         pmp.setBrush(QBrush(color));
         pmp.setPen(Qt::NoPen);

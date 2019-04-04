@@ -24,7 +24,7 @@ public:
   void setSmokeColorLegend();
   void setGlyphColorLegend();
   void setIsolineColorLegend();
-  QIcon setColorLegend(int levels, int color);
+  QIcon setColorLegend(int levels, int color_scheme);
 
 private slots:
   void waitForInitialization();

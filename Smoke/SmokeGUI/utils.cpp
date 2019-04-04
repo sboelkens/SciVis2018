@@ -13,14 +13,15 @@ QVector3D rainbow(double value) {
 
 QVector3D set_colormap(float vy, int scalar_col, int nlevels, float min, float max)
 {
+
     if (vy<min) vy=min; if (vy>max) vy=max;
     vy = vy - min;
     vy = vy/(max-min);
 
-    //subdivide values into levels
-    vy *= nlevels;
-    vy = int(round(vy));
-    vy/= nlevels;
+    float floorval = floor(vy * nlevels);
+    vy = (floorval/(nlevels-1));
+    if (vy<0) vy=0; if (vy>1) vy=1;
+
 
 
     if (scalar_col==COLOR_BLACKWHITE)
@@ -93,7 +94,7 @@ QVector3D getColorScheme(float value, int num_colors, float color_scheme[][3])
 
 QVector3D getZebraColor(float value, int nlevels)
 {
-    if (static_cast<int>(round(value * nlevels)) % 2 == 0) {
+    if (static_cast<int>(round(value * (nlevels-1))) % 2 == 0) {
         return QVector3D(0,0,0);
     } else {
         return QVector3D(1,1,1);

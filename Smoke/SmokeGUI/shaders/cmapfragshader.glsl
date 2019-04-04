@@ -24,9 +24,9 @@ void main() {
   value = value/(maxval-minval);
 
   //subdivide values into levels
-  value *= levels;
-  value = int(floor(value + 0.5));
-  value/= levels;
+  value = (floor((value * levels))/(levels-1));
+  if (value<0) value=0; if (value>1) value=1;
+
 
   float alpha = 1.0;
   if (mode == 0) //grayscale
