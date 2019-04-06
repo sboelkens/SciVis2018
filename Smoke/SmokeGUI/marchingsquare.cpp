@@ -20,21 +20,21 @@ QVector<QVector2D> MarchingSquare::calcIsoline(double *rho, int n, double isolin
     {
         for (int i = 0; i < (n-1); i++)
         {
-            int idx = (j*n) + i;
-            int idxR = (j * n) + (i+1);
-            int idxU = ((j+1) * n) + i;
+            int idxDL = (j*n) + i;
+            int idxDR = (j * n) + (i+1);
+            int idxUL = ((j+1) * n) + i;
             int idxUR = ((j+1) * n) + (i+1);
 
             QString code = "";
-            code += (rho[idxU] > rhoVal) ? "1" : "0";
+            code += (rho[idxUL] > rhoVal) ? "1" : "0";
             code += (rho[idxUR] > rhoVal) ? "1" : "0";
-            code += (rho[idxR] > rhoVal) ? "1" : "0";
-            code += (rho[idx] > rhoVal) ? "1" : "0";
+            code += (rho[idxDR] > rhoVal) ? "1" : "0";
+            code += (rho[idxDL] > rhoVal) ? "1" : "0";
 
             px = wn + static_cast<double>(i) * wn - 1.0;
             py = hn + static_cast<double>(j) * hn - 1.0;
 
-            lineFromBinary(rho[idx], rho[idxR], rho[idxU], rho[idxUR], code, px, py);
+            lineFromBinary(rho[idxDL], rho[idxDR], rho[idxUL], rho[idxUR], code, px, py);
         }
     }
 
