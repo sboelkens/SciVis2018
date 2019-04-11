@@ -400,8 +400,8 @@ void MainView::updateStreamtubes() {
               prev_pos = tube[j];
               pos_v = (prev_pos.y() + 1.0 - hn)/hn;
               idx = j * DIM*DIM + (pos_v * DIM) + pos_h;
-                new_x = prev_pos.x() + vx_frames[idx];
-                new_y = prev_pos.y() + vy_frames[idx];
+                new_x = prev_pos.x() + std::max(std::min(wn,vx_frames[idx]), -wn);
+                new_y = prev_pos.y() + std::max(std::min(hn,vy_frames[idx]), -hn);
                 if (new_x < -1.0 + wn)
                 {
                     new_x = 1.0 - wn;

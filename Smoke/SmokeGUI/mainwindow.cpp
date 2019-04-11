@@ -521,6 +521,8 @@ void MainWindow::setPresetDefault()
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
 
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
+
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
 }
@@ -562,6 +564,8 @@ void MainWindow::setPresetDivergence()
 
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
+
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
 
     ui->timeStepSlider->setValue(1);
     ui->viscositySlider->setValue(1);
@@ -605,6 +609,8 @@ void MainWindow::setPresetHeightplot()
     ui->heightplotBox->setCheckState(Qt::Checked);
     ui->hPlot_xAngle->setValue(60);
 
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
+
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
 }
@@ -646,6 +652,8 @@ void MainWindow::setPresetIsolines()
 
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
+
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
 
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
@@ -689,6 +697,8 @@ void MainWindow::setPreset3D()
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
 
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
+
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
 }
@@ -730,6 +740,8 @@ void MainWindow::setPresetScalingClamping()
 
     ui->heightplotBox->setCheckState(Qt::Unchecked);
     ui->hPlot_xAngle->setValue(45);
+
+    ui->streamtubesBox->setCheckState(Qt::Unchecked);
 
     ui->timeStepSlider->setValue(4);
     ui->viscositySlider->setValue(1);
